@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Англійська мова · 5 клас</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --ok:#1F9D63; --ok-soft:#E3F6EC;
+    --bad:#D8433B; --bad-soft:#FCE9E7; --gold:#E9A800;
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--paper);color:var(--ink);
+    font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3,.big{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.01em}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  .app{max-width:720px;margin:0 auto;padding:env(safe-area-inset-top) 20px 40px}
+  .screen{display:none}.screen.on{display:block}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;gap:12px;padding:16px 0 8px;min-height:60px}
+  .bar .back{font-size:17px;color:var(--accent);padding:8px 8px 8px 0}
+  .bar .title{font-weight:600;font-size:17px;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .spacer{width:64px}
+
+  /* subject header */
+  .subject{padding:28px 0 8px}
+  .subject h1{font-size:34px;margin:0 0 4px;font-weight:700}
+  .subject p{margin:0;color:var(--ink-2)}
+  .summary{display:flex;gap:18px;margin:16px 0 22px;color:var(--ink-2);font-size:15px}
+  .summary b{color:var(--ink);font-size:22px;display:block;font-family:ui-rounded,system-ui}
+
+  /* lesson list */
+  .section{color:var(--ink-2);font-size:15px;font-weight:600;margin:26px 0 10px;padding-left:2px}
+  .lesson{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:10px}
+  .lesson:active{background:var(--accent-soft)}
+  .lesson .n{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+    display:grid;place-items:center;font-weight:700;font-family:ui-rounded,system-ui;flex:none}
+  .lesson .n.done{background:var(--ok-soft);color:var(--ok)}
+  .lesson .t{flex:1;min-width:0}
+  .lesson .t b{display:block;font-weight:600}
+  .lesson .t span{color:var(--ink-2);font-size:14px}
+  .stars{color:var(--gold);font-size:15px;letter-spacing:1px;white-space:nowrap}
+  .stars .off{color:var(--line)}
+
+  /* lesson home */
+  .lh h2{font-size:28px;margin:12px 0 6px}
+  .lh p.lead{color:var(--ink-2);margin:0 0 22px}
+  .mode{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:#fff;
+    border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px}
+  .mode:active{background:var(--accent-soft)}
+  .mode .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none}
+  .mode .ic.a{background:#FFF1D6}.mode .ic.b{background:#E6EEFF}.mode .ic.c{background:#E3F6EC}
+  .mode b{display:block;font-size:18px;font-weight:600}
+  .mode span{color:var(--ink-2);font-size:15px}
+  .mode .st{margin-left:auto;color:var(--ink-2);font-size:14px;white-space:nowrap}
+
+  /* learn */
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+  .card h3{margin:0 0 8px;font-size:21px}
+  .card p{margin:0 0 10px}
+  .card p:last-child{margin:0}
+  .card .ex{background:var(--paper);border-radius:12px;padding:10px 14px;margin:8px 0}
+  .card .ex i{color:var(--accent);font-style:normal;font-weight:600}
+  .rem{background:#FFF7E0;border:1px solid #F5DFA0;border-radius:var(--r);padding:16px 20px;margin:6px 0 14px}
+  .rem b{display:block;margin-bottom:4px}
+  .term{font-weight:700;color:var(--accent)}
+  .cta{display:block;width:100%;background:var(--accent);color:#fff;border-radius:16px;padding:16px;
+    font-size:18px;font-weight:600;text-align:center;margin-top:8px}
+  .cta:active{opacity:.85}
+  .cta.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+
+  /* flashcards */
+  .prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 18px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+  .fc{perspective:1200px;height:300px;margin-bottom:18px}
+  .fc .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .fc.flip .in{transform:rotateY(180deg)}
+  .fc .f,.fc .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border-radius:24px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .fc .f{background:#fff;border:1px solid var(--line)}
+  .fc .f .big{font-size:30px;font-weight:700}
+  .fc .f small{color:var(--ink-2);margin-top:14px}
+  .fc .b{background:var(--ink);color:#fff;transform:rotateY(180deg);font-size:20px;line-height:1.45}
+  .row{display:flex;gap:12px}
+  .row .cta{margin:0}
+  .cta.no{background:var(--bad-soft);color:var(--bad)}
+  .cta.yes{background:var(--ok-soft);color:var(--ok)}
+  @media (prefers-reduced-motion:reduce){.fc .in{transition:none}.prog i{transition:none}}
+
+  /* quiz */
+  .qn{color:var(--ink-2);font-size:14px;margin-bottom:6px}
+  .q{font-size:22px;font-weight:600;margin:0 0 18px;font-family:ui-rounded,system-ui;line-height:1.35}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;
+    padding:14px 18px;margin-bottom:10px;font-size:18px}
+  .opt:active{background:var(--accent-soft)}
+  .opt.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opt:disabled{opacity:1}
+  .inp{width:100%;font:inherit;font-size:20px;padding:14px 18px;border:1.5px solid var(--line);border-radius:14px;background:#fff;outline:none}
+  .inp:focus{border-color:var(--accent)}
+  .inp.ok{border-color:var(--ok);background:var(--ok-soft)}.inp.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .fb{border-radius:14px;padding:14px 18px;margin:14px 0 12px;display:none}
+  .fb.on{display:block}
+  .fb.ok{background:var(--ok-soft);color:#155C3B}.fb.bad{background:var(--bad-soft);color:#7E2620}
+  .fb b{display:block;margin-bottom:2px}
+
+  /* result */
+  .res{text-align:center;padding:30px 0 10px}
+  .res .score{font-size:64px;font-weight:800;font-family:ui-rounded,system-ui;line-height:1}
+  .res .of{color:var(--ink-2);margin:6px 0 4px}
+  .res .stars{font-size:30px;margin:10px 0 18px;letter-spacing:4px}
+  .res p{margin:0 0 22px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== Список уроків ===== -->
+<section class="screen on" id="s-list">
+  <div class="subject">
+    <h1 id="subj-title"></h1>
+    <p id="subj-sub"></p>
+  </div>
+  <div class="summary">
+    <div><b id="sum-done">0</b>пройдено</div>
+    <div><b id="sum-total">0</b>уроків</div>
+    <div><b id="sum-stars">0</b>зірок</div>
+  </div>
+  <div id="lessons"></div>
+</section>
+
+<!-- ===== Урок: вибір режиму ===== -->
+<section class="screen" id="s-lesson">
+  <div class="bar"><button class="back" onclick="go('s-list')">‹ Уроки</button><div class="title" id="l-bar"></div><div class="spacer"></div></div>
+  <div class="lh">
+    <h2 id="l-title"></h2>
+    <p class="lead" id="l-goal"></p>
+    <button class="mode" onclick="openLearn()"><div class="ic a">📖</div><div><b>Вивчити</b><span>Правила й приклади коротко</span></div><div class="st" id="st-learn"></div></button>
+    <button class="mode" onclick="openCards()"><div class="ic b">🃏</div><div><b>Повторити</b><span id="cards-count">Картки з термінами</span></div><div class="st" id="st-cards"></div></button>
+    <button class="mode" onclick="openQuiz()"><div class="ic c">✅</div><div><b>Перевірити</b><span id="quiz-count">Тест</span></div><div class="st" id="st-quiz"></div></button>
+  </div>
+</section>
+
+<!-- ===== Вивчити ===== -->
+<section class="screen" id="s-learn">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Вивчити</div><div class="spacer"></div></div>
+  <div id="learn-body"></div>
+  <button class="cta" onclick="markLearn();openCards()">Далі — повторити картки</button>
+</section>
+
+<!-- ===== Картки ===== -->
+<section class="screen" id="s-cards">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Повторити</div><div class="spacer"></div></div>
+  <div class="qn" id="fc-n"></div>
+  <div class="prog"><i id="fc-prog"></i></div>
+  <div class="fc" id="fc" onclick="this.classList.toggle('flip')">
+    <div class="in"><div class="f"><div class="big" id="fc-front"></div><small>Торкнись, щоб перевернути</small></div><div class="b" id="fc-back"></div></div>
+  </div>
+  <div class="row">
+    <button class="cta no" onclick="fcAnswer(false)">Ще раз</button>
+    <button class="cta yes" onclick="fcAnswer(true)">Знаю</button>
+  </div>
+</section>
+
+<!-- ===== Тест ===== -->
+<section class="screen" id="s-quiz">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Перевірити</div><div class="spacer"></div></div>
+  <div class="qn" id="q-n"></div>
+  <div class="prog"><i id="q-prog"></i></div>
+  <div class="q" id="q-text"></div>
+  <div id="q-body"></div>
+  <div class="fb" id="q-fb"></div>
+  <button class="cta" id="q-btn" onclick="qNext()">Перевірити</button>
+</section>
+
+<!-- ===== Результат ===== -->
+<section class="screen" id="s-res">
+  <div class="bar"><div class="spacer"></div><div class="title">Результат</div><div class="spacer"></div></div>
+  <div class="res">
+    <div class="score" id="r-score"></div>
+    <div class="of" id="r-of"></div>
+    <div class="stars" id="r-stars"></div>
+    <p id="r-msg"></p>
+    <button class="cta" id="r-retry" onclick="retryWrong()">Повторити помилки</button>
+    <button class="cta ghost" onclick="openQuiz()">Пройти тест заново</button>
+    <button class="cta ghost" onclick="go('s-list')">До списку уроків</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+// ============================================================
+//  ДАНІ КУРСУ. Один об'єкт на предмет; генерується з підручника.
+// ============================================================
+const COURSE = {"id": "english5", "title": "Англійська мова", "subtitle": "5 клас · 13 уроків: граматика й лексика за програмою", "lessons": [{"id": "en-to-be", "sec": "Grammar", "title": "Дієслово to be. Особові займенники", "goal": "Ти знаєш форми am / is / are, будуєш твердження, заперечення й питання з to be.", "learn": [{"h": "Займенники і форми to be", "p": ["<b>I am</b> (I'm), <b>you are</b> (you're), <b>he / she / it is</b> (he's, she's, it's), <b>we are</b>, <b>they are</b>. To be означає «бути, є»: <i>I am ten.</i> — Мені десять. <i>She is a pupil.</i> — Вона учениця."], "ex": ["<i>It is</i> — про речі, тварин, погоду: <i>It is cold.</i>", "<i>They are my friends.</i> — Вони мої друзі."]}, {"h": "Заперечення", "p": ["Додаємо <b>not</b>: <i>I am not</i>, <i>he is not = isn't</i>, <i>we are not = aren't</i>. <i>She isn't at home.</i>"]}, {"h": "Питання", "p": ["To be ставимо <b>на перше місце</b>: <i>Are you ready? — Yes, I am. / No, I'm not.</i> <i>Is he a doctor? — Yes, he is. / No, he isn't.</i> Спеціальні питання: <i>Where are you from? — I'm from Ukraine. How old is she? — She is eleven. What is your name?</i>"]}, {"h": "Минулий час to be", "p": ["<b>was</b> — I, he, she, it; <b>were</b> — you, we, they. <i>I was at school yesterday. They were happy. Was it cold? — Yes, it was.</i>"]}], "remember": "I am, you are, he/she/it is, we/they are. Заперечення — not (isn't, aren't). Питання — to be на початок: Are you…? Is he…? Минуле: was (I, he, she, it), were (you, we, they).", "cards": [{"f": "I …, you …, he/she/it …, we/they …", "b": "I am, you are, he/she/it is, we/they are."}, {"f": "Скорочені форми", "b": "I'm, you're, he's, she's, it's, we're, they're."}, {"f": "Заперечення з to be", "b": "am not, isn't (is not), aren't (are not)."}, {"f": "Як утворити питання з to be?", "b": "Поставити am/is/are на початок: Are you ready? Is she at home?"}, {"f": "Коротка відповідь", "b": "Yes, I am. / No, I'm not. Yes, he is. / No, he isn't."}, {"f": "Was / were", "b": "Was — I, he, she, it; were — you, we, they."}, {"f": "Where are you from?", "b": "I'm from Ukraine."}], "quiz": [{"t": "choice", "q": "She … a pupil.", "o": ["am", "is", "are"], "a": 1, "e": "He/she/it — is."}, {"t": "choice", "q": "They … my friends.", "o": ["am", "is", "are"], "a": 2, "e": "They — are."}, {"t": "choice", "q": "I … eleven years old.", "o": ["am", "is", "are"], "a": 0, "e": "I am."}, {"t": "choice", "q": "… you from Kyiv? — No, I'm not.", "o": ["Is", "Are", "Am"], "a": 1, "e": "You — are."}, {"t": "choice", "q": "It … cold today. (заперечення)", "o": ["isn't", "aren't", "am not"], "a": 0, "e": "It isn't."}, {"t": "choice", "q": "Is he a doctor? — Yes, he …", "o": ["is", "are", "does"], "a": 0, "e": "Yes, he is."}, {"t": "choice", "q": "We … at school yesterday.", "o": ["was", "were", "are"], "a": 1, "e": "We — were (минуле)."}, {"t": "input", "q": "Заповни: «I … a boy.» (одне слово)", "a": ["am"], "e": "I am a boy."}, {"t": "input", "q": "Заповни: «My mum … a teacher.»", "a": ["is"], "e": "My mum is a teacher."}, {"t": "choice", "q": "Правильне питання:", "o": ["You are happy?", "Are you happy?", "Are happy you?"], "a": 1, "e": "To be на першому місці."}, {"t": "choice", "q": "Where … she from?", "o": ["is", "are", "am"], "a": 0, "e": "She — is."}]}, {"id": "en-have-got", "sec": "Grammar", "title": "Have got. Присвійні займенники. Множина іменників", "goal": "Ти вживаєш have got / has got, присвійні займенники my/your/his… і утворюєш множину.", "learn": [{"h": "Have got", "p": ["Означає «мати»: <b>I / you / we / they have got</b> ('ve got), <b>he / she / it has got</b> ('s got). <i>I have got a dog. She has got two brothers.</i> Заперечення: <i>haven't got / hasn't got</i>. Питання: <i>Have you got a pet? — Yes, I have. / No, I haven't. Has he got a bike? — Yes, he has.</i>"]}, {"h": "Присвійні займенники", "p": ["I → <b>my</b>, you → <b>your</b>, he → <b>his</b>, she → <b>her</b>, it → <b>its</b>, we → <b>our</b>, they → <b>their</b>. <i>This is my book. Her name is Ann. Their house is big.</i> Присвійний відмінок: <i>Tom's bag</i> — сумка Тома; <i>the girls' room</i> — кімната дівчат."]}, {"h": "Множина іменників", "p": ["Зазвичай <b>+s</b>: <i>cat — cats, book — books</i>. Після <b>-s, -sh, -ch, -x, -o</b>: <b>+es</b>: <i>bus — buses, box — boxes, watch — watches, tomato — tomatoes</i>. Приголосна + <b>y → ies</b>: <i>baby — babies, city — cities</i> (але <i>boy — boys</i>). <b>-f/-fe → ves</b>: <i>leaf — leaves, wolf — wolves</i>. <b>Винятки</b>: <i>man — men, woman — women, child — children, tooth — teeth, foot — feet, mouse — mice, sheep — sheep, fish — fish</i>."]}, {"h": "Артиклі a / an / the", "p": ["<b>a</b> — перед приголосним звуком (<i>a cat, a book</i>), <b>an</b> — перед голосним (<i>an apple, an orange, an hour</i>). <b>The</b> — коли предмет відомий, єдиний: <i>the sun, the book on the table</i>. Без артикля — множина взагалі, імена, країни: <i>I like apples. Ukraine.</i>"]}], "remember": "have got (I, you, we, they) / has got (he, she, it); haven't/hasn't got. Присвійні: my, your, his, her, its, our, their. Множина: +s; -s/-sh/-ch/-x/-o → es; y → ies; f → ves; винятки: men, women, children, teeth, feet, mice, sheep. a — приголосний, an — голосний.", "cards": [{"f": "Have got / has got", "b": "Have got — I, you, we, they; has got — he, she, it."}, {"f": "Have you got a pet? — коротка відповідь", "b": "Yes, I have. / No, I haven't."}, {"f": "Присвійні займенники", "b": "my, your, his, her, its, our, their."}, {"f": "Tom's bag", "b": "Сумка Тома — присвійний відмінок ('s)."}, {"f": "Множина після -s, -sh, -ch, -x, -o", "b": "+es: buses, boxes, watches, tomatoes."}, {"f": "Множина слів на приголосну + y", "b": "y → ies: baby — babies, city — cities."}, {"f": "Винятки множини", "b": "man — men, woman — women, child — children, tooth — teeth, foot — feet, mouse — mice, sheep — sheep."}, {"f": "a чи an?", "b": "a — перед приголосним звуком (a dog); an — перед голосним (an apple, an hour)."}], "quiz": [{"t": "choice", "q": "She … got a cat.", "o": ["have", "has"], "a": 1, "e": "She — has got."}, {"t": "choice", "q": "… they got a car? — No, they haven't.", "o": ["Has", "Have"], "a": 1, "e": "They — have."}, {"t": "choice", "q": "This is Ann. … name is Ann.", "o": ["His", "Her", "Its"], "a": 1, "e": "She → her."}, {"t": "choice", "q": "We love … school.", "o": ["our", "their", "your"], "a": 0, "e": "We → our."}, {"t": "input", "q": "Множина слова «box»:", "a": ["boxes"], "e": "box → boxes."}, {"t": "input", "q": "Множина слова «child»:", "a": ["children"], "e": "child → children."}, {"t": "input", "q": "Множина слова «city»:", "a": ["cities"], "e": "y → ies."}, {"t": "choice", "q": "Множина «foot» —", "o": ["foots", "feet", "feets"], "a": 1, "e": "foot — feet."}, {"t": "choice", "q": "… apple", "o": ["a", "an", "the"], "a": 1, "e": "Голосний звук — an."}, {"t": "choice", "q": "… book (будь-яка книга)", "o": ["a", "an"], "a": 0, "e": "Приголосний — a."}, {"t": "choice", "q": "Кімната Тома —", "o": ["Tom room", "Tom's room", "Toms room"], "a": 1, "e": "'s — присвійний."}]}, {"id": "en-present-simple", "sec": "Grammar", "title": "Present Simple. Daily routine", "goal": "Ти будуєш твердження, заперечення й питання в Present Simple і знаєш слова щоденних справ.", "learn": [{"h": "Коли вживаємо", "p": ["<span class='term'>Present Simple</span> — регулярні дії, звички, факти: <i>I go to school every day. Water boils at 100°C.</i> Слова-підказки: <b>always, usually, often, sometimes, never, every day, on Mondays</b>."]}, {"h": "Твердження", "p": ["I / you / we / they + дієслово: <i>I play football.</i> <b>He / she / it + дієслово + -s</b>: <i>She plays tennis. He watches TV (-ch → es). She studies (y → ies). He goes. She has</i> (have → has)."]}, {"h": "Заперечення і питання", "p": ["Допоміжні <b>do / does</b> (does — для he, she, it; після does дієслово <b>без -s</b>). <i>I don't like tea. She doesn't like coffee. Do you play chess? — Yes, I do. Does he speak English? — No, he doesn't. Where does she live? What time do you get up?</i>"]}, {"h": "Daily routine (щоденні справи)", "p": ["<i>get up</i> — вставати, <i>wash my face</i>, <i>brush my teeth</i>, <i>have breakfast / lunch / dinner</i>, <i>go to school</i>, <i>do homework</i>, <i>play with friends</i>, <i>watch TV</i>, <i>go to bed</i>. Час: <i>at seven o'clock, at half past eight (8:30), at a quarter past nine (9:15), at a quarter to ten (9:45)</i>. <i>in the morning / afternoon / evening, at night</i>."]}], "remember": "Present Simple — звички й факти (always, usually, every day). He/she/it + -s (plays, watches, studies, goes, has). Заперечення: don't / doesn't + дієслово без -s. Питання: Do/Does + підмет + дієслово? Get up, have breakfast, go to bed; half past, quarter past/to.", "cards": [{"f": "Коли вживають Present Simple?", "b": "Регулярні дії, звички, факти: every day, usually, always."}, {"f": "He/she/it у Present Simple", "b": "+ -s: plays, likes; watches, goes; studies; has."}, {"f": "Заперечення в Present Simple", "b": "don't (I, you, we, they) / doesn't (he, she, it) + дієслово без -s."}, {"f": "Питання в Present Simple", "b": "Do/Does + підмет + дієслово? Does she like tea?"}, {"f": "Слова-підказки Present Simple", "b": "always, usually, often, sometimes, never, every day."}, {"f": "half past eight / a quarter past nine / a quarter to ten", "b": "8:30 / 9:15 / 9:45."}, {"f": "get up / have breakfast / go to bed", "b": "вставати / снідати / іти спати."}], "quiz": [{"t": "choice", "q": "She … to school every day.", "o": ["go", "goes", "going"], "a": 1, "e": "She → goes."}, {"t": "choice", "q": "They … football on Sundays.", "o": ["play", "plays"], "a": 0, "e": "They — без -s."}, {"t": "choice", "q": "He … TV in the evening.", "o": ["watch", "watchs", "watches"], "a": 2, "e": "-ch → -es."}, {"t": "choice", "q": "I … like milk. (заперечення)", "o": ["don't", "doesn't", "not"], "a": 0, "e": "I don't."}, {"t": "choice", "q": "She … like coffee.", "o": ["don't", "doesn't"], "a": 1, "e": "She doesn't."}, {"t": "choice", "q": "… you speak English? — Yes, I do.", "o": ["Do", "Does", "Are"], "a": 0, "e": "Do you…?"}, {"t": "choice", "q": "… he play chess?", "o": ["Do", "Does"], "a": 1, "e": "Does he play (без -s)."}, {"t": "choice", "q": "Does she … tennis?", "o": ["play", "plays"], "a": 0, "e": "Після does — без -s."}, {"t": "input", "q": "Заповни: «My brother … (have) a bike.»", "a": ["has"], "e": "He has."}, {"t": "choice", "q": "«Half past seven» — це…", "o": ["7:15", "7:30", "6:30"], "a": 1, "e": "Половина восьмої."}, {"t": "choice", "q": "«A quarter to ten» — це…", "o": ["9:45", "10:15", "9:15"], "a": 0, "e": "Без чверті десять."}, {"t": "input", "q": "Переклади: «чистити зуби» — brush my …", "a": ["teeth"], "e": "brush my teeth."}]}, {"id": "en-present-continuous", "sec": "Grammar", "title": "Present Continuous. Present Simple vs Continuous", "goal": "Ти утворюєш Present Continuous і відрізняєш його від Present Simple.", "learn": [{"h": "Коли вживаємо", "p": ["<span class='term'>Present Continuous</span> — дія відбувається <b>зараз</b>, у момент мовлення: <i>I am reading now. Look! It is raining.</i> Слова-підказки: <b>now, at the moment, Look!, Listen!</b>"]}, {"h": "Утворення", "p": ["<b>am / is / are + дієслово + -ing</b>. <i>I am playing. She is sleeping. They are running.</i> Правила -ing: <i>play → playing</i>; <b>e</b> відпадає: <i>write → writing, make → making</i>; коротке слово з однією приголосною в кінці — <b>подвоюємо</b>: <i>run → running, swim → swimming, sit → sitting</i>."]}, {"h": "Заперечення і питання", "p": ["<i>I am not reading. He isn't sleeping. We aren't playing.</i> Питання — to be на початок: <i>Are you listening? — Yes, I am. Is she cooking? — No, she isn't. What are you doing?</i>"]}, {"h": "Simple чи Continuous", "p": ["<b>Present Simple</b> — завжди, регулярно: <i>I usually read at night.</i> <b>Present Continuous</b> — зараз: <i>I am reading now.</i> Дієслова стану (<i>like, love, want, know, understand</i>) у Continuous не вживають: <i>I like it</i> (не «I am liking»)."]}], "remember": "Present Continuous — дія зараз (now, at the moment, Look!): am/is/are + V-ing. write → writing, run → running. Питання: Are you…? Simple — регулярно (usually); Continuous — зараз (now). like, want, know — тільки Simple.", "cards": [{"f": "Коли вживають Present Continuous?", "b": "Дія відбувається зараз: now, at the moment, Look!"}, {"f": "Формула Present Continuous", "b": "am / is / are + дієслово + -ing."}, {"f": "write, make → -ing", "b": "writing, making (e відпадає)."}, {"f": "run, swim, sit → -ing", "b": "running, swimming, sitting (подвоєння)."}, {"f": "Питання в Present Continuous", "b": "Are you reading? Is she cooking? What are you doing?"}, {"f": "Simple vs Continuous", "b": "Usually I read (Simple) — I am reading now (Continuous)."}, {"f": "Дієслова, які не вживають у Continuous", "b": "like, love, want, know, understand."}], "quiz": [{"t": "choice", "q": "Look! It … .", "o": ["rains", "is raining", "rain"], "a": 1, "e": "Look! — зараз."}, {"t": "choice", "q": "She … a book now.", "o": ["reads", "is reading", "read"], "a": 1, "e": "Now — Continuous."}, {"t": "choice", "q": "They … football every Sunday.", "o": ["play", "are playing"], "a": 0, "e": "Every Sunday — Simple."}, {"t": "input", "q": "Утвори -ing форму: «swim» → …", "a": ["swimming"], "e": "Подвоюємо m."}, {"t": "input", "q": "Утвори -ing форму: «write» → …", "a": ["writing"], "e": "e відпадає."}, {"t": "choice", "q": "What … you doing?", "o": ["is", "are", "do"], "a": 1, "e": "You — are."}, {"t": "choice", "q": "… he sleeping? — Yes, he is.", "o": ["Is", "Does", "Are"], "a": 0, "e": "He — is."}, {"t": "choice", "q": "I … this song. (like)", "o": ["am liking", "like"], "a": 1, "e": "Like — не в Continuous."}, {"t": "choice", "q": "We … TV at the moment. (заперечення)", "o": ["aren't watching", "don't watch", "not watching"], "a": 0, "e": "At the moment — Continuous."}, {"t": "choice", "q": "Яке слово-підказка для Present Continuous?", "o": ["usually", "now", "every day"], "a": 1, "e": "Now."}]}, {"id": "en-past-simple", "sec": "Grammar", "title": "Past Simple. Правильні й неправильні дієслова", "goal": "Ти утворюєш Past Simple, знаєш найуживаніші неправильні дієслова, заперечення й питання з did.", "learn": [{"h": "Коли вживаємо", "p": ["<span class='term'>Past Simple</span> — дія в минулому, яка закінчилась: <i>I visited my granny yesterday.</i> Слова: <b>yesterday, last week / year, ago (two days ago), in 2020</b>."]}, {"h": "Правильні дієслова: -ed", "p": ["<i>play → played, watch → watched, visit → visited</i>; <b>e</b> в кінці → <i>like → liked</i>; приголосна + <b>y → ied</b>: <i>study → studied, try → tried</i> (але <i>play → played</i>); коротке слово — подвоєння: <i>stop → stopped, plan → planned</i>."]}, {"h": "Неправильні дієслова", "p": ["<i>go → went, see → saw, have → had, do → did, make → made, take → took, come → came, eat → ate, drink → drank, write → wrote, read → read, buy → bought, get → got, give → gave, say → said, tell → told, know → knew, run → ran, swim → swam, sit → sat, sleep → slept, meet → met, find → found, put → put, cut → cut, be → was/were</i>."], "note": "Неправильні треба просто вивчити — вони найуживаніші."}, {"h": "Заперечення і питання", "p": ["<b>did</b> для всіх осіб; після did — дієслово в <b>початковій формі</b>. <i>I didn't go to school. She didn't see him. Did you like the film? — Yes, I did. / No, I didn't. Where did they go? What did he say?</i>"]}], "remember": "Past Simple — минуле (yesterday, last week, ago). Правильні: +ed (played, liked, studied, stopped). Неправильні: go—went, see—saw, have—had, make—made, take—took, eat—ate, buy—bought. Заперечення: didn't + V. Питання: Did + підмет + V?", "cards": [{"f": "Слова-підказки Past Simple", "b": "yesterday, last week, last year, ago, in 2020."}, {"f": "Правильні дієслова в Past Simple", "b": "+ed: played, watched; study → studied; stop → stopped."}, {"f": "go, see, have, do, make → Past", "b": "went, saw, had, did, made."}, {"f": "take, come, eat, drink, write → Past", "b": "took, came, ate, drank, wrote."}, {"f": "buy, get, give, say, tell → Past", "b": "bought, got, gave, said, told."}, {"f": "read, put, cut → Past", "b": "read, put, cut (не змінюються)."}, {"f": "Заперечення в Past Simple", "b": "didn't + дієслово в початковій формі: didn't go."}, {"f": "Питання в Past Simple", "b": "Did + підмет + дієслово? Did you see it? — Yes, I did."}], "quiz": [{"t": "choice", "q": "I … TV yesterday.", "o": ["watch", "watched", "watching"], "a": 1, "e": "Yesterday — Past."}, {"t": "input", "q": "Past Simple від «go»:", "a": ["went"], "e": "go → went."}, {"t": "input", "q": "Past Simple від «see»:", "a": ["saw"], "e": "see → saw."}, {"t": "input", "q": "Past Simple від «buy»:", "a": ["bought"], "e": "buy → bought."}, {"t": "input", "q": "Past Simple від «study»:", "a": ["studied"], "e": "y → ied."}, {"t": "choice", "q": "Past Simple від «stop» —", "o": ["stoped", "stopped"], "a": 1, "e": "Подвоєння p."}, {"t": "choice", "q": "She … to school last week. (заперечення)", "o": ["didn't go", "didn't went", "doesn't go"], "a": 0, "e": "Після didn't — початкова форма."}, {"t": "choice", "q": "… you see the film? — Yes, I did.", "o": ["Did", "Do", "Were"], "a": 0, "e": "Did you see."}, {"t": "choice", "q": "Where … they … last summer? (go)", "o": ["did / go", "did / went", "do / go"], "a": 0, "e": "Did + go."}, {"t": "choice", "q": "We … pizza two days ago.", "o": ["eat", "ate", "eaten"], "a": 1, "e": "eat → ate."}, {"t": "input", "q": "Past Simple від «have»:", "a": ["had"], "e": "have → had."}]}, {"id": "en-modals-there-is", "sec": "Grammar", "title": "There is / there are. Can, must. Some / any. Прийменники місця", "goal": "Ти вживаєш there is/are, can/can't, must/mustn't, some/any і прийменники in, on, under, next to.", "learn": [{"h": "There is / there are", "p": ["<b>There is</b> + однина, <b>there are</b> + множина: <i>There is a sofa in the room. There are two chairs.</i> Заперечення: <i>There isn't a TV. There aren't any pictures.</i> Питання: <i>Is there a park near here? — Yes, there is. Are there any shops? — No, there aren't.</i>"]}, {"h": "Can / must", "p": ["<b>can</b> — уміння, дозвіл: <i>I can swim. Can I go out? — Yes, you can.</i> <b>can't</b> — не вмію / не можна: <i>He can't fly.</i> <b>must</b> — обов'язок: <i>You must do your homework.</i> <b>mustn't</b> — заборона: <i>You mustn't run in the corridor.</i> Після can / must — дієслово без to і без -s: <i>She can sing.</i>"]}, {"h": "Some / any / a lot of", "p": ["<b>Some</b> — у твердженнях: <i>There is some milk. I have some apples.</i> <b>Any</b> — у запереченнях і питаннях: <i>There isn't any juice. Have you got any pens?</i> <b>Countable</b> (злічувані: <i>an apple, two apples</i>) і <b>uncountable</b> (незлічувані: <i>milk, water, bread, sugar, rice</i> — без a/an, без множини). <b>How many</b> + злічувані, <b>How much</b> + незлічувані. <b>A lot of</b> — багато (для обох)."]}, {"h": "Прийменники місця", "p": ["<b>in</b> — у (in the box), <b>on</b> — на (on the table), <b>under</b> — під, <b>next to</b> — поруч, <b>between</b> — між, <b>behind</b> — за, <b>in front of</b> — перед, <b>near</b> — біля, <b>above</b> — над, <b>opposite</b> — навпроти."]}], "remember": "There is + однина, there are + множина. Can — уміння/дозвіл, must — обов'язок, mustn't — заборона; після них V без to. Some — твердження, any — питання й заперечення. How many — злічувані, how much — незлічувані (milk, water). in, on, under, next to, between, behind, in front of.", "cards": [{"f": "There is / there are", "b": "There is + однина; there are + множина."}, {"f": "Is there a park? — відповідь", "b": "Yes, there is. / No, there isn't."}, {"f": "Can / can't", "b": "Уміння або дозвіл / не вмію, не можна: I can swim. He can't fly."}, {"f": "Must / mustn't", "b": "Обов'язок / заборона: You must study. You mustn't run."}, {"f": "Some / any", "b": "Some — у твердженнях; any — у питаннях і запереченнях."}, {"f": "Незлічувані іменники", "b": "milk, water, bread, sugar, rice, tea — без a/an, без множини."}, {"f": "How many / how much", "b": "How many + злічувані (apples); how much + незлічувані (milk)."}, {"f": "under / next to / between / behind / in front of", "b": "під / поруч / між / за / перед."}], "quiz": [{"t": "choice", "q": "There … a cat under the table.", "o": ["is", "are"], "a": 0, "e": "Однина — is."}, {"t": "choice", "q": "There … three books on the desk.", "o": ["is", "are"], "a": 1, "e": "Множина — are."}, {"t": "choice", "q": "I … swim very well.", "o": ["can", "must", "am"], "a": 0, "e": "Уміння — can."}, {"t": "choice", "q": "You … run in the classroom. (заборона)", "o": ["can", "mustn't", "must"], "a": 1, "e": "Mustn't — заборона."}, {"t": "choice", "q": "She can … very well.", "o": ["sing", "sings", "to sing"], "a": 0, "e": "Після can — без to і -s."}, {"t": "choice", "q": "There is … milk in the fridge.", "o": ["some", "any"], "a": 0, "e": "Твердження — some."}, {"t": "choice", "q": "Have you got … brothers?", "o": ["some", "any"], "a": 1, "e": "Питання — any."}, {"t": "choice", "q": "How … water do you drink?", "o": ["many", "much"], "a": 1, "e": "Water — незлічуване."}, {"t": "choice", "q": "How … apples are there?", "o": ["many", "much"], "a": 0, "e": "Apples — злічувані."}, {"t": "choice", "q": "The cat is … the chair. (під)", "o": ["on", "under", "next to"], "a": 1, "e": "Under — під."}, {"t": "input", "q": "Переклади «між»: … the sofa and the table", "a": ["between"], "e": "between."}]}, {"id": "en-adjectives-questions", "sec": "Grammar", "title": "Ступені порівняння прикметників. Питальні слова. Порядкові числівники", "goal": "Ти утворюєш comparative і superlative, знаєш питальні слова та числівники.", "learn": [{"h": "Ступені порівняння", "p": ["Короткі прикметники: <b>-er</b> / <b>the -est</b>: <i>big — bigger — the biggest; tall — taller — the tallest; happy — happier — the happiest</i> (y → i). Довгі (2+ склади): <b>more</b> / <b>the most</b>: <i>beautiful — more beautiful — the most beautiful; interesting — more interesting — the most interesting</i>. <b>Винятки</b>: <i>good — better — the best; bad — worse — the worst; many/much — more — the most; little — less — the least; far — farther — the farthest</i>."], "ex": ["<i>Tom is taller than Ann. Kyiv is the biggest city in Ukraine. This book is more interesting than that one.</i> <b>than</b> — ніж; <b>as … as</b> — такий же: <i>as tall as</i>."]}, {"h": "Питальні слова", "p": ["<b>What</b> — що/який, <b>Who</b> — хто, <b>Where</b> — де/куди, <b>When</b> — коли, <b>Why</b> — чому, <b>How</b> — як, <b>How many/much</b> — скільки, <b>How old</b> — скільки років, <b>Which</b> — котрий, <b>Whose</b> — чий, <b>What time</b> — о котрій. Порядок: питальне слово + допоміжне + підмет + дієслово: <i>Where do you live? What time does it start?</i>"]}, {"h": "Числівники", "p": ["Кількісні: <i>one, two… twelve, thirteen… nineteen, twenty, thirty, forty, fifty, sixty, seventy, eighty, ninety, a hundred, a thousand; twenty-one</i>. Порядкові: <i>first (1st), second (2nd), third (3rd), fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, twentieth, twenty-first</i>. Дати: <i>the fifth of May, on Monday, in June, in 2026</i>."]}], "remember": "Короткі: -er / the -est (bigger, the biggest; happier); довгі: more / the most. good—better—best, bad—worse—worst. than — ніж. What, who, where, when, why, how, how many/much, which, whose. first, second, third, fourth… twelfth, twentieth.", "cards": [{"f": "Ступені коротких прикметників", "b": "-er / the -est: tall — taller — the tallest; big — bigger — the biggest."}, {"f": "Ступені довгих прикметників", "b": "more / the most: more interesting — the most interesting."}, {"f": "good / bad — ступені", "b": "good — better — the best; bad — worse — the worst."}, {"f": "than", "b": "«ніж»: Tom is taller than Ann."}, {"f": "Where / When / Why / How", "b": "де, куди / коли / чому / як."}, {"f": "Who / Whose / Which", "b": "хто / чий / котрий."}, {"f": "first, second, third, fifth, twelfth", "b": "1-й, 2-й, 3-й, 5-й, 12-й."}, {"f": "Як сказати дату 5 травня?", "b": "the fifth of May."}], "quiz": [{"t": "choice", "q": "Tom is … than Ann.", "o": ["tall", "taller", "the tallest"], "a": 1, "e": "Порівняння двох — comparative + than."}, {"t": "choice", "q": "Kyiv is … city in Ukraine.", "o": ["bigger", "the biggest", "big"], "a": 1, "e": "Найвищий ступінь — the -est."}, {"t": "choice", "q": "This film is … than that one.", "o": ["interestinger", "more interesting", "the most interesting"], "a": 1, "e": "Довгий прикметник — more."}, {"t": "input", "q": "Найвищий ступінь від «good»: the …", "a": ["best"], "e": "good — better — the best."}, {"t": "input", "q": "Порівняльний ступінь від «bad»:", "a": ["worse"], "e": "bad — worse."}, {"t": "input", "q": "Порівняльний ступінь від «happy»:", "a": ["happier"], "e": "y → ier."}, {"t": "choice", "q": "… do you live? — In Kiliia.", "o": ["When", "Where", "Why"], "a": 1, "e": "Where — де."}, {"t": "choice", "q": "… is your birthday? — In May.", "o": ["Where", "When", "Who"], "a": 1, "e": "When — коли."}, {"t": "choice", "q": "… bag is this? — It's Tom's.", "o": ["Whose", "Who", "Which"], "a": 0, "e": "Whose — чий."}, {"t": "input", "q": "Порядковий числівник від «three»:", "a": ["third", "3rd"], "e": "third."}, {"t": "input", "q": "Порядковий числівник від «five»:", "a": ["fifth", "5th"], "e": "fifth."}, {"t": "choice", "q": "Число 40 англійською —", "o": ["fourty", "forty", "fourteen"], "a": 1, "e": "forty (без u)."}]}, {"id": "en-about-me-family", "sec": "Vocabulary", "title": "About me. Family. Appearance", "goal": "Ти розповідаєш про себе й родину і описуєш зовнішність.", "learn": [{"h": "About me", "p": ["<i>My name is… I am eleven. I am from Ukraine. I live in Kiliia. I am in the fifth form (grade). My hobby is… My favourite subject is… My birthday is on the… of…</i>"]}, {"h": "Family", "p": ["<i>mother (mum), father (dad), parents, sister, brother, grandmother (granny), grandfather (grandpa), grandparents, aunt, uncle, cousin, son, daughter, husband, wife, baby</i>. <i>I have got a big family. My mum is a doctor. I've got no brothers or sisters — I'm an only child.</i>"]}, {"h": "Appearance", "p": ["Волосся: <i>long, short, straight, curly, wavy; fair (blond), dark, brown, red hair</i>. Очі: <i>blue, green, brown, grey eyes</i>. Зріст і статура: <i>tall, short, slim, plump</i>. Вік: <i>young, old</i>. Обличчя: <i>freckles, a beard, a moustache, glasses</i>. <i>She has got long dark hair and brown eyes. He is tall and slim. He wears glasses.</i>"]}, {"h": "Character", "p": ["<i>kind, friendly, funny, clever, brave, lazy, hard-working, polite, shy, honest, cheerful</i>. <i>My best friend is funny and kind.</i>"]}], "remember": "My name is…, I am eleven, I live in…, I'm in the fifth form. Family: parents, aunt, uncle, cousin, grandparents. Hair: long/short, straight/curly, fair/dark. Eyes: blue/brown. Tall/short, slim. Character: kind, funny, clever, brave, lazy, polite.", "cards": [{"f": "aunt / uncle / cousin", "b": "тітка / дядько / двоюрідний брат або сестра."}, {"f": "grandparents", "b": "бабуся й дідусь."}, {"f": "an only child", "b": "єдина дитина в сім'ї."}, {"f": "curly / straight / wavy hair", "b": "кучеряве / пряме / хвилясте волосся."}, {"f": "fair hair", "b": "світле (русяве) волосся."}, {"f": "slim / plump", "b": "стрункий / повненький."}, {"f": "kind / brave / lazy / polite", "b": "добрий / сміливий / ледачий / ввічливий."}, {"f": "freckles / glasses", "b": "веснянки / окуляри."}], "quiz": [{"t": "choice", "q": "«Тітка» англійською —", "o": ["uncle", "aunt", "cousin"], "a": 1, "e": "aunt."}, {"t": "choice", "q": "«Cousin» — це…", "o": ["брат", "двоюрідний брат/сестра", "племінник"], "a": 1, "e": "cousin."}, {"t": "input", "q": "Переклади «дідусь»:", "a": ["grandfather", "grandpa", "granddad"], "e": "grandfather (grandpa)."}, {"t": "choice", "q": "«Кучеряве волосся» —", "o": ["straight hair", "curly hair", "short hair"], "a": 1, "e": "curly."}, {"t": "choice", "q": "«She has got … eyes.» (карі)", "o": ["brown", "blue", "green"], "a": 0, "e": "brown eyes — карі."}, {"t": "choice", "q": "«Сміливий» —", "o": ["shy", "brave", "lazy"], "a": 1, "e": "brave."}, {"t": "choice", "q": "«Ледачий» —", "o": ["hard-working", "lazy", "polite"], "a": 1, "e": "lazy."}, {"t": "input", "q": "Переклади «стрункий»:", "a": ["slim", "thin"], "e": "slim."}, {"t": "choice", "q": "«I'm in the fifth …» (клас)", "o": ["form", "room", "class year"], "a": 0, "e": "form або grade."}, {"t": "choice", "q": "«He wears …» (окуляри)", "o": ["glasses", "eyes", "hair"], "a": 0, "e": "glasses."}]}, {"id": "en-school", "sec": "Vocabulary", "title": "School. Subjects. Classroom", "goal": "Ти знаєш назви шкільних предметів, речей у класі й шкільні фрази.", "learn": [{"h": "Subjects", "p": ["<i>Maths, English, Ukrainian, Literature, History, Science / Nature Study, Art, Music, PE (Physical Education), IT (Computer Science), Ethics, Health</i>. <i>My favourite subject is Maths. I'm good at English. We have got five lessons on Monday.</i>"]}, {"h": "Classroom", "p": ["<i>desk, chair, board (blackboard, whiteboard), teacher, pupil, textbook, exercise book (notebook), pen, pencil, rubber (eraser), ruler, pencil case, schoolbag, timetable, break, homework, mark, test</i>."]}, {"h": "School phrases", "p": ["<i>Open your books at page 10. Listen and repeat. Work in pairs. Put up your hand. Can I go out? May I come in? Sorry, I'm late. I don't understand. How do you spell it? What does this word mean?</i>"]}, {"h": "Days and time", "p": ["<i>Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday</i> — дні пишемо з великої букви. <i>on Monday, at 8 o'clock, in the morning, after school, at the weekend, every day, twice a week</i>."]}], "remember": "Subjects: Maths, English, History, Science, Art, Music, PE, IT. Classroom: desk, board, textbook, exercise book, rubber, ruler, timetable, break. Дні тижня — з великої: Monday… Sunday; on Monday, at 8 o'clock. Фрази: Put up your hand, May I come in?", "cards": [{"f": "PE / IT", "b": "фізкультура (Physical Education) / інформатика."}, {"f": "Maths / Science", "b": "математика / природознавство."}, {"f": "exercise book / textbook", "b": "зошит / підручник."}, {"f": "rubber / ruler / pencil case", "b": "гумка / лінійка / пенал."}, {"f": "timetable / break / mark", "b": "розклад / перерва / оцінка."}, {"f": "Put up your hand", "b": "Підніми руку."}, {"f": "May I come in?", "b": "Можна увійти?"}, {"f": "Дні тижня", "b": "Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday."}], "quiz": [{"t": "choice", "q": "«Фізкультура» —", "o": ["IT", "PE", "Art"], "a": 1, "e": "PE — Physical Education."}, {"t": "choice", "q": "«Розклад уроків» —", "o": ["timetable", "textbook", "test"], "a": 0, "e": "timetable."}, {"t": "input", "q": "Переклади «гумка»:", "a": ["rubber", "eraser"], "e": "rubber (eraser)."}, {"t": "choice", "q": "«Exercise book» — це…", "o": ["підручник", "зошит", "щоденник"], "a": 1, "e": "зошит."}, {"t": "input", "q": "Переклади «перерва»:", "a": ["break"], "e": "break."}, {"t": "choice", "q": "«Підніміть руку» —", "o": ["Put up your hand", "Open your books", "Sit down"], "a": 0, "e": "Put up your hand."}, {"t": "choice", "q": "Який день іде після Tuesday?", "o": ["Monday", "Wednesday", "Thursday"], "a": 1, "e": "Wednesday."}, {"t": "input", "q": "Переклади «четвер»:", "a": ["thursday"], "e": "Thursday."}, {"t": "choice", "q": "«… Monday» — який прийменник?", "o": ["in", "at", "on"], "a": 2, "e": "on Monday."}, {"t": "choice", "q": "Як спитати дозволу вийти?", "o": ["Can I go out?", "I go out.", "Go out!"], "a": 0, "e": "Can I go out?"}]}, {"id": "en-food", "sec": "Vocabulary", "title": "Food and drinks. Meals. At the café", "goal": "Ти знаєш назви продуктів, прийомів їжі і фрази для замовлення.", "learn": [{"h": "Food", "p": ["Фрукти: <i>apple, banana, orange, pear, grapes, strawberry, cherry, lemon, watermelon</i>. Овочі: <i>potato, tomato, cucumber, carrot, cabbage, onion</i>. <i>bread, butter, cheese, eggs, meat, chicken, fish, sausage, rice, pasta, soup, porridge, salad, pizza, sandwich, cake, sweets, ice cream, chocolate, honey, jam</i>. Напої: <i>water, milk, juice, tea, coffee, lemonade</i>."]}, {"h": "Meals", "p": ["<i>breakfast</i> — сніданок, <i>lunch</i> — обід, <i>dinner</i> — вечеря (обід), <i>supper</i> — вечеря. <i>I have breakfast at 7. For breakfast I usually eat porridge and drink tea.</i>"]}, {"h": "Likes and dislikes", "p": ["<i>I like / love / enjoy… I don't like… I hate… My favourite food is… It's tasty / delicious / yummy. It's healthy / unhealthy. Would you like some tea? — Yes, please. / No, thank you.</i>"]}, {"h": "At the café", "p": ["<i>Can I have a pizza, please? I'd like some juice. How much is it? — It's fifty hryvnias. Here you are. Anything else? Enjoy your meal! Bon appetit!</i>"]}], "remember": "Fruit: apple, pear, grapes, strawberry. Vegetables: potato, cucumber, carrot, cabbage. Meals: breakfast, lunch, dinner, supper. I like / don't like / hate; tasty, healthy. Would you like…? — Yes, please. Can I have…, please? How much is it?", "cards": [{"f": "pear / grapes / cherry", "b": "груша / виноград / вишня."}, {"f": "cucumber / cabbage / onion", "b": "огірок / капуста / цибуля."}, {"f": "porridge / sausage", "b": "каша / ковбаса, сосиска."}, {"f": "breakfast / lunch / dinner", "b": "сніданок / обід / вечеря (обід)."}, {"f": "tasty / healthy", "b": "смачний / корисний."}, {"f": "Would you like some tea?", "b": "Хочеш чаю? — Yes, please. / No, thank you."}, {"f": "Can I have…, please?", "b": "Можна мені…, будь ласка?"}, {"f": "How much is it?", "b": "Скільки це коштує?"}], "quiz": [{"t": "choice", "q": "«Груша» —", "o": ["pear", "peach", "plum"], "a": 0, "e": "pear."}, {"t": "choice", "q": "«Cucumber» — це…", "o": ["морква", "огірок", "капуста"], "a": 1, "e": "огірок."}, {"t": "input", "q": "Переклади «капуста»:", "a": ["cabbage"], "e": "cabbage."}, {"t": "choice", "q": "«Сніданок» —", "o": ["lunch", "breakfast", "dinner"], "a": 1, "e": "breakfast."}, {"t": "input", "q": "Переклади «каша»:", "a": ["porridge"], "e": "porridge."}, {"t": "choice", "q": "Ввічлива відповідь «Would you like some juice?»:", "o": ["Yes.", "Yes, please.", "Give me."], "a": 1, "e": "Yes, please."}, {"t": "choice", "q": "Як спитати ціну?", "o": ["How many is it?", "How much is it?", "What is it?"], "a": 1, "e": "How much is it?"}, {"t": "choice", "q": "«Смачний» —", "o": ["tasty", "healthy", "hungry"], "a": 0, "e": "tasty, delicious."}, {"t": "input", "q": "Переклади «полуниця»:", "a": ["strawberry"], "e": "strawberry."}, {"t": "choice", "q": "«Bon appetit!» українською —", "o": ["Смачного!", "Дякую!", "До побачення!"], "a": 0, "e": "Enjoy your meal!"}]}, {"id": "en-house-town", "sec": "Vocabulary", "title": "My house. My town. Directions", "goal": "Ти описуєш дім і кімнати, знаєш місця в місті і як спитати дорогу.", "learn": [{"h": "House", "p": ["<i>house, flat (apartment), living room, bedroom, kitchen, bathroom, toilet, hall, balcony, garden, garage; floor, wall, window, door, stairs</i>. Меблі: <i>sofa, armchair, bed, wardrobe, table, chair, shelf, carpet, lamp, mirror, fridge, cooker, TV</i>. <i>There is a sofa in the living room. My bedroom is small but cosy.</i>"]}, {"h": "Town", "p": ["<i>school, shop, supermarket, market, hospital, pharmacy (chemist's), bank, post office, library, museum, theatre, cinema, café, restaurant, park, zoo, stadium, swimming pool, bus stop, railway station, airport, church, square, street, bridge, river</i>. <i>There is a big park in my town. I live in Kiliia — a small town on the Danube.</i>"]}, {"h": "Directions", "p": ["<i>Excuse me, how can I get to the museum? Where is the bank? — Go straight on. Turn left / right. Take the first turning on the right. It's on the left. It's next to the school / opposite the park / between the bank and the shop. It's far / near. Cross the street. Thank you! — You're welcome.</i>"]}], "remember": "Rooms: living room, bedroom, kitchen, bathroom, hall. Furniture: sofa, armchair, wardrobe, shelf, carpet, fridge. Town: hospital, pharmacy, post office, library, cinema, square, bridge. Directions: go straight on, turn left/right, it's opposite/next to; Excuse me, how can I get to…?", "cards": [{"f": "living room / bedroom / kitchen / bathroom", "b": "вітальня / спальня / кухня / ванна."}, {"f": "wardrobe / armchair / carpet / shelf", "b": "шафа / крісло / килим / полиця."}, {"f": "fridge / cooker", "b": "холодильник / плита."}, {"f": "pharmacy (chemist's) / post office / library", "b": "аптека / пошта / бібліотека."}, {"f": "square / bridge / railway station", "b": "площа / міст / вокзал."}, {"f": "Go straight on. Turn left.", "b": "Іди прямо. Поверни ліворуч."}, {"f": "opposite / next to", "b": "навпроти / поруч."}, {"f": "Excuse me, how can I get to…?", "b": "Вибачте, як дістатись до…?"}], "quiz": [{"t": "choice", "q": "«Спальня» —", "o": ["bedroom", "bathroom", "living room"], "a": 0, "e": "bedroom."}, {"t": "choice", "q": "«Wardrobe» — це…", "o": ["ліжко", "шафа для одягу", "полиця"], "a": 1, "e": "шафа."}, {"t": "input", "q": "Переклади «кухня»:", "a": ["kitchen"], "e": "kitchen."}, {"t": "choice", "q": "«Аптека» —", "o": ["library", "pharmacy", "bakery"], "a": 1, "e": "pharmacy / chemist's."}, {"t": "input", "q": "Переклади «бібліотека»:", "a": ["library"], "e": "library."}, {"t": "choice", "q": "«Post office» — це…", "o": ["пошта", "поліція", "поле"], "a": 0, "e": "пошта."}, {"t": "choice", "q": "«Поверни праворуч» —", "o": ["Turn left", "Turn right", "Go straight"], "a": 1, "e": "turn right."}, {"t": "choice", "q": "«Навпроти» —", "o": ["next to", "opposite", "behind"], "a": 1, "e": "opposite."}, {"t": "choice", "q": "Як ввічливо спитати дорогу?", "o": ["Where bank?", "Excuse me, where is the bank?", "Bank!"], "a": 1, "e": "Excuse me…"}, {"t": "input", "q": "Переклади «міст»:", "a": ["bridge"], "e": "bridge."}]}, {"id": "en-hobbies-weather", "sec": "Vocabulary", "title": "Hobbies and sports. Weather and seasons. Clothes", "goal": "Ти розповідаєш про захоплення, погоду і одяг.", "learn": [{"h": "Hobbies and sports", "p": ["<i>reading, drawing, painting, singing, dancing, playing computer games, collecting stamps, cooking, taking photos, riding a bike</i>. Спорт: <i>football, basketball, volleyball, tennis, swimming, running, skating, skiing, chess, boxing</i>. <b>play</b> + ігри з м'ячем/шахи (<i>play football, play chess</i>), <b>go</b> + -ing (<i>go swimming, go skiing</i>), <b>do</b> (<i>do karate, do sport</i>). <i>I'm keen on… I'm fond of… I'm good at…</i>"]}, {"h": "Weather", "p": ["<i>It's sunny, cloudy, rainy, windy, snowy, foggy, hot, warm, cool, cold, frosty. It's raining. It's snowing. What's the weather like today? — It's warm and sunny.</i> Пори року: <i>spring, summer, autumn, winter</i>. Місяці: <i>January, February, March, April, May, June, July, August, September, October, November, December</i> — з великої букви. <i>in summer, in May</i>."]}, {"h": "Clothes", "p": ["<i>T-shirt, shirt, blouse, jumper (sweater), jacket, coat, dress, skirt, trousers, jeans, shorts, socks, shoes, trainers, boots, hat, cap, scarf, gloves, school uniform</i>. <i>put on</i> — вдягати, <i>take off</i> — знімати, <i>wear</i> — носити. <i>In winter I wear a warm coat, a hat and gloves.</i>"]}], "remember": "play football/chess, go swimming/skiing, do karate. I'm keen on / fond of / good at. Weather: sunny, cloudy, rainy, windy, foggy, frosty; What's the weather like? Seasons: spring, summer, autumn, winter; місяці з великої. Clothes: jumper, trousers, trainers, scarf, gloves; put on / take off / wear.", "cards": [{"f": "play / go / do зі спортом", "b": "play football, chess; go swimming, skiing; do karate."}, {"f": "I'm keen on / fond of / good at", "b": "Я захоплююсь / люблю / добре вмію."}, {"f": "What's the weather like today?", "b": "Яка сьогодні погода?"}, {"f": "cloudy / foggy / frosty / windy", "b": "хмарно / туманно / морозно / вітряно."}, {"f": "Пори року", "b": "spring, summer, autumn, winter."}, {"f": "jumper / trousers / trainers", "b": "світер / штани / кросівки."}, {"f": "scarf / gloves / boots", "b": "шарф / рукавички / чоботи."}, {"f": "put on / take off", "b": "вдягати / знімати."}], "quiz": [{"t": "choice", "q": "I … football every day.", "o": ["play", "go", "do"], "a": 0, "e": "play + гра з м'ячем."}, {"t": "choice", "q": "We … swimming in summer.", "o": ["play", "go", "do"], "a": 1, "e": "go + -ing."}, {"t": "choice", "q": "«Туманно» —", "o": ["foggy", "frosty", "sunny"], "a": 0, "e": "foggy."}, {"t": "choice", "q": "«What's the weather like?» — це…", "o": ["Що ти любиш?", "Яка погода?", "Де погода?"], "a": 1, "e": "Яка погода."}, {"t": "input", "q": "Переклади «осінь»:", "a": ["autumn", "fall"], "e": "autumn."}, {"t": "choice", "q": "Який місяць після March?", "o": ["May", "April", "February"], "a": 1, "e": "April."}, {"t": "input", "q": "Переклади «штани»:", "a": ["trousers", "pants"], "e": "trousers."}, {"t": "choice", "q": "«Trainers» — це…", "o": ["тренери", "кросівки", "штани"], "a": 1, "e": "кросівки."}, {"t": "input", "q": "Переклади «рукавички»:", "a": ["gloves"], "e": "gloves."}, {"t": "choice", "q": "«Take off your coat» —", "o": ["Вдягни пальто", "Зніми пальто", "Купи пальто"], "a": 1, "e": "take off — знімати."}, {"t": "choice", "q": "«Windy» —", "o": ["вітряно", "волого", "сніжно"], "a": 0, "e": "windy."}]}, {"id": "en-animals-holidays", "sec": "Vocabulary", "title": "Animals. Holidays and celebrations. Travelling", "goal": "Ти знаєш назви тварин, свят і слова про подорожі.", "learn": [{"h": "Animals", "p": ["Домашні (pets): <i>cat, dog, hamster, parrot, rabbit, guinea pig, fish, tortoise</i>. Ферма: <i>cow, horse, sheep, pig, goat, hen, cock, duck, goose</i>. Дикі: <i>lion, tiger, elephant, giraffe, monkey, bear, wolf, fox, hare, squirrel, hedgehog, deer, snake, crocodile, dolphin, whale, shark, eagle, owl</i>. <i>A giraffe is taller than an elephant. Dolphins live in the sea. Wolves are wild animals.</i>"]}, {"h": "Holidays", "p": ["<i>New Year, Christmas (25 December / 7 January), Easter, Mother's Day, Independence Day (24 August), birthday, Halloween (31 October), St Valentine's Day (14 February)</i>. <i>We decorate the Christmas tree, give presents, sing carols, make a cake, have a party. Happy birthday! Merry Christmas! Happy New Year!</i> Британські свята: <i>Christmas, Easter, Bonfire Night, Pancake Day</i>."]}, {"h": "Travelling", "p": ["Транспорт: <i>by bus, by car, by train, by plane, by ship, by bike, on foot</i>. <i>ticket, suitcase, map, passport, hotel, beach, mountains, camping, sightseeing, souvenir</i>. <i>Last summer I went to the seaside. We travelled by train. I took a lot of photos.</i> Країни: <i>Ukraine — Ukrainian, Great Britain (the UK) — English/British, the USA — American, Poland — Polish, Germany — German, France — French, Italy — Italian</i>. Столиці: <i>Kyiv, London, Washington, Warsaw, Berlin, Paris, Rome</i>."]}], "remember": "Pets: hamster, parrot, rabbit, tortoise. Farm: cow, sheep, goat, hen. Wild: bear, wolf, fox, squirrel, hedgehog, eagle, owl. Holidays: Christmas, Easter, Independence Day 24 August. by bus/train/plane, on foot. Ukraine — Ukrainian, the UK — British, London.", "cards": [{"f": "hamster / tortoise / guinea pig", "b": "хом'як / черепаха / морська свинка."}, {"f": "goat / sheep / hen / goose", "b": "коза / вівця / курка / гуска."}, {"f": "squirrel / hedgehog / hare", "b": "білка / їжак / заєць."}, {"f": "eagle / owl / whale", "b": "орел / сова / кит."}, {"f": "Independence Day of Ukraine", "b": "24 August."}, {"f": "Merry Christmas! / Happy New Year!", "b": "Веселого Різдва! / Щасливого Нового року!"}, {"f": "by train / on foot", "b": "поїздом / пішки."}, {"f": "the UK — capital and people", "b": "London; British / English."}, {"f": "suitcase / sightseeing / souvenir", "b": "валіза / огляд пам'яток / сувенір."}], "quiz": [{"t": "choice", "q": "«Білка» —", "o": ["squirrel", "hedgehog", "hare"], "a": 0, "e": "squirrel."}, {"t": "input", "q": "Переклади «їжак»:", "a": ["hedgehog"], "e": "hedgehog."}, {"t": "choice", "q": "«Tortoise» — це…", "o": ["черепаха", "ящірка", "жаба"], "a": 0, "e": "черепаха."}, {"t": "choice", "q": "«Сова» —", "o": ["eagle", "owl", "parrot"], "a": 1, "e": "owl (Совеня!)."}, {"t": "input", "q": "Переклади «вівця»:", "a": ["sheep"], "e": "sheep (множина теж sheep)."}, {"t": "choice", "q": "Коли День Незалежності України?", "o": ["24 August", "1 May", "7 January"], "a": 0, "e": "24 August."}, {"t": "choice", "q": "«Веселого Різдва!» —", "o": ["Happy Easter!", "Merry Christmas!", "Happy New Year!"], "a": 1, "e": "Merry Christmas!"}, {"t": "choice", "q": "«Пішки» —", "o": ["by foot", "on foot", "with foot"], "a": 1, "e": "on foot."}, {"t": "choice", "q": "«Ми поїхали поїздом» — We went …", "o": ["by train", "on train", "in train"], "a": 0, "e": "by train."}, {"t": "input", "q": "Столиця Великої Британії:", "a": ["london"], "e": "London."}, {"t": "choice", "q": "Люди з України —", "o": ["Ukrainians", "Ukrainish", "Ukrainers"], "a": 0, "e": "Ukrainians."}]}]};
+
+// ============================================================
+//  Прогрес (localStorage Safari)
+// ============================================================
+const KEY = "course:" + COURSE.id;
+const TG = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData ? window.Telegram.WebApp : null;
+const CS = TG && TG.CloudStorage && (TG.isVersionAtLeast ? TG.isVersionAtLeast("6.9") : true) ? TG.CloudStorage : null;
+let P = {};
+function load(cb){
+  let done=false; const finish=v=>{ if(done) return; done=true; try{ P = JSON.parse(v||"{}"); }catch(e){ P={}; } cb(); };
+  if(CS){ CS.getItem(KEY, (err,v)=>finish(err?null:v)); setTimeout(()=>finish(null), 1500); }
+  else { let v=null; try{ v = localStorage.getItem(KEY); }catch(e){} finish(v); }
+}
+function save(){
+  const s = JSON.stringify(P);
+  if(CS) CS.setItem(KEY, s, ()=>{});
+  try{ localStorage.setItem(KEY, s); }catch(e){}
+}
+if(TG){ TG.ready(); TG.expand(); if(TG.disableVerticalSwipes) TG.disableVerticalSwipes(); }
+function lp(id){ return P[id] || (P[id] = {learn:false, cards:false, best:null}); }
+function starsOf(pct){ return pct===null?0 : pct>=90?3 : pct>=70?2 : pct>=50?1 : 0; }
+function starStr(n){ let s=""; for(let i=0;i<3;i++) s+= i<n ? "★" : "<span class='off'>★</span>"; return s; }
+
+// ============================================================
+//  Навігація
+// ============================================================
+let L = null, cardsQueue=[], cardsTotal=0, quiz=[], qi=0, qPick=null, qWrong=[], qRight=0;
+const BACK = {"s-lesson":"s-list","s-learn":"s-lesson","s-cards":"s-lesson","s-quiz":"s-lesson","s-res":"s-list"};
+let CUR = "s-list";
+function go(id){
+  CUR = id;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); document.getElementById(id).classList.add("on"); window.scrollTo(0,0);
+  if(TG && TG.BackButton){ if(BACK[id]) TG.BackButton.show(); else TG.BackButton.hide(); }
+}
+if(TG && TG.BackButton) TG.BackButton.onClick(()=>{ const b = BACK[CUR]; if(b==="s-list") renderList(); else if(b) go(b); });
+
+let listScroll = 0;
+function renderList(){
+  document.getElementById("subj-title").textContent = COURSE.title;
+  document.getElementById("subj-sub").textContent = COURSE.subtitle;
+  let done=0, stars=0, html="";
+  let lastSec = null;
+  COURSE.lessons.forEach((l,i)=>{
+    const p = lp(l.id), st = starsOf(p.best);
+    if(p.best!==null && st>0) done++; stars+=st;
+    if(l.sec && l.sec!==lastSec){ html += `<div class="section">${l.sec}</div>`; lastSec = l.sec; }
+    html += `<button class="lesson" onclick="openLesson(${i})">
+      <div class="n ${st>0?'done':''}">${st>0?'✓':i+1}</div>
+      <div class="t"><b>${l.title}</b><span>${p.best===null?'Ще не проходив':'Найкращий результат: '+p.best+'%'}</span></div>
+      <div class="stars">${starStr(st)}</div></button>`;
+  });
+  document.getElementById("lessons").innerHTML = html;
+  document.getElementById("sum-done").textContent = done;
+  document.getElementById("sum-total").textContent = COURSE.lessons.length;
+  document.getElementById("sum-stars").textContent = stars;
+  go("s-list"); window.scrollTo(0, listScroll);
+}
+
+function openLesson(i){
+  listScroll = window.scrollY;
+  L = COURSE.lessons[i]; const p = lp(L.id);
+  document.getElementById("l-bar").textContent = "Урок " + (i+1);
+  document.getElementById("l-title").textContent = L.title;
+  document.getElementById("l-goal").textContent = L.goal;
+  document.getElementById("cards-count").textContent = L.cards.length + " карток";
+  document.getElementById("quiz-count").textContent = L.quiz.length + " питань";
+  document.getElementById("st-learn").textContent = p.learn ? "✓" : "";
+  document.getElementById("st-cards").textContent = p.cards ? "✓" : "";
+  document.getElementById("st-quiz").innerHTML = p.best===null ? "" : `<span class="stars">${starStr(starsOf(p.best))}</span>`;
+  go("s-lesson");
+}
+
+// ---- Вивчити
+function openLearn(){
+  let h = "";
+  L.learn.forEach(b=>{
+    h += `<div class="card"><h3>${b.h}</h3>${b.p.map(x=>`<p>${x}</p>`).join("")}`;
+    if(b.ex) h += b.ex.map(x=>`<div class="ex">${x}</div>`).join("");
+    if(b.note) h += `<p style="color:var(--ink-2);margin-top:10px">${b.note}</p>`;
+    h += `</div>`;
+  });
+  h += `<div class="rem"><b>Запам'ятай</b>${L.remember}</div>`;
+  document.getElementById("learn-body").innerHTML = h;
+  go("s-learn");
+}
+function markLearn(){ lp(L.id).learn = true; save(); }
+
+// ---- Картки
+function openCards(){
+  cardsQueue = L.cards.slice().sort(()=>Math.random()-.5); cardsTotal = cardsQueue.length;
+  showCard(); go("s-cards");
+}
+function showCard(){
+  const fc = document.getElementById("fc"); fc.classList.remove("flip");
+  const c = cardsQueue[0];
+  document.getElementById("fc-front").textContent = c.f;
+  document.getElementById("fc-back").textContent = c.b;
+  const left = cardsQueue.length;
+  document.getElementById("fc-n").textContent = `Залишилось: ${left}`;
+  document.getElementById("fc-prog").style.width = ((cardsTotal-left)/cardsTotal*100) + "%";
+}
+function fcAnswer(known){
+  const c = cardsQueue.shift();
+  if(!known) cardsQueue.push(c);
+  if(cardsQueue.length===0){ lp(L.id).cards = true; save(); openQuiz(); return; }
+  setTimeout(showCard, 60);
+}
+
+// ---- Тест
+function openQuiz(items){
+  quiz = (items || L.quiz).slice(); if(!items) quiz.sort(()=>Math.random()-.5);
+  qi=0; qWrong=[]; qRight=0; showQ(); go("s-quiz");
+}
+function showQ(){
+  const q = quiz[qi]; qPick=null;
+  document.getElementById("q-n").textContent = `Питання ${qi+1} з ${quiz.length}`;
+  document.getElementById("q-prog").style.width = (qi/quiz.length*100)+"%";
+  document.getElementById("q-text").textContent = q.q;
+  const fb = document.getElementById("q-fb"); fb.className="fb"; fb.innerHTML="";
+  const btn = document.getElementById("q-btn"); btn.textContent="Перевірити"; btn.dataset.state="check";
+  let h="";
+  if(q.t==="choice") h = q.o.map((o,i)=>`<button class="opt" onclick="pick(${i},this)">${o}</button>`).join("");
+  else if(q.t==="tf") h = `<button class="opt" onclick="pick(true,this)">Так, правильно</button><button class="opt" onclick="pick(false,this)">Ні, неправильно</button>`;
+  else h = `<input class="inp" id="q-inp" autocomplete="off" autocapitalize="off" placeholder="Впиши відповідь">`;
+  document.getElementById("q-body").innerHTML = h;
+  if(q.t==="input") document.getElementById("q-inp").addEventListener("keydown", e=>{ if(e.key==="Enter") qNext(); });
+}
+function pick(v, el){ if(document.getElementById("q-btn").dataset.state!=="check") return; qPick=v; document.querySelectorAll(".opt").forEach(o=>o.classList.remove("pick")); el.classList.add("pick"); }
+function norm(s){ return (s||"").toLowerCase().replace(/ё/g,"е").replace(/[’ʼ`]/g,"'").replace(/[^a-z0-9а-яіїєґ' \-]/gi,"").replace(/\s+/g," ").trim(); }
+function qNext(){
+  const btn = document.getElementById("q-btn"), q = quiz[qi];
+  if(btn.dataset.state==="check"){
+    let ok=false;
+    if(q.t==="input"){
+      const inp=document.getElementById("q-inp"), v=norm(inp.value); if(!v){ inp.focus(); inp.placeholder="Впиши відповідь і натисни Перевірити"; return; }
+      ok = q.a.map(norm).includes(v); inp.classList.add(ok?"ok":"bad"); inp.disabled=true;
+    } else {
+      if(qPick===null) return;
+      ok = (qPick===q.a);
+      document.querySelectorAll(".opt").forEach((o,i)=>{
+        const val = q.t==="tf" ? (i===0) : i;
+        if(val===q.a) o.classList.add("ok"); else if(val===qPick) o.classList.add("bad");
+        o.disabled=true;
+      });
+    }
+    if(ok) qRight++; else qWrong.push(q);
+    const fb=document.getElementById("q-fb"); fb.className="fb on "+(ok?"ok":"bad");
+    fb.innerHTML = `<b>${ok?"Правильно!":"Не зовсім."}</b>${q.e}${(!ok && q.t==="input")?" Правильно: <b>"+q.a[0]+"</b>.":""}`;
+    btn.textContent = qi+1<quiz.length ? "Наступне" : "Результат"; btn.dataset.state="next";
+  } else {
+    qi++; if(qi<quiz.length) showQ(); else showResult();
+  }
+}
+function showResult(){
+  const pct = Math.round(qRight/quiz.length*100), st = starsOf(pct), p = lp(L.id);
+  if(quiz.length===L.quiz.length && (p.best===null || pct>p.best)){ p.best=pct; save(); }
+  document.getElementById("r-score").textContent = pct+"%";
+  document.getElementById("r-of").textContent = `${qRight} з ${quiz.length} правильно`;
+  document.getElementById("r-stars").innerHTML = starStr(st);
+  document.getElementById("r-msg").textContent = st===3?"Чудово, тему знаєш.":st===2?"Добре. Глянь на помилки — і буде три зірки.":st===1?"Половина є. Повтори картки й спробуй ще.":"Повернись до «Вивчити», потім спробуй знову.";
+  document.getElementById("r-retry").style.display = qWrong.length? "block":"none";
+  go("s-res");
+}
+function retryWrong(){ openQuiz(qWrong); }
+
+load(renderList);
+</script>
+</body>
+</html>
