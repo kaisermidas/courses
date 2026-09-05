@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Українська мова · 5 клас</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --ok:#1F9D63; --ok-soft:#E3F6EC;
+    --bad:#D8433B; --bad-soft:#FCE9E7; --gold:#E9A800;
+    --r:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--paper);color:var(--ink);
+    font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3,.big{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.01em}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  .app{max-width:720px;margin:0 auto;padding:env(safe-area-inset-top) 20px 40px}
+  .screen{display:none}.screen.on{display:block}
+
+  /* top bar */
+  .bar{display:flex;align-items:center;gap:12px;padding:16px 0 8px;min-height:60px}
+  .bar .back{font-size:17px;color:var(--accent);padding:8px 8px 8px 0}
+  .bar .title{font-weight:600;font-size:17px;flex:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bar .spacer{width:64px}
+
+  /* subject header */
+  .subject{padding:28px 0 8px}
+  .subject h1{font-size:34px;margin:0 0 4px;font-weight:700}
+  .subject p{margin:0;color:var(--ink-2)}
+  .summary{display:flex;gap:18px;margin:16px 0 22px;color:var(--ink-2);font-size:15px}
+  .summary b{color:var(--ink);font-size:22px;display:block;font-family:ui-rounded,system-ui}
+
+  /* lesson list */
+  .section{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .lesson{display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:10px}
+  .lesson:active{background:var(--accent-soft)}
+  .lesson .n{width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--accent);
+    display:grid;place-items:center;font-weight:700;font-family:ui-rounded,system-ui;flex:none}
+  .lesson .n.done{background:var(--ok-soft);color:var(--ok)}
+  .lesson .t{flex:1;min-width:0}
+  .lesson .t b{display:block;font-weight:600}
+  .lesson .t span{color:var(--ink-2);font-size:14px}
+  .stars{color:var(--gold);font-size:15px;letter-spacing:1px;white-space:nowrap}
+  .stars .off{color:var(--line)}
+
+  /* lesson home */
+  .lh h2{font-size:28px;margin:12px 0 6px}
+  .lh p.lead{color:var(--ink-2);margin:0 0 22px}
+  .mode{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:#fff;
+    border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:12px}
+  .mode:active{background:var(--accent-soft)}
+  .mode .ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none}
+  .mode .ic.a{background:#FFF1D6}.mode .ic.b{background:#E6EEFF}.mode .ic.c{background:#E3F6EC}
+  .mode b{display:block;font-size:18px;font-weight:600}
+  .mode span{color:var(--ink-2);font-size:15px}
+  .mode .st{margin-left:auto;color:var(--ink-2);font-size:14px;white-space:nowrap}
+
+  /* learn */
+  .card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-bottom:14px}
+  .card h3{margin:0 0 8px;font-size:21px}
+  .card p{margin:0 0 10px}
+  .card p:last-child{margin:0}
+  .card .ex{background:var(--paper);border-radius:12px;padding:10px 14px;margin:8px 0}
+  .card .ex i{color:var(--accent);font-style:normal;font-weight:600}
+  .rem{background:#FFF7E0;border:1px solid #F5DFA0;border-radius:var(--r);padding:16px 20px;margin:6px 0 14px}
+  .rem b{display:block;margin-bottom:4px}
+  .term{font-weight:700;color:var(--accent)}
+  .cta{display:block;width:100%;background:var(--accent);color:#fff;border-radius:16px;padding:16px;
+    font-size:18px;font-weight:600;text-align:center;margin-top:8px}
+  .cta:active{opacity:.85}
+  .cta.ghost{background:#fff;color:var(--accent);border:1.5px solid var(--accent)}
+
+  /* flashcards */
+  .prog{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 18px}
+  .prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+  .fc{perspective:1200px;height:300px;margin-bottom:18px}
+  .fc .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .fc.flip .in{transform:rotateY(180deg)}
+  .fc .f,.fc .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border-radius:24px;padding:28px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .fc .f{background:#fff;border:1px solid var(--line)}
+  .fc .f .big{font-size:30px;font-weight:700}
+  .fc .f small{color:var(--ink-2);margin-top:14px}
+  .fc .b{background:var(--ink);color:#fff;transform:rotateY(180deg);font-size:20px;line-height:1.45}
+  .row{display:flex;gap:12px}
+  .row .cta{margin:0}
+  .cta.no{background:var(--bad-soft);color:var(--bad)}
+  .cta.yes{background:var(--ok-soft);color:var(--ok)}
+  @media (prefers-reduced-motion:reduce){.fc .in{transition:none}.prog i{transition:none}}
+
+  /* quiz */
+  .qn{color:var(--ink-2);font-size:14px;margin-bottom:6px}
+  .q{font-size:22px;font-weight:600;margin:0 0 18px;font-family:ui-rounded,system-ui;line-height:1.35}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;
+    padding:14px 18px;margin-bottom:10px;font-size:18px}
+  .opt:active{background:var(--accent-soft)}
+  .opt.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opt:disabled{opacity:1}
+  .inp{width:100%;font:inherit;font-size:20px;padding:14px 18px;border:1.5px solid var(--line);border-radius:14px;background:#fff;outline:none}
+  .inp:focus{border-color:var(--accent)}
+  .inp.ok{border-color:var(--ok);background:var(--ok-soft)}.inp.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .fb{border-radius:14px;padding:14px 18px;margin:14px 0 12px;display:none}
+  .fb.on{display:block}
+  .fb.ok{background:var(--ok-soft);color:#155C3B}.fb.bad{background:var(--bad-soft);color:#7E2620}
+  .fb b{display:block;margin-bottom:2px}
+
+  /* result */
+  .res{text-align:center;padding:30px 0 10px}
+  .res .score{font-size:64px;font-weight:800;font-family:ui-rounded,system-ui;line-height:1}
+  .res .of{color:var(--ink-2);margin:6px 0 4px}
+  .res .stars{font-size:30px;margin:10px 0 18px;letter-spacing:4px}
+  .res p{margin:0 0 22px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ===== Список уроків ===== -->
+<section class="screen on" id="s-list">
+  <div class="subject">
+    <h1 id="subj-title"></h1>
+    <p id="subj-sub"></p>
+  </div>
+  <div class="summary">
+    <div><b id="sum-done">0</b>пройдено</div>
+    <div><b id="sum-total">0</b>уроків</div>
+    <div><b id="sum-stars">0</b>зірок</div>
+  </div>
+  <div id="lessons"></div>
+</section>
+
+<!-- ===== Урок: вибір режиму ===== -->
+<section class="screen" id="s-lesson">
+  <div class="bar"><button class="back" onclick="go('s-list')">‹ Уроки</button><div class="title" id="l-bar"></div><div class="spacer"></div></div>
+  <div class="lh">
+    <h2 id="l-title"></h2>
+    <p class="lead" id="l-goal"></p>
+    <button class="mode" onclick="openLearn()"><div class="ic a">📖</div><div><b>Вивчити</b><span>Правила й приклади коротко</span></div><div class="st" id="st-learn"></div></button>
+    <button class="mode" onclick="openCards()"><div class="ic b">🃏</div><div><b>Повторити</b><span id="cards-count">Картки з термінами</span></div><div class="st" id="st-cards"></div></button>
+    <button class="mode" onclick="openQuiz()"><div class="ic c">✅</div><div><b>Перевірити</b><span id="quiz-count">Тест</span></div><div class="st" id="st-quiz"></div></button>
+  </div>
+</section>
+
+<!-- ===== Вивчити ===== -->
+<section class="screen" id="s-learn">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Вивчити</div><div class="spacer"></div></div>
+  <div id="learn-body"></div>
+  <button class="cta" onclick="markLearn();openCards()">Далі — повторити картки</button>
+</section>
+
+<!-- ===== Картки ===== -->
+<section class="screen" id="s-cards">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Повторити</div><div class="spacer"></div></div>
+  <div class="qn" id="fc-n"></div>
+  <div class="prog"><i id="fc-prog"></i></div>
+  <div class="fc" id="fc" onclick="this.classList.toggle('flip')">
+    <div class="in"><div class="f"><div class="big" id="fc-front"></div><small>Торкнись, щоб перевернути</small></div><div class="b" id="fc-back"></div></div>
+  </div>
+  <div class="row">
+    <button class="cta no" onclick="fcAnswer(false)">Ще раз</button>
+    <button class="cta yes" onclick="fcAnswer(true)">Знаю</button>
+  </div>
+</section>
+
+<!-- ===== Тест ===== -->
+<section class="screen" id="s-quiz">
+  <div class="bar"><button class="back" onclick="go('s-lesson')">‹ Назад</button><div class="title">Перевірити</div><div class="spacer"></div></div>
+  <div class="qn" id="q-n"></div>
+  <div class="prog"><i id="q-prog"></i></div>
+  <div class="q" id="q-text"></div>
+  <div id="q-body"></div>
+  <div class="fb" id="q-fb"></div>
+  <button class="cta" id="q-btn" onclick="qNext()">Перевірити</button>
+</section>
+
+<!-- ===== Результат ===== -->
+<section class="screen" id="s-res">
+  <div class="bar"><div class="spacer"></div><div class="title">Результат</div><div class="spacer"></div></div>
+  <div class="res">
+    <div class="score" id="r-score"></div>
+    <div class="of" id="r-of"></div>
+    <div class="stars" id="r-stars"></div>
+    <p id="r-msg"></p>
+    <button class="cta" id="r-retry" onclick="retryWrong()">Повторити помилки</button>
+    <button class="cta ghost" onclick="openQuiz()">Пройти тест заново</button>
+    <button class="cta ghost" onclick="go('s-list')">До списку уроків</button>
+  </div>
+</section>
+
+</div>
+
+<script>
+// ============================================================
+//  ДАНІ КУРСУ. Один об'єкт на предмет; генерується з підручника.
+// ============================================================
+const COURSE = {
+  id: "ukrmova5",
+  title: "Українська мова",
+  subtitle: "5 клас · за підручником Голуб, 2022",
+  lessons: [
+    {
+      id: "leksyka-1",
+      title: "Синоніми, антоніми, омоніми",
+      goal: "Після уроку ти знаєш, чим відрізняються ці три групи слів, і не плутаєш омоніми з багатозначними словами.",
+      learn: [
+        {h:"Синоніми", p:["<span class='term'>Синоніми</span> — це слова, різні за звучанням, але близькі або однакові за значенням."],
+         ex:["<i>сміливий</i> — <i>хоробрий</i> — <i>відважний</i>", "<i>говорити</i> — <i>казати</i> — <i>мовити</i>"],
+         note:"Синоніми роблять мову багатшою: не треба повторювати одне слово в кожному реченні."},
+        {h:"Антоніми", p:["<span class='term'>Антоніми</span> — це слова з протилежним значенням."],
+         ex:["<i>день</i> — <i>ніч</i>", "<i>високий</i> — <i>низький</i>", "<i>сміятися</i> — <i>плакати</i>"],
+         note:"Антоніми завжди належать до однієї частини мови: іменник — іменник, дієслово — дієслово."},
+        {h:"Омоніми", p:["<span class='term'>Омоніми</span> — це слова, що звучать і пишуться однаково, але мають зовсім різні значення."],
+         ex:["<i>коса</i> (дівоча) — <i>коса</i> (для трави) — <i>коса</i> (піщана)", "<i>ключ</i> (від дверей) — <i>ключ</i> (журавлиний)"],
+         note:"Не плутай з багатозначним словом: там значення пов'язані між собою (<i>ніжка</i> дитини й <i>ніжка</i> стола — обидві «підпора»). В омонімів зв'язку між значеннями немає."}
+      ],
+      remember: "Синоніми — <b>схожі</b> за значенням. Антоніми — <b>протилежні</b>. Омоніми — <b>однакові за звучанням</b>, різні за значенням.",
+      cards: [
+        {f:"Синоніми", b:"Слова, різні за звучанням, але близькі за значенням. Сміливий — хоробрий."},
+        {f:"Антоніми", b:"Слова з протилежним значенням. День — ніч."},
+        {f:"Омоніми", b:"Слова, що звучать однаково, але мають різні, не пов'язані значення. Коса — коса."},
+        {f:"Багатозначне слово", b:"Одне слово з кількома пов'язаними значеннями. Ніжка дитини — ніжка стола."},
+        {f:"Синонімічний ряд", b:"Група синонімів. Головне слово ряду — найзагальніше: іти — крокувати, брести, чимчикувати."},
+        {f:"Чим омонім відрізняється від багатозначного слова?", b:"У багатозначного значення пов'язані між собою, в омонімів — ні."}
+      ],
+      quiz: [
+        {t:"choice", q:"Які слова називають синонімами?",
+         o:["Слова з протилежним значенням","Слова, близькі за значенням","Слова, однакові за звучанням"], a:1,
+         e:"Синоніми близькі за значенням: веселий — радісний."},
+        {t:"choice", q:"Знайди пару антонімів.",
+         o:["сміливий — хоробрий","світло — темрява","коса — коса"], a:1,
+         e:"Світло і темрява — протилежні за значенням, тому це антоніми."},
+        {t:"choice", q:"Слово «ключ» (від дверей) і «ключ» (журавлиний) — це…",
+         o:["синоніми","антоніми","омоніми"], a:2,
+         e:"Пишуться й звучать однаково, а значення різні й не пов'язані — омоніми."},
+        {t:"tf", q:"Антоніми можуть бути різними частинами мови, наприклад «швидкий — повільно».", a:false,
+         e:"Ні. Антоніми завжди однієї частини мови: швидкий — повільний, швидко — повільно."},
+        {t:"input", q:"Добери антонім до слова «холодний».", a:["теплий","гарячий"],
+         e:"Холодний — теплий (або гарячий)."},
+        {t:"input", q:"Добери синонім до слова «великий».", a:["величезний","здоровенний","чималий","гігантський","огрядний","велетенський"],
+         e:"Наприклад: величезний, чималий, велетенський."},
+        {t:"choice", q:"«Ніжка» дитини і «ніжка» стільця — що це?",
+         o:["омоніми","багатозначне слово","антоніми"], a:1,
+         e:"Обидві ніжки — це «опора», значення пов'язані. Тому це одне багатозначне слово, а не омоніми."},
+        {t:"tf", q:"Синоніми допомагають не повторювати те саме слово в тексті.", a:true,
+         e:"Так, саме для цього ними й користуються."},
+        {t:"choice", q:"Який рядок складається лише з синонімів?",
+         o:["радісний, веселий, щасливий","радісний, сумний, веселий","радісний, радість, радіти"], a:0,
+         e:"У другому рядку є антонім «сумний», у третьому — різні частини мови одного кореня."},
+        {t:"input", q:"Як називається група синонімів, наприклад «іти, крокувати, брести»?", a:["синонімічний ряд","ряд синонімів"],
+         e:"Це синонімічний ряд."}
+      ]
+    },
+    {
+      id: "leksyka-2",
+      title: "Пряме і переносне значення слова",
+      goal: "Ти відрізняєш пряме значення від переносного і знаходиш переносне в реченні.",
+      learn: [
+        {h:"Пряме значення", p:["Пряме значення — це основне, звичайне значення слова, яке першим спадає на думку."], ex:["<i>золотий</i> перстень — зроблений із золота"]},
+        {h:"Переносне значення", p:["Переносне значення виникає, коли назву одного предмета переносять на інший через схожість."], ex:["<i>золоте</i> волосся — кольору золота", "<i>золоті</i> руки — вмілі"], note:"Переносне значення часто трапляється у віршах і казках — так мова стає образною."}
+      ],
+      remember: "Пряме — звичайне значення. Переносне — назву перенесли на щось схоже.",
+      cards: [
+        {f:"Пряме значення", b:"Основне, звичайне значення слова. Гострий ніж."},
+        {f:"Переносне значення", b:"Назва перенесена на інший предмет через схожість. Гострий розум."}
+      ],
+      quiz: [
+        {t:"choice", q:"У якому словосполученні слово вжито в переносному значенні?", o:["солодкий мед","солодкий сон","солодка цукерка"], a:1, e:"Сон не має смаку — «солодкий» тут означає приємний."},
+        {t:"tf", q:"«Кам'яне серце» — це пряме значення.", a:false, e:"Серце не з каменю; «кам'яне» тут — байдуже, жорстоке. Переносне значення."},
+        {t:"input", q:"У виразі «залізна воля» слово «залізна» вжито в … значенні.", a:["переносному","переносне"], e:"Воля не із заліза — значення переносне: міцна, непохитна."}
+      ]
+    }
+  ]
+};
+
+// ============================================================
+//  Прогрес (localStorage Safari)
+// ============================================================
+const KEY = "course:" + COURSE.id;
+const TG = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData ? window.Telegram.WebApp : null;
+const CS = TG && TG.CloudStorage && (TG.isVersionAtLeast ? TG.isVersionAtLeast("6.9") : true) ? TG.CloudStorage : null;
+let P = {};
+function load(cb){
+  let done=false; const finish=v=>{ if(done) return; done=true; try{ P = JSON.parse(v||"{}"); }catch(e){ P={}; } cb(); };
+  if(CS){ CS.getItem(KEY, (err,v)=>finish(err?null:v)); setTimeout(()=>finish(null), 1500); }
+  else { let v=null; try{ v = localStorage.getItem(KEY); }catch(e){} finish(v); }
+}
+function save(){
+  const s = JSON.stringify(P);
+  if(CS) CS.setItem(KEY, s, ()=>{});
+  try{ localStorage.setItem(KEY, s); }catch(e){}
+}
+if(TG){ TG.ready(); TG.expand(); if(TG.disableVerticalSwipes) TG.disableVerticalSwipes(); }
+function lp(id){ return P[id] || (P[id] = {learn:false, cards:false, best:null}); }
+function starsOf(pct){ return pct===null?0 : pct>=90?3 : pct>=70?2 : pct>=50?1 : 0; }
+function starStr(n){ let s=""; for(let i=0;i<3;i++) s+= i<n ? "★" : "<span class='off'>★</span>"; return s; }
+
+// ============================================================
+//  Навігація
+// ============================================================
+let L = null, cardsQueue=[], cardsTotal=0, quiz=[], qi=0, qPick=null, qWrong=[], qRight=0;
+const BACK = {"s-lesson":"s-list","s-learn":"s-lesson","s-cards":"s-lesson","s-quiz":"s-lesson","s-res":"s-list"};
+let CUR = "s-list";
+function go(id){
+  CUR = id;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); document.getElementById(id).classList.add("on"); window.scrollTo(0,0);
+  if(TG && TG.BackButton){ if(BACK[id]) TG.BackButton.show(); else TG.BackButton.hide(); }
+}
+if(TG && TG.BackButton) TG.BackButton.onClick(()=>{ const b = BACK[CUR]; if(b==="s-list") renderList(); else if(b) go(b); });
+
+function renderList(){
+  document.getElementById("subj-title").textContent = COURSE.title;
+  document.getElementById("subj-sub").textContent = COURSE.subtitle;
+  let done=0, stars=0, html="";
+  COURSE.lessons.forEach((l,i)=>{
+    const p = lp(l.id), st = starsOf(p.best);
+    if(p.best!==null && st>0) done++; stars+=st;
+    html += `<button class="lesson" onclick="openLesson(${i})">
+      <div class="n ${st>0?'done':''}">${st>0?'✓':i+1}</div>
+      <div class="t"><b>${l.title}</b><span>${p.best===null?'Ще не проходив':'Найкращий результат: '+p.best+'%'}</span></div>
+      <div class="stars">${starStr(st)}</div></button>`;
+  });
+  document.getElementById("lessons").innerHTML = html;
+  document.getElementById("sum-done").textContent = done;
+  document.getElementById("sum-total").textContent = COURSE.lessons.length;
+  document.getElementById("sum-stars").textContent = stars;
+  go("s-list");
+}
+
+function openLesson(i){
+  L = COURSE.lessons[i]; const p = lp(L.id);
+  document.getElementById("l-bar").textContent = "Урок " + (i+1);
+  document.getElementById("l-title").textContent = L.title;
+  document.getElementById("l-goal").textContent = L.goal;
+  document.getElementById("cards-count").textContent = L.cards.length + " карток";
+  document.getElementById("quiz-count").textContent = L.quiz.length + " питань";
+  document.getElementById("st-learn").textContent = p.learn ? "✓" : "";
+  document.getElementById("st-cards").textContent = p.cards ? "✓" : "";
+  document.getElementById("st-quiz").innerHTML = p.best===null ? "" : `<span class="stars">${starStr(starsOf(p.best))}</span>`;
+  go("s-lesson");
+}
+
+// ---- Вивчити
+function openLearn(){
+  let h = "";
+  L.learn.forEach(b=>{
+    h += `<div class="card"><h3>${b.h}</h3>${b.p.map(x=>`<p>${x}</p>`).join("")}`;
+    if(b.ex) h += b.ex.map(x=>`<div class="ex">${x}</div>`).join("");
+    if(b.note) h += `<p style="color:var(--ink-2);margin-top:10px">${b.note}</p>`;
+    h += `</div>`;
+  });
+  h += `<div class="rem"><b>Запам'ятай</b>${L.remember}</div>`;
+  document.getElementById("learn-body").innerHTML = h;
+  go("s-learn");
+}
+function markLearn(){ lp(L.id).learn = true; save(); }
+
+// ---- Картки
+function openCards(){
+  cardsQueue = L.cards.slice().sort(()=>Math.random()-.5); cardsTotal = cardsQueue.length;
+  showCard(); go("s-cards");
+}
+function showCard(){
+  const fc = document.getElementById("fc"); fc.classList.remove("flip");
+  const c = cardsQueue[0];
+  document.getElementById("fc-front").textContent = c.f;
+  document.getElementById("fc-back").textContent = c.b;
+  const left = cardsQueue.length;
+  document.getElementById("fc-n").textContent = `Залишилось: ${left}`;
+  document.getElementById("fc-prog").style.width = ((cardsTotal-left)/cardsTotal*100) + "%";
+}
+function fcAnswer(known){
+  const c = cardsQueue.shift();
+  if(!known) cardsQueue.push(c);
+  if(cardsQueue.length===0){ lp(L.id).cards = true; save(); openQuiz(); return; }
+  setTimeout(showCard, 60);
+}
+
+// ---- Тест
+function openQuiz(items){
+  quiz = (items || L.quiz).slice(); if(!items) quiz.sort(()=>Math.random()-.5);
+  qi=0; qWrong=[]; qRight=0; showQ(); go("s-quiz");
+}
+function showQ(){
+  const q = quiz[qi]; qPick=null;
+  document.getElementById("q-n").textContent = `Питання ${qi+1} з ${quiz.length}`;
+  document.getElementById("q-prog").style.width = (qi/quiz.length*100)+"%";
+  document.getElementById("q-text").textContent = q.q;
+  const fb = document.getElementById("q-fb"); fb.className="fb"; fb.innerHTML="";
+  const btn = document.getElementById("q-btn"); btn.textContent="Перевірити"; btn.dataset.state="check";
+  let h="";
+  if(q.t==="choice") h = q.o.map((o,i)=>`<button class="opt" onclick="pick(${i},this)">${o}</button>`).join("");
+  else if(q.t==="tf") h = `<button class="opt" onclick="pick(true,this)">Так, правильно</button><button class="opt" onclick="pick(false,this)">Ні, неправильно</button>`;
+  else h = `<input class="inp" id="q-inp" autocomplete="off" autocapitalize="off" placeholder="Впиши відповідь">`;
+  document.getElementById("q-body").innerHTML = h;
+  if(q.t==="input") document.getElementById("q-inp").addEventListener("keydown", e=>{ if(e.key==="Enter") qNext(); });
+}
+function pick(v, el){ if(document.getElementById("q-btn").dataset.state!=="check") return; qPick=v; document.querySelectorAll(".opt").forEach(o=>o.classList.remove("pick")); el.classList.add("pick"); }
+function norm(s){ return (s||"").toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-яіїєґ'’ ]/gi,"").replace(/\s+/g," ").trim(); }
+function qNext(){
+  const btn = document.getElementById("q-btn"), q = quiz[qi];
+  if(btn.dataset.state==="check"){
+    let ok=false;
+    if(q.t==="input"){
+      const inp=document.getElementById("q-inp"), v=norm(inp.value); if(!v){ inp.focus(); return; }
+      ok = q.a.map(norm).includes(v); inp.classList.add(ok?"ok":"bad"); inp.disabled=true;
+    } else {
+      if(qPick===null) return;
+      ok = (qPick===q.a);
+      document.querySelectorAll(".opt").forEach((o,i)=>{
+        const val = q.t==="tf" ? (i===0) : i;
+        if(val===q.a) o.classList.add("ok"); else if(val===qPick) o.classList.add("bad");
+        o.disabled=true;
+      });
+    }
+    if(ok) qRight++; else qWrong.push(q);
+    const fb=document.getElementById("q-fb"); fb.className="fb on "+(ok?"ok":"bad");
+    fb.innerHTML = `<b>${ok?"Правильно!":"Не зовсім."}</b>${q.e}${(!ok && q.t==="input")?" Правильно: <b>"+q.a[0]+"</b>.":""}`;
+    btn.textContent = qi+1<quiz.length ? "Наступне" : "Результат"; btn.dataset.state="next";
+  } else {
+    qi++; if(qi<quiz.length) showQ(); else showResult();
+  }
+}
+function showResult(){
+  const pct = Math.round(qRight/quiz.length*100), st = starsOf(pct), p = lp(L.id);
+  if(quiz.length===L.quiz.length && (p.best===null || pct>p.best)){ p.best=pct; save(); }
+  document.getElementById("r-score").textContent = pct+"%";
+  document.getElementById("r-of").textContent = `${qRight} з ${quiz.length} правильно`;
+  document.getElementById("r-stars").innerHTML = starStr(st);
+  document.getElementById("r-msg").textContent = st===3?"Чудово, тему знаєш.":st===2?"Добре. Глянь на помилки — і буде три зірки.":st===1?"Половина є. Повтори картки й спробуй ще.":"Повернись до «Вивчити», потім спробуй знову.";
+  document.getElementById("r-retry").style.display = qWrong.length? "block":"none";
+  go("s-res");
+}
+function retryWrong(){ openQuiz(qWrong); }
+
+load(renderList);
+</script>
+</body>
+</html>
