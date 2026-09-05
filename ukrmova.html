@@ -330,13 +330,13 @@ function showQ(){
   if(q.t==="input") document.getElementById("q-inp").addEventListener("keydown", e=>{ if(e.key==="Enter") qNext(); });
 }
 function pick(v, el){ if(document.getElementById("q-btn").dataset.state!=="check") return; qPick=v; document.querySelectorAll(".opt").forEach(o=>o.classList.remove("pick")); el.classList.add("pick"); }
-function norm(s){ return (s||"").toLowerCase().replace(/ё/g,"е").replace(/[^a-zа-яіїєґ'’ ]/gi,"").replace(/\s+/g," ").trim(); }
+function norm(s){ return (s||"").toLowerCase().replace(/ё/g,"е").replace(/[’ʼ`]/g,"'").replace(/[^a-z0-9а-яіїєґ' \-]/gi,"").replace(/\s+/g," ").trim(); }
 function qNext(){
   const btn = document.getElementById("q-btn"), q = quiz[qi];
   if(btn.dataset.state==="check"){
     let ok=false;
     if(q.t==="input"){
-      const inp=document.getElementById("q-inp"), v=norm(inp.value); if(!v){ inp.focus(); return; }
+      const inp=document.getElementById("q-inp"), v=norm(inp.value); if(!v){ inp.focus(); inp.placeholder="Впиши відповідь і натисни Перевірити"; return; }
       ok = q.a.map(norm).includes(v); inp.classList.add(ok?"ok":"bad"); inp.disabled=true;
     } else {
       if(qPick===null) return;
