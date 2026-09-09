@@ -217,7 +217,7 @@ const tlSets=[
  [['Проголошення УНР','1917'],['Голодомор','1932'],['Незалежність України','1991'],['Революція Гідності','2014']]];
 let tlI=0,tlOk=0,tlOrder=[],tlSel=null;
 function tlLoad(){const set=tlSets[tlI];tlOrder=set.map((_,i)=>i).sort(()=>Math.random()-.5);tlSel=null;hide('#tl-v');tlDraw();}
-function tlDraw(){const set=tlSets[tlI];
+function tlDraw(){if(!document.querySelector('#tl-cards'))return;const set=tlSets[tlI];
   $('#tl-task').innerHTML='Розстав <b>'+set.length+'</b> події від найдавнішої до найновішої: тисни на дві картки, щоб поміняти їх місцями.<span class="chip">'+tlOk+' з 3</span>';
   const box=$('#tl-cards');box.innerHTML='';
   tlOrder.forEach((idx,pos)=>{const b=document.createElement('button');
@@ -250,7 +250,7 @@ T('cent',{g:0,ic:'🔢',t:'Рік і століття',s:'Чому 1700 — це
 </div>`,init(){ceDraw();}});
 const ROM=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
 function toRoman(n){let s='';ROM.forEach(([v,r])=>{while(n>=v){s+=r;n-=v;}});return s;}
-function ceDraw(){const y=+$('#ce-r').value,c=Math.ceil(y/100);
+function ceDraw(){if(!document.querySelector('#ce-r'))return;const y=+$('#ce-r').value,c=Math.ceil(y/100);
   $('#ce-year').textContent=y+' рік';
   $('#ce-cent').textContent=toRoman(c)+' століття';
   const last=y%100===0;
@@ -275,7 +275,7 @@ T('roman',{g:0,ic:'Ⅻ',t:'Римські цифри',s:'Як читати да�
   <div class="legend">I=1, V=5, X=10, L=50, C=100, D=500, M=1000. Менша цифра перед більшою — віднімається: IX = 9, XL = 40.</div>
 </div>`,init(){rmT=2026;rmDraw();}});
 let rmT=2026;
-function rmDraw(){const n=+$('#rm-r').value;$('#rm-n').textContent=n;
+function rmDraw(){if(!document.querySelector('#rm-in'))return;const n=+$('#rm-r').value;$('#rm-n').textContent=n;
   $('#rm-v2').textContent=toRoman(n);
   const parts=[];let x=n;ROM.forEach(([v,r])=>{while(x>=v){parts.push(r+'='+v);x-=v;}});
   $('#rm-state').textContent=parts.join(' + ');}
@@ -304,10 +304,10 @@ const bcT=[{a:-50,b:150,q:'Скільки років минуло від 50 р. 
  {a:988,b:1991,q:'Скільки років від хрещення Русі до Незалежності?',r:1003},
  {a:-480,b:1991,q:'Скільки років від битви під Фермопілами (480 до н. е.) до 1991?',r:2470}];
 let bcI=0,bcOk=0;
-function bcLoad(){const t=bcT[bcI];$('#bc-a').value=t.a;$('#bc-b').value=t.b;
+function bcLoad(){if(!document.querySelector('#bc-a'))return;const t=bcT[bcI];$('#bc-a').value=t.a;$('#bc-b').value=t.b;
   $('#bc-task').innerHTML=t.q+'<span class="chip">'+bcOk+' з 3</span>';$('#bc-in').value='';hide('#bc-v');bcDraw();}
 function bcYear(v){return v<0?Math.abs(v)+' до н.е.':v+' н.е.';}
-function bcDraw(){const a=+$('#bc-a').value,b=+$('#bc-b').value;
+function bcDraw(){if(!document.querySelector('#bc-a'))return;const a=+$('#bc-a').value,b=+$('#bc-b').value;
   const pos=v=>16+((v+800)/2826)*288;
   let s='<line x1="10" y1="60" x2="310" y2="60" stroke="#C9C6BB" stroke-width="3"/>';
   s+='<line x1="'+pos(0)+'" y1="40" x2="'+pos(0)+'" y2="80" stroke="#8B5E34" stroke-width="3"/>'+
