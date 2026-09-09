@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Математика руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#1F7A5A; --accent-soft:#E2F2EC; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Математика руками</h1>
+    <p>Сімнадцять приладів. Не рахувалка, а спосіб побачити, <i>чому</i> правило працює саме так.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='math-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['Числа й дії','Дроби, десяткові, відсотки','Величини й геометрія','Задачі та стратегії'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+
+/* --- 1. Решето Ератосфена --- */
+T('sieve',{g:0,ic:'🔎',t:'Решето Ератосфена',s:'Де ховаються прості числа',html:`
+<div class="panel">
+  <div class="task">Викреслюй кратні: спершу 2, потім 3, 5, 7. Те, що лишиться, — прості числа.</div>
+  <div class="row center" id="sv-btns"></div>
+  <div class="sieve" id="sv-grid"></div>
+  <div class="hintline" id="sv-state"></div>
+  <div class="verdict" id="sv-v"></div>
+  <div class="legend">Чому досить 2, 3, 5, 7? Якщо число до 100 складене, то менший його дільник не більший за √100 = 10. Тому далі викреслювати нема чого.</div>
+</div>`,init(){svInit();}});
+let svOut={},svDone={};
+function svInit(){svOut={};svDone={};
+  $('#sv-btns').innerHTML=[2,3,5,7].map(p=>'<button class="btn small ghost" id="sv-'+p+'" onclick="svCross('+p+')">кратні '+p+'</button>').join('');
+  const g=$('#sv-grid');g.innerHTML='';
+  for(let n=1;n<=100;n++){const b=document.createElement('button');b.id='sv-c'+n;b.textContent=n;
+    if(n===1)b.className='one';
+    (function(k){b.onclick=()=>{if(k===1)return;svOut[k]=!svOut[k];svDraw();};})(n);g.appendChild(b);}
+  svDraw();}
+function svCross(p){for(let n=2*p;n<=100;n+=p)svOut[n]=true;svDone[p]=true;
+  $('#sv-'+p).className='btn small';svDraw();}
+function svDraw(){let left=0;
+  for(let n=1;n<=100;n++){const b=$('#sv-c'+n);
+    if(n===1){b.className='one';continue;}
+    if(svOut[n])b.className='out';else{b.className=(svDone[2]&&svDone[3]&&svDone[5]&&svDone[7])?'prime':'';left++;}}
+  $('#sv-state').textContent='Лишилось чисел: '+left;
+  if(svDone[2]&&svDone[3]&&svDone[5]&&svDone[7]){
+    if(left===25){mark('sieve');say('#sv-v','Рівно <b>25</b> простих чисел до 100. Одиниця не є простим: у простого рівно два дільники, а в неї один.',true);}
+    else say('#sv-v','Лишилось '+left+', а простих має бути 25. Схоже, щось викреслено зайве або пропущено.',false);}
+  else hide('#sv-v');}
+
+/* --- 2. Ділники як прямокутники --- */
+T('divrect',{g:0,ic:'▦',t:'Ділники — це прямокутники',s:'Просте число не складається у прямокутник',html:`
+<div class="panel">
+  <div class="task">Із скількох різних прямокутників можна скласти <b id="dv-n">12</b> клітинок? Кожен прямокутник — це пара ділників.</div>
+  <input type="range" min="2" max="36" value="12" id="dv-r" oninput="dvDraw()">
+  <div id="dv-list" style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:12px 0"></div>
+  <div class="hintline" id="dv-state"></div>
+  <div class="verdict" id="dv-v"></div>
+  <div class="legend">Спробуй 13, 17, 23 — у них лише один варіант, витягнута смужка. Такі числа й називають простими. А в 36 прямокутник виходить квадратним: 6 × 6.</div>
+</div>`,init(){dvDraw();}});
+function dvDraw(){const n=+$('#dv-r').value;$('#dv-n').textContent=n;
+  const box=$('#dv-list');box.innerHTML='';let divs=[];
+  for(let a=1;a*a<=n;a++)if(n%a===0)divs.push([a,n/a]);
+  divs.forEach(d=>{const [a,b]=d,s=Math.max(5,Math.min(13,Math.floor(150/b)));
+    const el=document.createElement('div');el.style.textAlign='center';
+    el.innerHTML='<svg viewBox="0 0 '+(b*s+2)+' '+(a*s+2)+'" height="'+Math.min(70,a*s+2)+'">'+
+      Array.from({length:a*b},(_,i)=>{const r=Math.floor(i/b),c=i%b;
+        return '<rect x="'+(c*s+1)+'" y="'+(r*s+1)+'" width="'+s+'" height="'+s+'" fill="#E2F2EC" stroke="#1F7A5A" stroke-width="1"/>';}).join('')+
+      '</svg><div style="font-size:13px;color:var(--ink-2);margin-top:4px">'+a+' × '+b+'</div>';
+    box.appendChild(el);});
+  let all=0;for(let i=1;i<=n;i++)if(n%i===0)all++;
+  $('#dv-state').textContent='Прямокутників: '+divs.length+' · усього ділників: '+all;
+  if(divs.length===1&&n>1){mark('divrect');say('#dv-v','Один-єдиний прямокутник 1 × '+n+' — отже, '+n+' просте число.',true);}
+  else if(divs[divs.length-1][0]===divs[divs.length-1][1])say('#dv-v',n+' = '+divs[divs.length-1][0]+'², тому серед прямокутників є квадрат.',true);
+  else hide('#dv-v');}
+
+/* --- 3. Годинникова арифметика --- */
+T('clock',{g:0,ic:'🕰',t:'Остача по колу',s:'Який день буде через 100 днів',html:`
+<div class="panel">
+  <div class="task" id="ck-task"></div>
+  <svg viewBox="0 0 240 240" height="230" id="ck-svg"></svg>
+  <div class="row center"><input type="number" id="ck-in" style="width:120px;text-align:center" value="10" oninput="ckDraw()"></div>
+  <div class="hintline" id="ck-state"></div>
+  <div class="row center" style="margin-top:8px"><button class="btn" onclick="ckCheck()">Перевірити відповідь</button>
+    <button class="btn ghost" onclick="ckNew()">Інша задача</button></div>
+  <div class="verdict" id="ck-v"></div>
+  <div class="legend">Рахувати всі кроки не треба: важлива лише остача від ділення на кількість поділок кола.</div>
+</div>`,init(){ckI=0;ckOk=0;ckNewLoad();}});
+const DAYS=['понеділок','вівторок','середа','четвер','п’ятниця','субота','неділя'];
+const ckT=[{n:7,start:1,step:100,q:'Сьогодні вівторок. Який день тижня буде через 100 днів?'},
+ {n:7,start:4,step:365,q:'Сьогодні п’ятниця. Який день буде рівно через рік (365 днів)?'},
+ {n:12,start:9,step:50,q:'Зараз 9 година. Котра буде через 50 годин? (за 12-годинним колом)'},
+ {n:7,start:0,step:1000,q:'Сьогодні понеділок. Який день буде через 1000 днів?'}];
+let ckI=0,ckOk=0;
+function ckNewLoad(){const t=ckT[ckI];$('#ck-task').innerHTML=t.q+'<span class="chip">'+ckOk+' з 3</span>';
+  $('#ck-in').value=t.step;hide('#ck-v');ckDraw();}
+function ckNew(){ckI=(ckI+1)%ckT.length;ckNewLoad();}
+function ckDraw(){const t=ckT[ckI],steps=+$('#ck-in').value||0;
+  const pos=((t.start+steps)%t.n+t.n)%t.n;let s='<circle cx="120" cy="120" r="92" fill="#fff" stroke="#C9C6BB" stroke-width="3"/>';
+  for(let i=0;i<t.n;i++){const a=-Math.PI/2+i*2*Math.PI/t.n,x=120+Math.cos(a)*72,y=120+Math.sin(a)*72;
+    const lab=t.n===7?DAYS[i].slice(0,2):(i===0?12:i);
+    s+='<circle cx="'+x+'" cy="'+y+'" r="18" fill="'+(i===pos?'#1F7A5A':i===t.start?'#FFF3D4':'#F4F2EC')+'"/>'+
+       '<text x="'+x+'" y="'+(y+5)+'" text-anchor="middle" font-size="13" font-weight="600" fill="'+(i===pos?'#fff':'#1E2A3A')+'">'+lab+'</text>';}
+  const a=-Math.PI/2+pos*2*Math.PI/t.n;
+  s+='<line x1="120" y1="120" x2="'+(120+Math.cos(a)*48)+'" y2="'+(120+Math.sin(a)*48)+'" stroke="#1F7A5A" stroke-width="5" stroke-linecap="round"/>';
+  $('#ck-svg').innerHTML=s;
+  $('#ck-state').textContent=steps+' : '+t.n+' = '+Math.floor(steps/t.n)+' і остача '+(steps%t.n)+' → зсув на '+(steps%t.n);}
+function ckCheck(){const t=ckT[ckI],steps=+$('#ck-in').value||0;
+  if(steps!==t.step)return say('#ck-v','Постав у полі саме '+t.step+' — і подивись, куди вкаже стрілка.',false);
+  const pos=(t.start+steps)%t.n;ckOk++;
+  const name=t.n===7?DAYS[pos]:(pos===0?12:pos)+' година';
+  $('#ck-task').innerHTML=t.q+'<span class="chip">'+ckOk+' з 3</span>';
+  if(ckOk>=3)mark('clock');
+  say('#ck-v','Відповідь: <b>'+name+'</b>. Бо '+steps+' = '+t.n+' × '+Math.floor(steps/t.n)+' + '+(steps%t.n)+', і повні кола нічого не змінюють.',true);}
+
+/* --- 4. Сума 1 + 2 + … + n --- */
+T('gauss',{g:0,ic:'📶',t:'Сходинки Гаусса',s:'Як скласти всі числа за один крок',html:`
+<div class="panel">
+  <div class="task">Пересунь повзунок і додай дзеркальну копію сходинок — вийде прямокутник.</div>
+  <input type="range" min="3" max="14" value="6" id="ga-n" oninput="gaDraw()">
+  <svg viewBox="0 0 320 200" height="190" id="ga-svg"></svg>
+  <div class="row center"><button class="btn" onclick="gaMirror()">Додати копію</button>
+    <button class="btn ghost" onclick="gaReset()">Прибрати</button></div>
+  <div class="big" id="ga-eq"></div>
+  <div class="row center" style="margin-top:10px"><input type="number" id="ga-in" style="width:150px;text-align:center" placeholder="1+2+…+100 = ?">
+    <button class="btn small" onclick="gaCheck()">Перевірити</button></div>
+  <div class="verdict" id="ga-v"></div>
+</div>`,init(){gaOn=false;gaDraw();}});
+let gaOn=false;
+function gaMirror(){gaOn=true;gaDraw();}
+function gaReset(){gaOn=false;gaDraw();}
+function gaDraw(){const n=+$('#ga-n').value,s=Math.floor(170/(n+1));let g='';
+  for(let r=0;r<n;r++)for(let c=0;c<=r;c++)
+    g+='<rect x="'+(10+c*s)+'" y="'+(180-(r+1)*s)+'" width="'+(s-2)+'" height="'+(s-2)+'" fill="#1F7A5A" rx="2"/>';
+  if(gaOn)for(let r=0;r<n;r++)for(let c=r+1;c<=n;c++)
+    g+='<rect x="'+(10+c*s)+'" y="'+(180-(r+1)*s)+'" width="'+(s-2)+'" height="'+(s-2)+'" fill="#E9A800" rx="2" opacity=".75"/>';
+  $('#ga-svg').innerHTML=g;
+  const sum=n*(n+1)/2;
+  $('#ga-eq').innerHTML=gaOn
+    ? '1+2+…+'+n+' = '+n+' × '+(n+1)+' : 2 = <b>'+sum+'</b>'
+    : '1 + 2 + … + '+n+' = ?';}
+function gaCheck(){const v=+$('#ga-in').value;
+  if(v===5050){mark('gauss');say('#ga-v','Так, 5050. Гаусс у школі помітив те саме: 100 × 101 : 2.',true);}
+  else say('#ga-v','Ще ні. Підстав у формулу n × (n + 1) : 2 число 100.',false);}
+
+/* --- 5. Постав дужки --- */
+T('brackets',{g:0,ic:'( )',t:'Сила дужок',s:'Порядок дій змінює все',html:`
+<div class="panel">
+  <div class="task" id="br-task"></div>
+  <div class="opts" id="br-opts"></div>
+  <div class="verdict" id="br-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="brNext()">Далі</button></div>
+  <div class="legend">Спершу дужки, потім множення й ділення, і лише тоді додавання й віднімання.</div>
+</div>`,init(){brI=0;brOk=0;brDraw();}});
+const brT=[
+ {e:'2 + 3 × 4 − 5',target:15,o:['(2 + 3) × 4 − 5','2 + 3 × (4 − 5)','2 + (3 × 4 − 5)'],a:0},
+ {e:'12 : 2 + 4 × 2',target:16,o:['12 : (2 + 4) × 2','(12 : 2 + 4) × 2','12 : 2 + (4 × 2)'],a:1},
+ {e:'20 − 4 × 3 + 2',target:34,o:['(20 − 4) × 3 + 2','20 − 4 × (3 + 2)','20 − (4 × 3 + 2)'],a:0},
+ {e:'6 + 6 : 6 + 6',target:2,o:['(6 + 6) : (6 + 6)','6 + (6 : 6) + 6','(6 + 6) : 6 + 6'],a:0}];
+let brI=0,brOk=0;
+function brDraw(){const t=brT[brI];
+  $('#br-task').innerHTML='Постав дужки у виразі <b>'+t.e+'</b> так, щоб вийшло <b>'+t.target+'</b>.<span class="chip">'+brOk+' з 3</span>';
+  const box=$('#br-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{const val=eval(o.replace(/×/g,'*').replace(/:/g,'/').replace(/−/g,'-'));
+      $$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){brOk++;say('#br-v','Так, '+o+' = '+val+'.',true);if(brOk>=3)mark('brackets');}
+      else say('#br-v','Тут вийде '+val+', а треба '+t.target+'.',false);};
+    box.appendChild(b);});
+  hide('#br-v');}
+function brNext(){brI=(brI+1)%brT.length;brDraw();}
+
+/* --- 6. Дроби смужками --- */
+T('frac',{g:1,ic:'🍫',t:'Дроби смужками',s:'Що більше: 7/12 чи 5/8',html:`
+<div class="panel">
+  <div class="task" id="fr-task"></div>
+  <div style="font-size:15px;color:var(--ink-2)">Перший дріб: <b id="fr-l1"></b></div>
+  <div class="fracbar" id="fr-b1"></div>
+  <div class="row"><input type="range" min="1" max="12" value="7" id="fr-n1" oninput="frDraw()">
+    <input type="range" min="2" max="12" value="12" id="fr-d1" oninput="frDraw()"></div>
+  <div style="font-size:15px;color:var(--ink-2);margin-top:10px">Другий дріб: <b id="fr-l2"></b></div>
+  <div class="fracbar b" id="fr-b2"></div>
+  <div class="row"><input type="range" min="1" max="12" value="5" id="fr-n2" oninput="frDraw()">
+    <input type="range" min="2" max="12" value="8" id="fr-d2" oninput="frDraw()"></div>
+  <div class="big" id="fr-cmp" style="margin-top:14px"></div>
+  <div class="row center"><button class="btn" onclick="frCommon()">Спільний знаменник</button>
+    <button class="btn ghost" onclick="frNext()">Інше завдання</button></div>
+  <div class="hintline" id="fr-state"></div>
+  <div class="verdict" id="fr-v"></div>
+</div>`,init(){frI=0;frOk=0;frLoad();}});
+const frT=[{a:[7,12],b:[5,8],q:'Постав смужки й порівняй 7/12 і 5/8. Що більше?'},
+ {a:[2,3],b:[3,4],q:'Порівняй 2/3 і 3/4.'},
+ {a:[5,6],b:[7,9],q:'Порівняй 5/6 і 7/9.'},
+ {a:[1,2],b:[4,8],q:'Порівняй 1/2 і 4/8 — і поясни, чому так.'}];
+let frI=0,frOk=0;
+function frLoad(){const t=frT[frI];
+  $('#fr-n1').value=t.a[0];$('#fr-d1').value=t.a[1];$('#fr-n2').value=t.b[0];$('#fr-d2').value=t.b[1];
+  $('#fr-task').innerHTML=t.q+'<span class="chip">'+frOk+' з 3</span>';hide('#fr-v');frDraw();}
+function frBar(el,n,d,split){const box=$(el);box.innerHTML='';
+  const parts=split||d;for(let i=0;i<parts;i++){const s=document.createElement('i');
+    if(i< n*(parts/d))s.className='on';box.appendChild(s);}}
+function frDraw(split){const n1=+$('#fr-n1').value,d1=+$('#fr-d1').value,n2=+$('#fr-n2').value,d2=+$('#fr-d2').value;
+  $('#fr-n1').max=d1;$('#fr-n2').max=d2;
+  $('#fr-l1').textContent=Math.min(n1,d1)+'/'+d1;$('#fr-l2').textContent=Math.min(n2,d2)+'/'+d2;
+  frBar('#fr-b1',Math.min(n1,d1),d1,split);frBar('#fr-b2',Math.min(n2,d2),d2,split);
+  const v1=Math.min(n1,d1)/d1,v2=Math.min(n2,d2)/d2;
+  $('#fr-cmp').innerHTML=Math.min(n1,d1)+'/'+d1+(v1>v2?' &gt; ':v1<v2?' &lt; ':' = ')+Math.min(n2,d2)+'/'+d2;
+  const t=frT[frI];
+  if(n1===t.a[0]&&d1===t.a[1]&&n2===t.b[0]&&d2===t.b[1]){
+    const L=(d1*d2)/gcd(d1,d2);
+    $('#fr-state').textContent='Спільний знаменник: '+L+' → '+(t.a[0]*L/d1)+'/'+L+' і '+(t.b[0]*L/d2)+'/'+L;}
+  else $('#fr-state').textContent='';}
+function frCommon(){const d1=+$('#fr-d1').value,d2=+$('#fr-d2').value,L=(d1*d2)/gcd(d1,d2);
+  if(L>60)return say('#fr-v','Спільний знаменник '+L+' — задрібно для смужки. Спробуй інші дроби.',false);
+  frDraw(L);frOk++;if(frOk>=3)mark('frac');
+  const t=frT[frI];
+  say('#fr-v','Обидві смужки поділено на '+L+' однакових частин — тепер видно, що більше. Це і є зведення до спільного знаменника.',true);
+  $('#fr-task').innerHTML=t.q+'<span class="chip">'+frOk+' з 3</span>';}
+function frNext(){frI=(frI+1)%frT.length;frLoad();}
+
+/* --- 7. Десяткові й округлення --- */
+T('dec',{g:1,ic:'📏',t:'Десяткові під лупою',s:'Куди дивиться округлення',html:`
+<div class="panel">
+  <div class="task">Пересувай число й дивись, до якого сусіда воно ближче. Округлення — це вибір найближчої мітки.</div>
+  <div class="big" id="dc-val"></div>
+  <input type="range" min="0" max="1000" value="496" id="dc-r" oninput="dcDraw()">
+  <svg viewBox="0 0 320 120" height="115" id="dc-svg"></svg>
+  <table class="tt" id="dc-tt"></table>
+  <div class="row center" style="margin-top:10px"><button class="btn" onclick="dcTask()">Завдання</button></div>
+  <div class="verdict" id="dc-v"></div>
+  <div class="legend">Головна пастка: 0,0496 округлюється до сотих як 0,05 — бо дивимось лише на наступну цифру, а не на весь хвіст.</div>
+</div>`,init(){dcI=0;dcOk=0;dcDraw();}});
+const dcT=[{v:0.496,to:'сотих',a:'0,50'},{v:0.35,to:'десятих',a:'0,4'},{v:2.449,to:'десятих',a:'2,4'},{v:0.996,to:'сотих',a:'1,00'}];
+let dcI=0,dcOk=0;
+function dcDraw(){const v=(+$('#dc-r').value)/1000;
+  $('#dc-val').textContent=v.toFixed(3).replace('.',',');
+  const lo=Math.floor(v*10)/10,hi=lo+0.1;
+  let s='<line x1="20" y1="60" x2="300" y2="60" stroke="#C9C6BB" stroke-width="3"/>';
+  for(let i=0;i<=10;i++){const x=20+i*28,val=lo+i*0.01;
+    s+='<line x1="'+x+'" y1="'+(i%5===0?45:52)+'" x2="'+x+'" y2="60" stroke="#C9C6BB" stroke-width="2"/>';
+    if(i%5===0)s+='<text x="'+x+'" y="36" text-anchor="middle" font-size="11" fill="#5B6779">'+val.toFixed(2).replace('.',',')+'</text>';}
+  const px=20+((v-lo)/0.1)*280;
+  s+='<circle cx="'+px+'" cy="60" r="9" fill="#1F7A5A"/>'+
+     '<text x="'+px+'" y="88" text-anchor="middle" font-size="12" fill="#1F7A5A" font-weight="600">'+v.toFixed(3).replace('.',',')+'</text>';
+  $('#dc-svg').innerHTML=s;
+  $('#dc-tt').innerHTML='<tr><th>до одиниць</th><th>до десятих</th><th>до сотих</th></tr><tr><td>'+
+    Math.round(v)+'</td><td>'+v.toFixed(1).replace('.',',')+'</td><td>'+v.toFixed(2).replace('.',',')+'</td></tr>';}
+function dcTask(){const t=dcT[dcI];
+  const v=(+$('#dc-r').value)/1000;
+  if(Math.abs(v-t.v)>0.0005)return say('#dc-v','Постав повзунком число <b>'+t.v.toFixed(3).replace('.',',')+'</b> і подивись у таблицю: до чого воно ближче?',false);
+  dcOk++;dcI=(dcI+1)%dcT.length;if(dcOk>=3)mark('dec');
+  say('#dc-v','Так: '+t.v.toFixed(3).replace('.',',')+' до '+t.to+' — це <b>'+t.a+'</b>. Наступне число: постав '+dcT[dcI].v.toFixed(3).replace('.',',')+'.',true);}
+
+/* --- 8. Відсоткова смужка --- */
+T('perc',{g:1,ic:'％',t:'Відсоткова смужка',s:'Чому −20% і +25% повертають ціну',html:`
+<div class="panel">
+  <div class="task">Ціна — сто клітинок. Натискай операції й дивись, від чого щоразу береться відсоток.</div>
+  <div class="big" id="pc-val">100</div>
+  <div class="strip" id="pc-strip"></div>
+  <div class="row center">
+    <button class="btn ghost small" onclick="pcOp(-20)">−20%</button>
+    <button class="btn ghost small" onclick="pcOp(-25)">−25%</button>
+    <button class="btn ghost small" onclick="pcOp(25)">+25%</button>
+    <button class="btn ghost small" onclick="pcOp(20)">+20%</button>
+    <button class="btn ghost small" onclick="pcOp(10)">+10%</button>
+    <button class="btn ghost small" onclick="pcOp(-10)">−10%</button>
+    <button class="btn small" onclick="pcReset()">Скинути</button></div>
+  <div class="hintline" id="pc-log">Історія: 100</div>
+  <div class="verdict" id="pc-v"></div>
+  <div class="legend">Відсоток завжди береться від того, що є <i>зараз</i>, а не від початкової ціни. Тому −10% і +10% дають 99, а не 100.</div>
+</div>`,init(){pcReset();}});
+let pcVal=100,pcLog=[];
+function pcReset(){pcVal=100;pcLog=[];hide('#pc-v');pcDraw();}
+function pcOp(p){const before=pcVal;pcVal=Math.round(pcVal*(1+p/100)*100)/100;
+  pcLog.push((p>0?'+':'')+p+'% від '+before+' → '+pcVal);pcDraw();
+  if(pcLog.length>=2){
+    const s=pcLog.join(' · ');
+    if(Math.abs(pcVal-100)<0.01&&pcLog.length===2){mark('perc');
+      say('#pc-v','Ціна повернулась рівно до 100 — саме тому, що 0,8 × 1,25 = 1. Це рідкісний збіг, а не правило.',true);}
+    else if(Math.abs(pcVal-99)<0.01){mark('perc');
+      say('#pc-v','Вийшло 99, а не 100. Перші −10% брались від 100, а +10% — уже від 90. Ось чому відсотки не «складаються».',true);}
+    else hide('#pc-v');}}
+function pcDraw(){$('#pc-val').textContent=pcVal;
+  const box=$('#pc-strip');box.innerHTML='';
+  const n=Math.round(pcVal);
+  for(let i=0;i<Math.max(100,n);i++){const d=document.createElement('div');
+    if(i<n)d.className='on';else d.className='cut';box.appendChild(d);}
+  $('#pc-log').textContent='Історія: '+(pcLog.length?pcLog.join(' · '):'100');}
+
+/* --- 9. Площа й периметр --- */
+T('rect',{g:2,ic:'⬛',t:'Площа проти периметра',s:'Однаковий паркан — різна ділянка',html:`
+<div class="panel">
+  <div class="task" id="rc-task"></div>
+  <div class="row"><div style="flex:1">ширина <b id="rc-aL"></b><input type="range" min="1" max="12" value="4" id="rc-a" oninput="rcDraw()"></div>
+    <div style="flex:1">висота <b id="rc-bL"></b><input type="range" min="1" max="12" value="3" id="rc-b" oninput="rcDraw()"></div></div>
+  <svg viewBox="0 0 320 200" height="190" id="rc-svg"></svg>
+  <div class="big" id="rc-val"></div>
+  <div class="hintline" id="rc-rec"></div>
+  <div class="verdict" id="rc-v"></div>
+  <div class="legend">З однакового периметра найбільшу площу дає квадрат. Тому поля й кімнати рідко роблять довгими смужками.</div>
+</div>`,init(){rcBest=0;rcDraw();}});
+let rcBest=0;
+function rcDraw(){const a=+$('#rc-a').value,b=+$('#rc-b').value,s=Math.floor(150/Math.max(a,b,6));
+  $('#rc-aL').textContent=a;$('#rc-bL').textContent=b;
+  let g='';for(let r=0;r<b;r++)for(let c=0;c<a;c++)
+    g+='<rect x="'+(15+c*s)+'" y="'+(15+r*s)+'" width="'+(s-1)+'" height="'+(s-1)+'" fill="#E2F2EC" stroke="#1F7A5A" stroke-width="1"/>';
+  $('#rc-svg').innerHTML=g;
+  const S=a*b,P=2*(a+b);
+  $('#rc-val').innerHTML='площа '+S+' · периметр '+P;
+  $('#rc-task').innerHTML='Зроби периметр рівно <b>24</b> і знайди найбільшу можливу площу.';
+  if(P===24){if(S>rcBest)rcBest=S;
+    $('#rc-rec').textContent='Периметр 24 ✓ · твій рекорд площі: '+rcBest;
+    if(S===36){mark('rect');say('#rc-v','36 — це максимум. Квадрат 6 × 6: з усіх прямокутників однакового периметра він має найбільшу площу.',true);}
+    else say('#rc-v','Периметр правильний, площа '+S+'. Спробуй зробити сторони ближчими одна до одної.',false);}
+  else{$('#rc-rec').textContent='Периметр зараз '+P+', потрібно 24.';hide('#rc-v');}}
+
+/* --- 10. Кубики: об’єм і фарба --- */
+T('cubes',{g:2,ic:'🧊',t:'Кубики, об’єм і фарба',s:'Скільки кубиків із трьома гранями',html:`
+<div class="panel">
+  <div class="task">Куб зі стороною n пофарбували ззовні й розрізали на одиничні кубики. Скільки з них мають 3, 2, 1 і 0 пофарбованих граней?</div>
+  <div class="row"><div style="flex:1">сторона n = <b id="cb-nL">3</b><input type="range" min="2" max="6" value="3" id="cb-n" oninput="cbDraw()"></div></div>
+  <svg viewBox="0 0 320 200" height="190" id="cb-svg"></svg>
+  <table class="tt" id="cb-tt"></table>
+  <div class="row center" style="margin-top:10px"><input type="number" id="cb-in" style="width:130px;text-align:center" placeholder="для n = 10">
+    <button class="btn small" onclick="cbCheck()">Скільки з 3 гранями?</button></div>
+  <div class="verdict" id="cb-v"></div>
+  <div class="legend">Кубиків із трьома пофарбованими гранями завжди 8 — це кути. Скільки б не був куб.</div>
+</div>`,init(){cbDraw();}});
+function cbDraw(){const n=+$('#cb-n').value;$('#cb-nL').textContent=n;
+  const s=Math.floor(120/n),ox=90,oy=40,k=0.45;
+  let g='';
+  for(let z=0;z<n;z++)for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    if(x!==n-1&&y!==0&&z!==n-1)continue;
+    const px=ox+(x-y)*s*0.86+0,py=oy+(x+y)*s*0.5+(n-1-z)*s*k*1.6;
+    const faces=(x===0||x===n-1?1:0)+(y===0||y===n-1?1:0)+(z===0||z===n-1?1:0);
+    const col=faces===3?'#D8433B':faces===2?'#E9A800':faces===1?'#1F7A5A':'#C9C6BB';
+    g+='<rect x="'+px+'" y="'+py+'" width="'+(s*0.9)+'" height="'+(s*0.9)+'" rx="2" fill="'+col+'" opacity=".9" stroke="#fff" stroke-width="1"/>';}
+  $('#cb-svg').innerHTML=g;
+  const c3=n<2?0:8,c2=12*(n-2),c1=6*(n-2)*(n-2),c0=(n-2)*(n-2)*(n-2);
+  $('#cb-tt').innerHTML='<tr><th>граней</th><th>3</th><th>2</th><th>1</th><th>0</th><th>усього</th></tr>'+
+    '<tr><td>кубиків</td><td>'+c3+'</td><td>'+Math.max(0,c2)+'</td><td>'+Math.max(0,c1)+'</td><td>'+Math.max(0,c0)+'</td><td>'+(n*n*n)+'</td></tr>';}
+function cbCheck(){const v=+$('#cb-in').value;
+  if(v===8){mark('cubes');say('#cb-v','Саме так: <b>8</b> — і для n = 10, і для n = 100. Три пофарбовані грані бувають лише в кутів, а кутів у куба вісім.',true);}
+  else say('#cb-v','Ще ні. Подивись у таблицю: як змінюється перший стовпчик, коли ти совгаєш n?',false);}
+
+/* --- 11. Транспортир --- */
+T('angle',{g:2,ic:'📐',t:'Транспортир',s:'Побудуй кут на око й перевір',html:`
+<div class="panel">
+  <div class="task" id="ag-task"></div>
+  <svg viewBox="0 0 320 190" height="185" id="ag-svg"></svg>
+  <div class="big" id="ag-val"></div>
+  <div class="row center"><button class="btn" onclick="agCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="agNext()">Інший кут</button>
+    <button class="btn ghost small" onclick="agProt()">Показати транспортир</button></div>
+  <div class="verdict" id="ag-v"></div>
+  <div class="legend">Гострий кут менший за 90°, тупий — більший, розгорнутий — рівно 180°.</div>
+</div>`,init(){agI=0;agOk=0;agAng=30;agShow=false;agLoad();}});
+const agT=[{a:90,n:'прямий кут'},{a:45,n:'половина прямого'},{a:120,n:'тупий кут 120°'},{a:60,n:'кут 60°'},{a:150,n:'кут 150°'}];
+let agI=0,agOk=0,agAng=30,agShow=false;
+function agLoad(){$('#ag-task').innerHTML='Постав <b>'+agT[agI].n+'</b> — тягни синій промінь.<span class="chip">'+agOk+' з 4</span>';hide('#ag-v');agDraw();}
+function agProt(){agShow=!agShow;agDraw();}
+function agDraw(){const cx=160,cy=160,R=125;let s='';
+  if(agShow){s+='<path d="M'+(cx-R)+' '+cy+' A '+R+' '+R+' 0 0 1 '+(cx+R)+' '+cy+'" fill="#F4F2EC" stroke="#C9C6BB" stroke-width="2"/>';
+    for(let a=0;a<=180;a+=10){const r=a*Math.PI/180;
+      s+='<line x1="'+(cx-Math.cos(r)*R)+'" y1="'+(cy-Math.sin(r)*R)+'" x2="'+(cx-Math.cos(r)*(R-(a%30?7:13)))+'" y2="'+(cy-Math.sin(r)*(R-(a%30?7:13)))+'" stroke="#8B8578" stroke-width="1.5"/>';
+      if(a%30===0)s+='<text x="'+(cx-Math.cos(r)*(R-26))+'" y="'+(cy-Math.sin(r)*(R-26)+4)+'" text-anchor="middle" font-size="11" fill="#5B6779">'+a+'</text>';}}
+  const r=agAng*Math.PI/180;
+  s+='<path d="M '+(cx+34)+' '+cy+' A 34 34 0 0 0 '+(cx+Math.cos(r)*34)+' '+(cy-Math.sin(r)*34)+'" fill="none" stroke="#E9A800" stroke-width="3"/>';
+  s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+R)+'" y2="'+cy+'" stroke="#1E2A3A" stroke-width="4" stroke-linecap="round"/>';
+  s+='<line id="ag-ray" x1="'+cx+'" y1="'+cy+'" x2="'+(cx+Math.cos(r)*R)+'" y2="'+(cy-Math.sin(r)*R)+'" stroke="#2F6FE4" stroke-width="5" stroke-linecap="round"/>';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="#1E2A3A"/>';
+  $('#ag-svg').innerHTML=s;$('#ag-val').textContent=Math.round(agAng)+'°';agBind();}
+function agBind(){const svg=$('#ag-svg');if(!svg||svg.dataset.b)return;svg.dataset.b=1;let on=false;
+  const upd=e=>{const b=svg.getBoundingClientRect();
+    const x=(e.clientX-b.left)/b.width*320-160,y=160-(e.clientY-b.top)/b.height*190;
+    let a=Math.atan2(y,x)*180/Math.PI;if(a<0)a=0;if(a>180)a=180;agAng=a;agDraw();};
+  svg.addEventListener('pointerdown',e=>{on=true;svg.setPointerCapture(e.pointerId);upd(e);});
+  svg.addEventListener('pointermove',e=>{if(on){e.preventDefault();upd(e);}});
+  svg.addEventListener('pointerup',()=>on=false);svg.addEventListener('pointercancel',()=>on=false);}
+function agCheck(){const t=agT[agI],d=Math.abs(agAng-t.a);
+  if(d<=3){agOk++;$('#ag-task').innerHTML='Постав <b>'+t.n+'</b> — тягни синій промінь.<span class="chip">'+agOk+' з 4</span>';
+    say('#ag-v','Точно: '+Math.round(agAng)+'°. Похибка менша за 3°.',true);if(agOk>=4)mark('angle');}
+  else say('#ag-v','Зараз '+Math.round(agAng)+'°, а треба '+t.a+'°. Різниця '+Math.round(d)+'°.',false);}
+function agNext(){agI=(agI+1)%agT.length;agLoad();}
+
+/* --- 12. Сума кутів трикутника --- */
+T('tri',{g:2,ic:'🔺',t:'Сума кутів трикутника',s:'Тягни вершини — сума не змінюється',html:`
+<div class="panel">
+  <div class="task">Перетягуй вершини як завгодно. Стеж за сумою внизу.</div>
+  <svg viewBox="0 0 320 220" height="215" id="tr-svg"></svg>
+  <div class="big" id="tr-sum"></div>
+  <div class="hintline" id="tr-state"></div>
+  <div class="verdict" id="tr-v"></div>
+  <div class="legend">Сума кутів будь-якого трикутника — 180°. У чотирикутника вдвічі більше: 360°, бо його завжди можна розрізати на два трикутники.</div>
+</div>`,init(){trP=[[60,180],[260,180],[150,50]];trMoved=0;trDraw();}});
+let trP=[[60,180],[260,180],[150,50]],trMoved=0;
+function trAng(i){const a=trP[i],b=trP[(i+1)%3],c=trP[(i+2)%3];
+  const v1=[b[0]-a[0],b[1]-a[1]],v2=[c[0]-a[0],c[1]-a[1]];
+  const d=(v1[0]*v2[0]+v1[1]*v2[1])/(Math.hypot(...v1)*Math.hypot(...v2));
+  return Math.acos(Math.max(-1,Math.min(1,d)))*180/Math.PI;}
+function trDraw(){const A=trAng(0),B=trAng(1),C=trAng(2);
+  let s='<polygon points="'+trP.map(p=>p.join(',')).join(' ')+'" fill="#E2F2EC" stroke="#1F7A5A" stroke-width="3"/>';
+  trP.forEach((p,i)=>{const ang=[A,B,C][i];
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="13" fill="#2F6FE4" style="cursor:grab"/>'+
+       '<text x="'+p[0]+'" y="'+(p[1]-20)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#1E2A3A">'+Math.round(ang)+'°</text>';});
+  $('#tr-svg').innerHTML=s;
+  const sum=Math.round(A+B+C);
+  $('#tr-sum').textContent=Math.round(A)+'° + '+Math.round(B)+'° + '+Math.round(C)+'° = '+sum+'°';
+  $('#tr-state').textContent='Форм змінено: '+trMoved;
+  if(trMoved>=6){mark('tri');say('#tr-v','Скільки не тягни — завжди 180°. Це не збіг: якщо провести пряму через вершину паралельно основі, три кути складуться в розгорнутий.',true);}
+  trBind();}
+function trBind(){const svg=$('#tr-svg');if(!svg||svg.dataset.b)return;svg.dataset.b=1;let idx=-1;
+  const pt=e=>{const b=svg.getBoundingClientRect();
+    return [(e.clientX-b.left)/b.width*320,(e.clientY-b.top)/b.height*220];};
+  svg.addEventListener('pointerdown',e=>{const p=pt(e);
+    idx=trP.findIndex(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<24);
+    if(idx>=0)svg.setPointerCapture(e.pointerId);});
+  svg.addEventListener('pointermove',e=>{if(idx<0)return;e.preventDefault();const p=pt(e);
+    trP[idx]=[Math.max(15,Math.min(305,p[0])),Math.max(15,Math.min(205,p[1]))];trDraw();});
+  svg.addEventListener('pointerup',()=>{if(idx>=0)trMoved++;idx=-1;trDraw();});
+  svg.addEventListener('pointercancel',()=>idx=-1);}
+
+/* --- 13. Числова пряма --- */
+T('numline',{g:2,ic:'↔️',t:'Числова пряма',s:'Відстань, середина, поділ відрізка',html:`
+<div class="panel">
+  <div class="task" id="nl-task"></div>
+  <svg viewBox="0 0 320 120" height="115" id="nl-svg"></svg>
+  <div class="row"><div style="flex:1">точка A: <b id="nl-aL"></b><input type="range" min="0" max="20" value="3" id="nl-a" oninput="nlDraw()"></div>
+    <div style="flex:1">точка B: <b id="nl-bL"></b><input type="range" min="0" max="20" value="15" id="nl-b" oninput="nlDraw()"></div></div>
+  <div class="row center"><input type="number" id="nl-in" style="width:120px;text-align:center">
+    <button class="btn" onclick="nlCheck()">Відповісти</button>
+    <button class="btn ghost" onclick="nlNext()">Далі</button></div>
+  <div class="hintline" id="nl-state"></div>
+  <div class="verdict" id="nl-v"></div>
+</div>`,init(){nlI=0;nlOk=0;nlLoad();}});
+const nlT=[{q:'Постав A = 3, B = 15. Яка відстань між ними?',a:12},
+ {q:'A = 3, B = 15. Яка координата середини відрізка?',a:9},
+ {q:'A = 4, B = 16. Точка C ділить AC : CB = 1 : 3. Яка координата C?',a:7},
+ {q:'A = 2, B = 18. Яка координата точки, що вдвічі ближча до A, ніж до B?',a:7.33}];
+let nlI=0,nlOk=0;
+function nlLoad(){$('#nl-task').innerHTML=nlT[nlI].q+'<span class="chip">'+nlOk+' з 3</span>';$('#nl-in').value='';hide('#nl-v');nlDraw();}
+function nlDraw(){const a=+$('#nl-a').value,b=+$('#nl-b').value;
+  $('#nl-aL').textContent=a;$('#nl-bL').textContent=b;
+  let s='<line x1="15" y1="70" x2="305" y2="70" stroke="#C9C6BB" stroke-width="3"/>';
+  for(let i=0;i<=20;i++){const x=15+i*14.5;
+    s+='<line x1="'+x+'" y1="63" x2="'+x+'" y2="77" stroke="#C9C6BB" stroke-width="'+(i%5?1:2)+'"/>';
+    if(i%5===0)s+='<text x="'+x+'" y="95" text-anchor="middle" font-size="11" fill="#5B6779">'+i+'</text>';}
+  const xa=15+a*14.5,xb=15+b*14.5;
+  s+='<line x1="'+xa+'" y1="70" x2="'+xb+'" y2="70" stroke="#1F7A5A" stroke-width="5"/>';
+  s+='<circle cx="'+xa+'" cy="70" r="8" fill="#2F6FE4"/><text x="'+xa+'" y="50" text-anchor="middle" font-size="13" font-weight="700">A</text>';
+  s+='<circle cx="'+xb+'" cy="70" r="8" fill="#E9A800"/><text x="'+xb+'" y="50" text-anchor="middle" font-size="13" font-weight="700">B</text>';
+  const m=(a+b)/2;s+='<line x1="'+(15+m*14.5)+'" y1="60" x2="'+(15+m*14.5)+'" y2="80" stroke="#D8433B" stroke-width="2" stroke-dasharray="3 3"/>';
+  $('#nl-svg').innerHTML=s;
+  $('#nl-state').textContent='AB = '+Math.abs(b-a)+' · середина = '+m;}
+function nlCheck(){const v=parseFloat($('#nl-in').value.replace(',','.')),t=nlT[nlI];
+  if(Math.abs(v-t.a)<0.05){nlOk++;say('#nl-v','Правильно.',true);if(nlOk>=3)mark('numline');nlLoad();}
+  else say('#nl-v','Ще ні. Виставляй повзунки й дивись на підпис під прямою.',false);}
+function nlNext(){nlI=(nlI+1)%nlT.length;nlLoad();}
+
+/* --- 14. Терези-рівняння --- */
+T('balance',{g:3,ic:'⚖️',t:'Рівняння на терезах',s:'Що знімаєш зліва — знімай і справа',html:`
+<div class="panel">
+  <div class="row" style="margin-bottom:10px" id="bl-lv"></div>
+  <div class="task" id="bl-task"></div>
+  <div class="pans"><div class="pan" id="bl-L"></div><div style="align-self:center;font-size:24px;font-weight:700">=</div><div class="pan" id="bl-R"></div></div>
+  <div class="row center">
+    <button class="btn ghost small" onclick="blOp('x')">зняти x з обох</button>
+    <button class="btn ghost small" onclick="blOp('1')">зняти 1 з обох</button>
+    <button class="btn ghost small" onclick="blOp('half')">поділити все навпіл</button>
+    <button class="btn ghost small" onclick="blLoad(blI)">спочатку</button></div>
+  <div class="hintline" id="bl-state"></div>
+  <div class="verdict" id="bl-v"></div>
+  <div class="legend">Терези лишаються в рівновазі, поки з обох шальок знімаєш однакове. Це і є розв’язування рівняння.</div>
+</div>`,init(){blI=0;blOk=0;blLoad(0);}});
+const blT=[{lx:3,lc:2,rx:1,rc:8},{lx:2,lc:5,rx:0,rc:11},{lx:4,lc:1,rx:2,rc:9},{lx:5,lc:0,rx:1,rc:12}];
+let blI=0,blOk=0,blS={};
+function blLoad(i){blI=i;blS=Object.assign({},blT[i]);hide('#bl-v');
+  $('#bl-lv').innerHTML=blT.map((t,k)=>'<button class="btn small'+(k===i?'':' ghost')+'" onclick="blLoad('+k+')">рівняння '+(k+1)+'</button>').join('');
+  blDraw();}
+function blDraw(){const eq=(x,c)=>(x?x+'x':'')+(x&&c?' + ':'')+(c||(x?'':'0'));
+  $('#bl-task').innerHTML='Розв’яжи: <b>'+eq(blS.lx,blS.lc)+' = '+eq(blS.rx,blS.rc)+'</b><span class="chip">'+blOk+' з 3</span>';
+  const fill=(sel,x,c)=>{const p=$(sel);p.innerHTML='';
+    for(let i=0;i<x;i++){const d=document.createElement('div');d.className='xbox';d.textContent='x';p.appendChild(d);}
+    for(let i=0;i<c;i++){const d=document.createElement('div');d.className='wt';p.appendChild(d);}};
+  fill('#bl-L',blS.lx,blS.lc);fill('#bl-R',blS.rx,blS.rc);
+  $('#bl-state').textContent='Ліворуч: '+blS.lx+' коробок і '+blS.lc+' гир · праворуч: '+blS.rx+' і '+blS.rc;
+  if(blS.lx===1&&blS.lc===0&&blS.rx===0){blOk++;if(blOk>=3)mark('balance');
+    say('#bl-v','Готово: <b>x = '+blS.rc+'</b>. Перевіримо в початковому рівнянні — сходиться.',true);}
+  else if(blS.rx===1&&blS.rc===0&&blS.lx===0){blOk++;if(blOk>=3)mark('balance');
+    say('#bl-v','Готово: <b>x = '+blS.lc+'</b>.',true);}}
+function blOp(op){
+  if(op==='x'){if(blS.lx<1||blS.rx<1)return say('#bl-v','Коробка має бути з обох боків, інакше рівновага зламається.',false);
+    blS.lx--;blS.rx--;}
+  else if(op==='1'){if(blS.lc<1||blS.rc<1)return say('#bl-v','Гиря має бути з обох боків.',false);
+    blS.lc--;blS.rc--;}
+  else{if(blS.lx%2||blS.lc%2||blS.rx%2||blS.rc%2)return say('#bl-v','Навпіл ділиться лише тоді, коли всього парна кількість з обох боків.',false);
+    blS.lx/=2;blS.lc/=2;blS.rx/=2;blS.rc/=2;}
+  hide('#bl-v');blDraw();}
+
+/* --- 15. Задача на рух --- */
+T('move',{g:3,ic:'🚗',t:'Задача на рух',s:'Зустріч і навздогін наочно',html:`
+<div class="panel">
+  <div class="row" style="margin-bottom:10px">
+    <button class="btn small" id="mv-0" onclick="mvMode(0)">Назустріч</button>
+    <button class="btn small ghost" id="mv-1" onclick="mvMode(1)">Навздогін</button></div>
+  <div class="task" id="mv-task"></div>
+  <svg viewBox="0 0 320 120" height="115" id="mv-svg"></svg>
+  <div class="row"><div style="flex:1">швидкість 1: <b id="mv-v1L">60</b> км/год<input type="range" min="10" max="100" step="5" value="60" id="mv-v1" oninput="mvDraw()"></div></div>
+  <div class="row"><div style="flex:1">швидкість 2: <b id="mv-v2L">40</b> км/год<input type="range" min="10" max="100" step="5" value="40" id="mv-v2" oninput="mvDraw()"></div></div>
+  <div class="row"><div style="flex:1">відстань: <b id="mv-dL">200</b> км<input type="range" min="20" max="400" step="10" value="200" id="mv-d" oninput="mvDraw()"></div></div>
+  <div class="big" id="mv-res"></div>
+  <div class="row center"><button class="btn" onclick="mvRun()">Поїхали</button></div>
+  <div class="verdict" id="mv-v"></div>
+  <div class="legend">Назустріч швидкості додаються, навздогін — віднімаються. Час = відстань : швидкість зближення.</div>
+</div>`,init(){mvM=0;mvMode(0);}});
+let mvM=0,mvT=null;
+function mvMode(m){mvM=m;$('#mv-0').className='btn small'+(m?' ghost':'');$('#mv-1').className='btn small'+(m?'':' ghost');mvDraw();}
+function mvDraw(t){const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
+  $('#mv-v1L').textContent=v1;$('#mv-v2L').textContent=v2;$('#mv-dL').textContent=d;
+  const close=mvM===0?v1+v2:v1-v2;
+  $('#mv-task').innerHTML=mvM===0?'Два автомобілі виїхали назустріч. Через скільки годин зустрінуться?'
+    :'Перший наздоганяє другого. Через скільки годин наздожене? (перший має бути швидшим)';
+  const time=close>0?d/close:Infinity;
+  const p=t===undefined?0:Math.min(1,t/time);
+  const x1=15+p*(v1/(close||1))*(290*(close?d/d:1))*(close?close/close:1)*0;
+  const pos1=15+(v1*(t||0))/d*290, pos2=mvM===0?305-(v2*(t||0))/d*290:15+(v2*(t||0)+d*0)/d*290+((mvM?d:0)/d*0);
+  const start2=mvM===0?305:15+ (0);
+  const p2=mvM===0?305-(v2*(t||0))/d*290:15+290*0.5+(v2*(t||0))/d*290*0;
+  let s='<line x1="15" y1="80" x2="305" y2="80" stroke="#C9C6BB" stroke-width="4"/>';
+  const a=Math.min(305,15+(v1*(t||0))/d*290);
+  const b=mvM===0?Math.max(15,305-(v2*(t||0))/d*290):Math.min(305,160+(v2*(t||0))/d*290);
+  s+='<circle cx="'+a+'" cy="66" r="10" fill="#1F7A5A"/><text x="'+a+'" y="52" text-anchor="middle" font-size="11" fill="#1F7A5A">'+v1+'</text>';
+  s+='<circle cx="'+b+'" cy="94" r="10" fill="#E9A800"/><text x="'+b+'" y="115" text-anchor="middle" font-size="11" fill="#B37F00">'+v2+'</text>';
+  $('#mv-svg').innerHTML=s;
+  $('#mv-res').innerHTML=close>0?'зближення '+close+' км/год · час '+(Math.round(time*100)/100)+' год'
+    :'перший не швидший — не наздожене ніколи';}
+function mvRun(){clearInterval(mvT);const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
+  const close=mvM===0?v1+v2:v1-v2;if(close<=0)return say('#mv-v','Зроби першу швидкість більшою — інакше він ніколи не наздожене.',false);
+  const time=mvM===0?d/close:(d/2)/close;let t=0;
+  mvT=setInterval(()=>{t+=time/40;mvDraw(t);
+    if(t>=time){clearInterval(mvT);mark('move');
+      say('#mv-v',mvM===0?'Зустріч через '+(Math.round(time*100)/100)+' год. Швидкість зближення '+close+' км/год — швидкості склались.'
+        :'Наздогнав через '+(Math.round(time*100)/100)+' год. Тут швидкості віднімаються: '+v1+' − '+v2+' = '+close+'.',true);}},40);}
+
+/* --- 16. Ханойська вежа --- */
+T('hanoi',{g:3,ic:'🗼',t:'Ханойська вежа',s:'Скільки ходів насправді треба',html:`
+<div class="panel">
+  <div class="task" id="hn-task"></div>
+  <div class="hanoi" id="hn-pegs"></div>
+  <div class="hintline" id="hn-state"></div>
+  <div class="row center"><button class="btn ghost small" onclick="hnSet(3)">3 диски</button>
+    <button class="btn ghost small" onclick="hnSet(4)">4</button>
+    <button class="btn ghost small" onclick="hnSet(5)">5</button></div>
+  <div class="verdict" id="hn-v"></div>
+  <div class="legend">Мінімум ходів — 2ⁿ − 1. Для 3 дисків це 7, для 5 — 31, а для 64 дисків знадобилося б понад 580 мільярдів років.</div>
+</div>`,init(){hnSet(3);}});
+let HN={n:3,pegs:[[],[],[]],sel:null,moves:0};
+function hnSet(n){HN={n:n,pegs:[[],[],[]],sel:null,moves:0};
+  for(let i=n;i>=1;i--)HN.pegs[0].push(i);hide('#hn-v');hnDraw();}
+function hnDraw(){const cols=['#1F7A5A','#2F6FE4','#E9A800','#D8433B','#8B5CF6'];
+  const box=$('#hn-pegs');box.innerHTML='';
+  HN.pegs.forEach((p,i)=>{const el=document.createElement('div');el.className='peg'+(HN.sel===i?' sel':'');
+    p.forEach(d=>{const dv=document.createElement('div');dv.className='disk';
+      dv.style.width=(28+d*16)+'px';dv.style.background=cols[d-1];dv.textContent=d;el.appendChild(dv);});
+    (function(k){el.onclick=()=>hnTap(k);})(i);box.appendChild(el);});
+  const min=Math.pow(2,HN.n)-1;
+  $('#hn-task').innerHTML='Перенеси всі диски на праву паличку. Більший диск не можна класти на менший.';
+  $('#hn-state').textContent='Ходів: '+HN.moves+' · мінімум для '+HN.n+' дисків: '+min;}
+function hnTap(i){
+  if(HN.sel===null){if(!HN.pegs[i].length)return;HN.sel=i;hnDraw();return;}
+  if(HN.sel===i){HN.sel=null;hnDraw();return;}
+  const from=HN.pegs[HN.sel],to=HN.pegs[i],d=from[from.length-1];
+  if(to.length&&to[to.length-1]<d){HN.sel=null;hnDraw();
+    return say('#hn-v','Більший диск не кладуть на менший.',false);}
+  from.pop();to.push(d);HN.moves++;HN.sel=null;hide('#hn-v');hnDraw();
+  if(HN.pegs[2].length===HN.n){const min=Math.pow(2,HN.n)-1;mark('hanoi');
+    say('#hn-v',HN.moves===min?'Ідеально: '+HN.moves+' ходів — це і є мінімум 2^'+HN.n+' − 1.'
+      :'Готово за '+HN.moves+' ходів. Мінімум — '+min+'. Спробуй ще: кожен зайвий диск подвоює роботу.',HN.moves===min);}}
+
+/* --- 17. Дерево варіантів --- */
+T('tree',{g:3,ic:'🌳',t:'Дерево варіантів',s:'Чому варіанти множаться',html:`
+<div class="panel">
+  <div class="task">Скільки різних комплектів можна скласти? Додавай гілки й дивись, як росте число.</div>
+  <div class="row"><div style="flex:1">футболки: <b id="tw-aL">2</b><input type="range" min="1" max="4" value="2" id="tw-a" oninput="twDraw()"></div>
+    <div style="flex:1">штани: <b id="tw-bL">3</b><input type="range" min="1" max="4" value="3" id="tw-b" oninput="twDraw()"></div></div>
+  <svg viewBox="0 0 320 210" height="200" id="tw-svg"></svg>
+  <div class="big" id="tw-val"></div>
+  <div class="row center"><input type="number" id="tw-in" style="width:150px;text-align:center" placeholder="3 · 4 · 2 = ?">
+    <button class="btn small" onclick="twCheck()">Перевірити</button></div>
+  <div class="verdict" id="tw-v"></div>
+  <div class="legend">Правило множення: якщо перший вибір має a способів, а другий — b, то разом їх a × b. Додається ще й третій — множимо далі.</div>
+</div>`,init(){twDraw();}});
+function twDraw(){const a=+$('#tw-a').value,b=+$('#tw-b').value;
+  $('#tw-aL').textContent=a;$('#tw-bL').textContent=b;
+  let s='<circle cx="24" cy="105" r="9" fill="#1E2A3A"/>';
+  for(let i=0;i<a;i++){const y1=105,y2=40+ (i+0.5)*(130/a);
+    s+='<line x1="24" y1="'+y1+'" x2="120" y2="'+y2+'" stroke="#1F7A5A" stroke-width="2"/>'+
+       '<circle cx="120" cy="'+y2+'" r="8" fill="#1F7A5A"/>';
+    for(let j=0;j<b;j++){const y3=20+((i*b+j)+0.5)*(175/(a*b));
+      s+='<line x1="120" y1="'+y2+'" x2="240" y2="'+y3+'" stroke="#E9A800" stroke-width="1.5"/>'+
+         '<circle cx="240" cy="'+y3+'" r="5" fill="#E9A800"/>'+
+         '<text x="256" y="'+(y3+4)+'" font-size="10" fill="#5B6779">'+(i+1)+'–'+(j+1)+'</text>';}}
+  $('#tw-svg').innerHTML=s;
+  $('#tw-val').innerHTML=a+' × '+b+' = <b>'+(a*b)+'</b> комплектів';}
+function twCheck(){const v=+$('#tw-in').value;
+  if(v===24){mark('tree');say('#tw-v','Так, 24. Кожен новий вибір не додається, а множиться — гілок стає в стільки разів більше.',true);}
+  else say('#tw-v','Ще ні. Перемнож усі три числа: 3 · 4 · 2.',false);}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
