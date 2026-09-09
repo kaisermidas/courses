@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Мистецтво руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#9333EA; --accent-soft:#F3E8FF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  .keys{display:flex;justify-content:center;margin:14px 0;position:relative;height:130px}
+  .wkey{width:13%;max-width:44px;height:130px;background:#fff;border:1px solid #C9C6BB;border-radius:0 0 7px 7px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:12px;color:var(--ink-2)}
+  .wkey:active,.wkey.on{background:var(--accent-soft)}
+  .seq{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:10px 0}
+  .seq button{aspect-ratio:1;border-radius:8px;background:#F0EAF7;border:1px solid var(--line)}
+  .seq button.on{background:var(--accent);border-color:var(--accent)}
+  .seq button.now{outline:3px solid var(--volt);outline-offset:-3px}
+  .seqrow{display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:center;margin-bottom:5px}
+  .seqrow span{font-size:13px;color:var(--ink-2)}
+  .swatch{width:100%;height:78px;border-radius:12px;border:2px solid var(--line)}
+  .mix{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+  .canvasbox{display:grid;place-items:center;margin:10px 0}
+  .sayw{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:12px 0}
+  .sayw button{border:1px solid var(--line);border-radius:11px;padding:9px 13px;background:#fff;font-size:16px}
+  .sayw button.on{border-color:var(--accent);background:var(--accent-soft)}
+  .build{display:flex;flex-wrap:wrap;gap:6px;min-height:52px;border:2px dashed var(--line);
+    border-radius:12px;padding:9px;margin:10px 0;align-items:flex-start}
+  .tile{border:1px solid var(--accent);background:var(--accent-soft);border-radius:9px;padding:7px 11px;font-size:15px}
+  .bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+  .bank button{border:1px solid var(--line);border-radius:9px;padding:7px 11px;background:#fff;font-size:15px}
+  .clockf{margin:0 auto;display:block}
+  .plate{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+  .zone{border:2px dashed var(--line);border-radius:12px;min-height:74px;padding:8px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+  .zone b{width:100%;font-size:13px;color:var(--ink-2);font-weight:600}
+  .food{border:1px solid var(--line);border-radius:9px;padding:5px 9px;background:#fff;font-size:14px}
+  .food.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .sugar{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0}
+  .cube{width:17px;height:17px;background:#fff;border:2px solid #C9C6BB;border-radius:3px}
+  .day{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:10px 0;border:1px solid var(--line)}
+  .day div{display:grid;place-items:center;font-size:11px;color:#fff;font-weight:600}
+  .scene{position:relative;border-radius:12px;overflow:hidden;background:#F2F6F4}
+  .hot{position:absolute;border-radius:50%;border:2px dashed transparent;cursor:pointer}
+  .hot.found{border-color:var(--ok);background:rgba(31,157,99,.18)}
+  .steps{display:grid;gap:8px;margin:10px 0}
+  .step{border:2px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;text-align:left;font-size:15px}
+  .step.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .step .num{display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:12px;text-align:center;line-height:22px;margin-right:8px}
+  .breathe{width:150px;height:150px;border-radius:50%;background:var(--accent-soft);border:3px solid var(--accent);
+    margin:14px auto;display:grid;place-items:center;font-size:19px;font-weight:600;transition:transform 1s linear}
+  .tl{position:relative;height:60px;margin:16px 0;background:#F4F2EC;border-radius:10px}
+  .tl .ax{position:absolute;left:2%;right:2%;top:28px;height:3px;background:#C9C6BB}
+  .tl .ev{position:absolute;top:14px;width:30px;height:30px;border-radius:50%;background:var(--accent);
+    color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;transform:translateX(-15px)}
+  .cards{display:grid;gap:8px;margin:10px 0}
+  .card2{border:2px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;text-align:left;font-size:15px}
+  .card2.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .card2.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .card2.no{border-color:var(--bad);background:var(--bad-soft)}
+  .slots{display:grid;gap:8px;margin:10px 0}
+  .slot{border:2px dashed var(--line);border-radius:12px;padding:9px 12px;min-height:46px;font-size:14px;color:var(--ink-2)}
+  .slot b{color:var(--ink)}
+  .dig{display:flex;flex-direction:column-reverse;gap:3px;margin:10px 0}
+  .layer{border-radius:8px;padding:12px;color:#fff;font-size:14px;text-align:center;cursor:pointer;position:relative}
+  .layer.hid{background:#B7A98F!important;color:#8B7B5E}
+  .word{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+  .word button{min-width:34px;height:46px;border-radius:9px;background:#F4F2EC;font-size:20px;font-weight:600}
+  .word button.pick{background:var(--accent);color:#fff}
+  .word button.gap{min-width:16px;background:transparent;color:var(--ink-2);font-size:22px}
+  .word button.gap.on{background:var(--volt);color:#fff;border-radius:6px}
+  .trans{font-size:24px;text-align:center;letter-spacing:.06em;margin:10px 0;font-weight:600}
+  .sent{font-size:18px;line-height:2.4;text-align:center;margin:12px 0}
+  .sent span{padding:2px 1px}
+  .sent .g{display:inline-block;width:16px;color:#C4C0B4;cursor:pointer;font-weight:700}
+  .sent .g.on{color:var(--bad);font-size:22px}
+  .sent .w{cursor:pointer;border-radius:5px;padding:2px 4px}
+  .sent .w.subj{background:#DCE9FF;box-shadow:inset 0 -3px 0 #2F6FE4}
+  .sent .w.pred{background:#E3F6EC;box-shadow:inset 0 -3px 0 #1F9D63}
+  .morph{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .morph div{border-radius:8px;padding:8px 10px;font-size:19px;font-weight:600;text-align:center}
+  .morph small{display:block;font-size:11px;font-weight:400;color:var(--ink-2);margin-top:2px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .pair button{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;font-size:14px;text-align:left}
+  .pair button.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pair button.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .bits{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+  .bit{width:44px;text-align:center}
+  .bit button{width:44px;height:52px;border-radius:10px;background:#EFEDE6;font-size:22px;font-weight:700;color:#B9B5A8}
+  .bit button.on{background:var(--accent);color:#fff}
+  .bit span{display:block;font-size:11px;color:var(--ink-2);margin-top:3px}
+  .pix{display:grid;width:min(100%,270px);margin:0 auto;gap:1px;background:#D8D3C4;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .pix button{aspect-ratio:1;border:0;background:#fff}
+  .pix button.on{background:#1E2A3A}
+  .rgrid{display:grid;width:min(100%,300px);margin:0 auto;gap:2px}
+  .rgrid div{aspect-ratio:1;border-radius:4px;background:#F4F2EC;display:grid;place-items:center;font-size:15px}
+  .rgrid div.rob{background:var(--accent-soft)}
+  .rgrid div.goal{background:#FFF3D4}
+  .rgrid div.wall{background:#8B8578}
+  .prog{display:flex;flex-wrap:wrap;gap:6px;min-height:48px;border:2px dashed var(--line);border-radius:12px;padding:8px;margin:10px 0}
+  .cmd{background:var(--accent-soft);border:1px solid var(--accent);border-radius:9px;padding:6px 10px;font-size:14px;font-weight:600}
+  .cmd.now{background:var(--volt-soft);border-color:var(--volt)}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:130px;justify-content:center}
+  .bars div{flex:1;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;position:relative;transition:height .2s}
+  .bars div.cmp{background:var(--volt)}
+  .bars div.done{background:var(--ok)}
+  .tree{font-size:15px;line-height:1.8}
+  .tree button{text-align:left}
+  .tree .fold{color:var(--accent);font-weight:600}
+  .mail{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;font-size:15px;line-height:1.7}
+  .mail mark{background:#FFF3D4;border-radius:4px;padding:1px 3px;cursor:pointer}
+  .mail mark.hit{background:var(--ok-soft);outline:2px solid var(--ok)}
+  .planet{cursor:pointer}
+  .molec{position:relative;height:150px;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#F7FAFF}
+  .mol{position:absolute;width:13px;height:13px;border-radius:50%;background:#2F6FE4}
+  .tank{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;position:relative;overflow:hidden;background:#EAF4FF}
+  .tank .surf{position:absolute;left:0;right:0;top:38%;height:2px;background:#5AA9EE}
+  .item{position:absolute;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;transition:top .5s ease}
+  .kbox{border:2px dashed var(--line);border-radius:12px;min-height:64px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .kcard{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;font-size:14px}
+  .kcard.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pyr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+  .lvl{border-radius:10px;padding:9px 14px;font-weight:600;color:#fff;text-align:center;transition:opacity .3s}
+  .lvl.dead{opacity:.25;text-decoration:line-through}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Мистецтво руками</h1>
+    <p>Чотирнадцять приладів. Колір можна змішати, ритм — простукати, а лад — почути власними вухами.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='art-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['Колір і форма','Музична азбука','Види мистецтва','Театр і кіно'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
+
+
+
+
+/* --- спільне: звук --- */
+let AC=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+  if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(freq,dur,type,vol){const a=ac();if(!a)return;
+  const o=a.createOscillator(),g=a.createGain();
+  o.type=type||'triangle';o.frequency.value=freq;
+  g.gain.setValueAtTime(0,a.currentTime);
+  g.gain.linearRampToValueAtTime(vol===undefined?0.22:vol,a.currentTime+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,a.currentTime+(dur||0.4));
+  o.connect(g);g.connect(a.destination);o.start();o.stop(a.currentTime+(dur||0.4)+0.05);}
+function noise(dur,vol){const a=ac();if(!a)return;
+  const n=a.sampleRate*(dur||0.12),buf=a.createBuffer(1,n,a.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n);
+  const src=a.createBufferSource(),g=a.createGain();src.buffer=buf;
+  g.gain.value=vol===undefined?0.3:vol;src.connect(g);g.connect(a.destination);src.start();}
+const NOTE={'до':261.63,'ре':293.66,'мі':329.63,'фа':349.23,'соль':392.00,'ля':440.00,'сі':493.88,'до²':523.25};
+
+/* --- 1. Змішування фарб --- */
+T('mix',{g:0,ic:'🎨',t:'Змішування фарб',s:'Три основні кольори дають усі інші',html:`
+<div class="panel">
+  <div class="task" id="mx-task"></div>
+  <div class="mix">
+    <div><div class="swatch" style="background:#D93025"></div><div style="font-size:13px;color:var(--ink-2);text-align:center">червона</div>
+      <input type="range" min="0" max="100" value="0" id="mx-r" oninput="mxDraw()"></div>
+    <div><div class="swatch" style="background:#F2C200"></div><div style="font-size:13px;color:var(--ink-2);text-align:center">жовта</div>
+      <input type="range" min="0" max="100" value="0" id="mx-y" oninput="mxDraw()"></div>
+    <div><div class="swatch" style="background:#1E5FBF"></div><div style="font-size:13px;color:var(--ink-2);text-align:center">синя</div>
+      <input type="range" min="0" max="100" value="0" id="mx-b" oninput="mxDraw()"></div></div>
+  <div class="swatch" id="mx-out" style="height:110px"></div>
+  <div class="big" id="mx-name" style="font-size:19px"></div>
+  <div class="row center"><button class="btn" onclick="mxNext()">Інше завдання</button></div>
+  <div class="verdict" id="mx-v"></div>
+  <div class="legend">Червоний, жовтий і синій — основні: їх не можна отримати змішуванням. Усі три разом дають брудно-коричневий, а не чорний.</div>
+</div>`,init(){mxI=0;mxOk=0;mxDraw();}});
+const mxT=[{n:'помаранчевий',r:1,y:1,b:0},{n:'зелений',r:0,y:1,b:1},{n:'фіолетовий',r:1,y:0,b:1},
+ {n:'коричневий',r:1,y:1,b:1}];
+let mxI=0,mxOk=0;
+function mxDraw(){if(!document.querySelector('#mx-r'))return;const r=+$('#mx-r').value,y=+$('#mx-y').value,b=+$('#mx-b').value;
+  const R=Math.round(255-(y*0.1+b*2.2)),G=Math.round(255-(r*2.1+b*1.5)),B=Math.round(255-(r*2.1+y*2.3));
+  const col='rgb('+Math.max(20,Math.min(255,R))+','+Math.max(20,Math.min(255,G))+','+Math.max(20,Math.min(255,B))+')';
+  $('#mx-out').style.background=(r+y+b)?col:'#fff';
+  const on=[r>25,y>25,b>25];
+  const name=!on[0]&&!on[1]&&!on[2]?'чистий аркуш':
+    on[0]&&on[1]&&on[2]?'коричневий':on[0]&&on[1]?'помаранчевий':on[1]&&on[2]?'зелений':on[0]&&on[2]?'фіолетовий':
+    on[0]?'червоний':on[1]?'жовтий':'синій';
+  $('#mx-name').textContent=name;
+  $('#mx-task').innerHTML='Змішай <b>'+mxT[mxI].n+'</b>.<span class="chip">'+mxOk+' з 3</span>';
+  const t=mxT[mxI];
+  if(name===t.n){mxOk++;if(mxOk>=3)mark('mix');
+    say('#mx-v','Так, вийшов '+t.n+'. Кольори, отримані змішуванням двох основних, називають похідними.',true);
+    mxI=(mxI+1)%mxT.length;}
+  else hide('#mx-v');}
+function mxNext(){mxI=(mxI+1)%mxT.length;['r','y','b'].forEach(k=>$('#mx-'+k).value=0);hide('#mx-v');mxDraw();}
+
+/* --- 2. Тепла й холодна гама --- */
+T('warm',{g:0,ic:'🌡',t:'Тепла чи холодна',s:'Колір і настрій',html:`
+<div class="panel">
+  <div class="task" id="wm-task"></div>
+  <svg viewBox="0 0 300 160" height="155" id="wm-svg"></svg>
+  <input type="range" min="0" max="100" value="50" id="wm-r" oninput="wmDraw()">
+  <div class="big" id="wm-name" style="font-size:18px"></div>
+  <div class="row center"><button class="btn" onclick="wmCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="wmNext()">Інший настрій</button></div>
+  <div class="verdict" id="wm-v"></div>
+  <div class="legend">Теплі кольори наближають предмет до глядача, холодні — віддаляють. Тому далекі гори на картинах майже завжди блакитні.</div>
+</div>`,init(){wmI=0;wmOk=0;wmDraw();}});
+const wmT=[{n:'спекотний літній полудень',warm:true},{n:'морозний зимовий ранок',warm:false},
+ {n:'затишний вечір біля вогню',warm:true},{n:'глибина моря',warm:false}];
+let wmI=0,wmOk=0;
+function wmDraw(){if(!document.querySelector('#wm-r'))return;const v=+$('#wm-r').value;
+  const sky=v>50?'hsl('+(38-(v-50)*0.35)+',85%,'+(70-(v-50)*0.15)+'%)':'hsl('+(200+(50-v)*0.4)+',60%,'+(60+(50-v)*0.3)+'%)';
+  const gr=v>50?'hsl('+(28-(v-50)*0.2)+',70%,45%)':'hsl('+(210+(50-v)*0.3)+',35%,55%)';
+  $('#wm-svg').innerHTML='<rect x="0" y="0" width="300" height="160" fill="'+sky+'" rx="10"/>'+
+    '<circle cx="'+(v>50?236:60)+'" cy="42" r="20" fill="'+(v>50?'#FFD84D':'#F2F6FB')+'"/>'+
+    '<path d="M 0 120 L 70 70 L 130 120 Z" fill="'+gr+'"/><path d="M 100 130 L 190 62 L 280 130 Z" fill="'+gr+'" opacity=".85"/>'+
+    '<rect x="0" y="126" width="300" height="34" fill="'+gr+'" opacity=".6"/>';
+  $('#wm-name').textContent=v>60?'тепла гама':v<40?'холодна гама':'нейтрально';
+  $('#wm-task').innerHTML='Добери гаму для настрою: <b>'+wmT[wmI].n+'</b>.<span class="chip">'+wmOk+' з 3</span>';}
+function wmCheck(){const v=+$('#wm-r').value,t=wmT[wmI];
+  const warm=v>60,cold=v<40;
+  if((t.warm&&warm)||(!t.warm&&cold)){wmOk++;if(wmOk>=3)mark('warm');
+    say('#wm-v','Так. '+(t.warm?'Теплі кольори — червоний, оранжевий, жовтий — передають тепло й рух.':'Холодні — синій, блакитний, фіолетовий — спокій і прохолоду.'),true);
+    wmI=(wmI+1)%wmT.length;setTimeout(wmDraw,1300);}
+  else say('#wm-v','Ще ні. Посунь повзунок далі в потрібний бік.',false);}
+function wmNext(){wmI=(wmI+1)%wmT.length;wmDraw();hide('#wm-v');}
+
+/* --- 3. Композиція --- */
+T('comp',{g:0,ic:'🖼',t:'Правило третин',s:'Куди ставити головне',html:`
+<div class="panel">
+  <div class="task">Пересунь дерево так, щоб композиція стала цікавою. Прилад підкаже.</div>
+  <svg viewBox="0 0 300 200" height="195" id="cp-svg"></svg>
+  <div class="hintline" id="cp-state"></div>
+  <div class="verdict" id="cp-v"></div>
+  <div class="legend">Головний об'єкт краще ставити не в центр, а на перетин ліній, що ділять картину на три частини. Так само працює й лінія горизонту.</div>
+</div>`,init(){cpX=150;cpY=110;cpOk=false;cpDraw();}});
+let cpX=150,cpY=110,cpOk=false;
+function cpDraw(){let s='<rect x="0" y="0" width="300" height="200" fill="#DCEBF7" rx="8"/>';
+  s+='<rect x="0" y="134" width="300" height="66" fill="#9EC98A"/>';
+  [100,200].forEach(x=>{s+='<line x1="'+x+'" y1="0" x2="'+x+'" y2="200" stroke="#fff" stroke-width="1" opacity=".7" stroke-dasharray="4 4"/>';});
+  [67,134].forEach(y=>{s+='<line x1="0" y1="'+y+'" x2="300" y2="'+y+'" stroke="#fff" stroke-width="1" opacity=".7" stroke-dasharray="4 4"/>';});
+  s+='<rect x="'+(cpX-4)+'" y="'+cpY+'" width="8" height="'+(150-cpY)+'" fill="#7A5C3E"/>';
+  s+='<circle cx="'+cpX+'" cy="'+cpY+'" r="26" fill="#4E8C3F" style="cursor:grab"/>';
+  $('#cp-svg').innerHTML=s;
+  const near=[[100,67],[200,67],[100,134],[200,134]].some(p=>Math.hypot(p[0]-cpX,p[1]-cpY)<26);
+  const center=Math.hypot(150-cpX,100-cpY)<26;
+  $('#cp-state').textContent=near?'Дерево стоїть на перетині ліній третин.':center?'Дерево рівно посередині.':'Дерево між лініями.';
+  if(near&&!cpOk){cpOk=true;mark('comp');
+    say('#cp-v','Ось воно. Око глядача першим падає саме на ці чотири точки — художники й фотографи ставлять туди головне.',true);}
+  else if(center)say('#cp-v','Строго центральна композиція виглядає спокійно, але часто нудно. Спробуй посунути дерево до перетину пунктирів.',false);
+  cpBind();}
+function cpBind(){const svg=$('#cp-svg');if(!svg||svg.dataset.b)return;svg.dataset.b=1;let on=false;
+  const upd=e=>{const b=svg.getBoundingClientRect();
+    cpX=Math.max(30,Math.min(270,(e.clientX-b.left)/b.width*300));
+    cpY=Math.max(30,Math.min(140,(e.clientY-b.top)/b.height*200));cpDraw();};
+  svg.addEventListener('pointerdown',e=>{on=true;svg.setPointerCapture(e.pointerId);upd(e);});
+  svg.addEventListener('pointermove',e=>{if(on){e.preventDefault();upd(e);}});
+  svg.addEventListener('pointerup',()=>on=false);}
+
+/* --- 4. Перспектива --- */
+T('persp',{g:0,ic:'🛣',t:'Перспектива',s:'Чому далеке здається меншим',html:`
+<div class="panel">
+  <div class="task">Пересувай лінію горизонту й дивись, що стається з дорогою та деревами.</div>
+  <svg viewBox="0 0 300 200" height="195" id="pe-svg"></svg>
+  <div style="font-size:14px;color:var(--ink-2)">лінія горизонту</div>
+  <input type="range" min="40" max="150" value="90" id="pe-r" oninput="peDraw()">
+  <div class="hintline" id="pe-state"></div>
+  <div class="verdict" id="pe-v"></div>
+  <div class="legend">Усі паралельні лінії, що йдуть углиб, сходяться в одній точці на горизонті. Її називають точкою сходу.</div>
+</div>`,init(){peSeen={};peDraw();}});
+let peSeen={};
+function peDraw(){if(!document.querySelector('#pe-r'))return;const h=+$('#pe-r').value;
+  let s='<rect x="0" y="0" width="300" height="'+h+'" fill="#CFE6F7"/>';
+  s+='<rect x="0" y="'+h+'" width="300" height="'+(200-h)+'" fill="#9EC98A"/>';
+  s+='<line x1="0" y1="'+h+'" x2="300" y2="'+h+'" stroke="#8B8578" stroke-width="1.5"/>';
+  s+='<polygon points="150,'+h+' 40,200 260,200" fill="#B7AFA2"/>';
+  s+='<line x1="150" y1="'+h+'" x2="150" y2="200" stroke="#fff" stroke-width="2" stroke-dasharray="10 8"/>';
+  [0.25,0.5,0.8].forEach(k=>{const y=h+(200-h)*k,size=8+34*k;
+    s+='<rect x="'+(150-150*k-6)+'" y="'+(y-size)+'" width="5" height="'+size+'" fill="#7A5C3E"/>'+
+       '<circle cx="'+(150-150*k-4)+'" cy="'+(y-size)+'" r="'+(6+14*k)+'" fill="#4E8C3F"/>';});
+  s+='<circle cx="150" cy="'+h+'" r="4" fill="#D8433B"/>';
+  $('#pe-svg').innerHTML=s;
+  peSeen[h>110?'low':h<60?'high':'mid']=1;
+  $('#pe-state').textContent=h<60?'Високий горизонт: видно багато землі — погляд ніби згори.'
+    :h>110?'Низький горизонт: багато неба — відчуття простору й висоти.'
+    :'Горизонт посередині — найспокійніший, але й найнейтральніший варіант.';
+  if(Object.keys(peSeen).length>=3){mark('persp');
+    say('#pe-v','Червона крапка — точка сходу. Куди її поставиш, туди й дивитиметься глядач; а висота горизонту вирішує, про що картина — про землю чи про небо.',true);}}
+
+/* --- 5. Орнамент --- */
+T('ornam',{g:0,ic:'❄️',t:'Симетричний орнамент',s:'Як працює писанка',html:`
+<div class="panel">
+  <div class="task">Малюй пальцем у крузі — візерунок повторюється симетрично, як на писанці.</div>
+  <div class="canvasbox"><canvas id="or-c" width="280" height="280" style="border-radius:50%;border:2px solid var(--line);background:#FFFDF7;touch-action:none"></canvas></div>
+  <div class="row center"><button class="btn ghost small" onclick="orSet(4)">4 промені</button>
+    <button class="btn ghost small" onclick="orSet(6)">6</button>
+    <button class="btn ghost small" onclick="orSet(8)">8</button>
+    <button class="btn ghost small" onclick="orClear()">Стерти</button></div>
+  <div class="hintline" id="or-state"></div>
+  <div class="verdict" id="or-v"></div>
+  <div class="legend">Симетрія — основа орнаменту: писанки, вишиванки, розписи. Один рух руки перетворюється на цілий візерунок.</div>
+</div>`,init(){orN=6;orInit();}});
+let orN=6,orDrawn=0;
+function orInit(){const c=$('#or-c');if(!c)return;const x=c.getContext('2d');
+  x.clearRect(0,0,280,280);orDrawn=0;$('#or-state').textContent='Променів симетрії: '+orN;
+  if(c.dataset.b)return;c.dataset.b=1;let on=false,last=null;
+  const pt=e=>{const r=c.getBoundingClientRect();return[(e.clientX-r.left)*280/r.width-140,(e.clientY-r.top)*280/r.height-140];};
+  const draw=p=>{const x2=c.getContext('2d');x2.strokeStyle='#9333EA';x2.lineWidth=3;x2.lineCap='round';
+    for(let i=0;i<orN;i++){const a=i*2*Math.PI/orN;
+      const rot=([px,py])=>[px*Math.cos(a)-py*Math.sin(a)+140,px*Math.sin(a)+py*Math.cos(a)+140];
+      const A=rot(last),B=rot(p);
+      x2.beginPath();x2.moveTo(A[0],A[1]);x2.lineTo(B[0],B[1]);x2.stroke();
+      const A2=rot([last[0],-last[1]]),B2=rot([p[0],-p[1]]);
+      x2.beginPath();x2.moveTo(A2[0],A2[1]);x2.lineTo(B2[0],B2[1]);x2.stroke();}
+    orDrawn++;if(orDrawn>25){mark('ornam');
+      say('#or-v','Один рух — і вже цілий орнамент. Саме так будують писанку: майстер веде лінію в одному секторі, а решта повторюється.',true);}};
+  c.addEventListener('pointerdown',e=>{on=true;c.setPointerCapture(e.pointerId);last=pt(e);});
+  c.addEventListener('pointermove',e=>{if(!on)return;e.preventDefault();const p=pt(e);draw(p);last=p;});
+  c.addEventListener('pointerup',()=>on=false);}
+function orSet(n){orN=n;$('#or-state').textContent='Променів симетрії: '+orN;}
+function orClear(){const c=$('#or-c');if(c)c.getContext('2d').clearRect(0,0,280,280);orDrawn=0;hide('#or-v');}
+
+/* --- 6. Клавіатура --- */
+T('keys',{g:1,ic:'🎹',t:'Ноти',s:'Сім звуків, з яких усе',html:`
+<div class="panel">
+  <div class="task" id="ky-task">Тисни на клавіші — почуєш ноти. Потім спробуй повторити мелодію.</div>
+  <div class="keys" id="ky-row"></div>
+  <div class="row center"><button class="btn" onclick="kyPlay()">Послухати мелодію</button>
+    <button class="btn ghost" onclick="kyStart()">Повторити її</button></div>
+  <div class="hintline" id="ky-state"></div>
+  <div class="verdict" id="ky-v"></div>
+  <div class="legend">Відстань між «до» і наступним «до» — октава. Частота при цьому подвоюється: 261 Гц і 523 Гц.</div>
+</div>`,init(){kyRec=null;kyDraw();}});
+const KYM=['мі','ре','до','ре','мі','мі','мі'];
+let kyRec=null;
+function kyDraw(){if(!document.querySelector('#ky-row'))return;const box=$('#ky-row');box.innerHTML='';
+  Object.keys(NOTE).forEach(n=>{const d=document.createElement('div');d.className='wkey';d.textContent=n;
+    (function(nm){d.onclick=()=>{tone(NOTE[nm],0.5);d.classList.add('on');setTimeout(()=>d.classList.remove('on'),160);kyTap(nm);};})(n);
+    box.appendChild(d);});}
+function kyPlay(){stopAll();let i=0;
+  every(()=>{if(i>=KYM.length){stopAll();return;}tone(NOTE[KYM[i]],0.45);i++;},480);
+  $('#ky-state').textContent='Це початок «Ой на горі та й женці жнуть»… а насправді — проста поспівка з трьох нот.';}
+function kyStart(){kyRec=[];$('#ky-state').textContent='Тепер повтори: сім натискань.';hide('#ky-v');}
+function kyTap(n){if(!kyRec)return;kyRec.push(n);
+  $('#ky-state').textContent='Зіграно '+kyRec.length+' з '+KYM.length;
+  if(kyRec.length===KYM.length){const ok=kyRec.every((v,i)=>v===KYM[i]);
+    if(ok){mark('keys');say('#ky-v','Точно так! Ти щойно зіграв мелодію на слух — це називають підбором.',true);}
+    else say('#ky-v','Не зовсім. Послухай ще раз і зверни увагу: перші три ноти йдуть униз, а далі повертаються.',false);
+    kyRec=null;}}
+
+/* --- 7. Мажор і мінор --- */
+T('mode',{g:1,ic:'🙂',t:'Мажор і мінор',s:'Одна мелодія — два настрої',html:`
+<div class="panel">
+  <div class="task" id="md-task">Послухай обидва варіанти. Різниця лише в одній ноті — а настрій зовсім інший.</div>
+  <div class="row center"><button class="btn" onclick="mdPlay(1)">Мажор</button>
+    <button class="btn ghost" onclick="mdPlay(0)">Мінор</button></div>
+  <div class="big" id="md-now" style="font-size:19px"></div>
+  <div class="row center" style="margin-top:10px"><button class="btn ghost" onclick="mdQuiz()">Вгадай на слух</button></div>
+  <div class="verdict" id="md-v"></div>
+  <div class="legend">У мажорі третя нота вища на півтону, ніж у мінорі. Через це мажор чують як світлий, а мінор — як задумливий.</div>
+</div>`,init(){mdQ=-1;}});
+let mdQ=-1;
+function mdPlay(maj){stopAll();
+  const seq=maj?[261.63,329.63,392.00,523.25]:[261.63,311.13,392.00,523.25];
+  let i=0;every(()=>{if(i>=seq.length){stopAll();return;}tone(seq[i],0.5);i++;},420);
+  if(mdQ<0)$('#md-now').textContent=maj?'мажор — світло, радість':'мінор — сум, задума';}
+function mdQuiz(){mdQ=Math.random()<0.5?1:0;$('#md-now').textContent='Що це було?';
+  mdPlay(mdQ);
+  say('#md-v','Слухай і натисни ту кнопку, якою, на твою думку, це звучало.',true);
+  const orig=window.mdPlay;
+  window.mdPlay=function(m){if(mdQ>=0){const right=m===mdQ;
+      say('#md-v',right?'Так, це '+(mdQ?'мажор':'мінор')+'. Вухо швидко вчиться це чути.':'Ні, це був '+(mdQ?'мажор':'мінор')+'. Спробуй ще раз.',right);
+      if(right)mark('mode');mdQ=-1;window.mdPlay=orig;return;}
+    orig(m);};}
+
+/* --- 8. Ритм --- */
+T('rhythm',{g:1,ic:'🥁',t:'Ритм-машина',s:'Постав удари й послухай',html:`
+<div class="panel">
+  <div class="task">Постав удари в клітинках — і натисни «грати». Вісім клітинок — це два такти по чотири долі.</div>
+  <div class="seqrow"><span>бочка</span><div class="seq" id="rh-0"></div></div>
+  <div class="seqrow"><span>плескіт</span><div class="seq" id="rh-1"></div></div>
+  <div class="seqrow"><span>тарілка</span><div class="seq" id="rh-2"></div></div>
+  <div class="row center"><button class="btn" onclick="rhPlay()">Грати</button>
+    <button class="btn ghost" onclick="rhStop()">Стоп</button>
+    <button class="btn ghost" onclick="rhPreset()">Простий біт</button>
+    <button class="btn ghost" onclick="rhClear()">Очистити</button></div>
+  <div class="hintline" id="rh-state"></div>
+  <div class="verdict" id="rh-v"></div>
+  <div class="legend">Сильна доля — перша в такті. Саме на неї зазвичай ставлять бочку, а плескіт — на третю: так виходить знайомий «тук-тс-так-тс».</div>
+</div>`,init(){rhG=[[],[],[]];rhDraw();}});
+let rhG=[[],[],[]],rhStep=0;
+function rhDraw(){if(!document.querySelector('#rh-0'))return;for(let r=0;r<3;r++){const box=$('#rh-'+r);box.innerHTML='';
+  for(let i=0;i<8;i++){const b=document.createElement('button');
+    b.className=(rhG[r][i]?'on':'')+(rhStep===i?' now':'');
+    (function(rr,ii){b.onclick=()=>{rhG[rr][ii]=!rhG[rr][ii];rhDraw();};})(r,i);box.appendChild(b);}}}
+function rhPlay(){stopAll();ac();rhStep=0;
+  every(()=>{if(!document.querySelector('#rh-0')){stopAll();return;}
+    if(rhG[0][rhStep])tone(70,0.22,'sine',0.5);
+    if(rhG[1][rhStep])noise(0.13,0.28);
+    if(rhG[2][rhStep])noise(0.05,0.12);
+    rhDraw();rhStep=(rhStep+1)%8;
+    const n=rhG.reduce((a,r)=>a+r.filter(Boolean).length,0);
+    if(n>=6)mark('rhythm');},260);
+  $('#rh-state').textContent='Грає. Спробуй додати плескіт на 3-ю й 7-у клітинку.';}
+function rhStop(){stopAll();rhStep=-1;rhDraw();$('#rh-state').textContent='';}
+function rhClear(){rhG=[[],[],[]];rhDraw();}
+function rhPreset(){rhG=[[1,0,0,0,1,0,0,0],[0,0,1,0,0,0,1,0],[1,1,1,1,1,1,1,1]];rhDraw();
+  say('#rh-v','Це найпоширеніший біт у світі: бочка на 1 і 5, плескіт на 3 і 7, тарілка рівно. Послухай — і впізнаєш його в сотні пісень.',true);}
+
+/* --- 9. Темп і динаміка --- */
+T('tempo',{g:1,ic:'🎚',t:'Темп і динаміка',s:'Швидше, повільніше, гучніше',html:`
+<div class="panel">
+  <div class="task">Та сама мелодія звучить по-різному залежно від темпу й гучності.</div>
+  <div style="font-size:14px;color:var(--ink-2)">темп: <b id="tp-tL">120</b> ударів за хвилину</div>
+  <input type="range" min="50" max="200" value="120" id="tp-t" oninput="tpLab()">
+  <div style="font-size:14px;color:var(--ink-2);margin-top:8px">гучність: <b id="tp-vL">середня</b></div>
+  <input type="range" min="1" max="10" value="5" id="tp-vol" oninput="tpLab()">
+  <div class="big" id="tp-name" style="font-size:18px"></div>
+  <div class="row center"><button class="btn" onclick="tpPlay()">Послухати</button></div>
+  <div class="verdict" id="tp-v"></div>
+  <div class="legend">Італійські назви: adagio — повільно, moderato — помірно, allegro — швидко. Гучність: piano (p) — тихо, forte (f) — гучно.</div>
+</div>`,init(){tpSeen={};tpLab();}});
+let tpSeen={};
+function tpLab(){if(!document.querySelector('#tp-t'))return;const t=+$('#tp-t').value,v=+$('#tp-vol').value;
+  $('#tp-tL').textContent=t;
+  $('#tp-vL').textContent=v<=3?'тихо (piano)':v>=8?'гучно (forte)':'середня (mezzo)';
+  const name=t<70?'adagio — повільно, урочисто':t<110?'moderato — помірно':t<160?'allegro — швидко, весело':'presto — дуже швидко';
+  $('#tp-name').textContent=name;
+  tpSeen[name.split(' ')[0]]=1;
+  if(Object.keys(tpSeen).length>=3){mark('tempo');
+    say('#tp-v','Один і той самий мотив у adagio звучить як колискова, а в allegro — як танець. Темп змінює жанр.',true);}}
+function tpPlay(){stopAll();const t=+$('#tp-t').value,v=+$('#tp-vol').value/12;
+  const seq=[261.63,293.66,329.63,349.23,392.00,349.23,329.63,293.66];let i=0;
+  every(()=>{if(i>=seq.length){stopAll();return;}tone(seq[i],60/t*0.9,'triangle',v);i++;},60/t*1000);}
+
+/* --- 10. Тембр --- */
+T('timbre',{g:1,ic:'🎺',t:'Тембр',s:'Одна нота — різні інструменти',html:`
+<div class="panel">
+  <div class="task" id="tm-task">Одна й та сама нота «ля» звучить по-різному. Це і є тембр.</div>
+  <div class="row center" id="tm-btns"></div>
+  <div class="hintline" id="tm-state"></div>
+  <div class="row center" style="margin-top:10px"><button class="btn" onclick="tmQuiz()">Вгадай на слух</button></div>
+  <div class="verdict" id="tm-v"></div>
+  <div class="legend">Саме тембр дозволяє впізнати голос друга по телефону або скрипку серед оркестру — хоча нота може бути та сама.</div>
+</div>`,init(){tmQ=-1;tmDraw();}});
+const TM=[['м’який, як флейта','sine'],['дзвінкий, як скрипка','sawtooth'],['гострий, як гармошка','square'],['теплий, як гітара','triangle']];
+let tmQ=-1;
+function tmDraw(){$('#tm-btns').innerHTML=TM.map((t,i)=>'<button class="btn ghost small" onclick="tmPlay('+i+')">'+t[0]+'</button>').join('');}
+function tmPlay(i){tone(440,0.8,TM[i][1]);
+  if(tmQ>=0){const right=i===tmQ;
+    say('#tm-v',right?'Так, це був «'+TM[tmQ][0]+'».':'Ні, звучав «'+TM[tmQ][0]+'». Послухай ще раз.',right);
+    if(right)mark('timbre');tmQ=-1;return;}
+  $('#tm-state').textContent='Звучить: '+TM[i][0]+'. Нота та сама — 440 Гц.';}
+function tmQuiz(){tmQ=Math.floor(Math.random()*TM.length);tone(440,0.9,TM[tmQ][1]);
+  say('#tm-v','Слухай і натисни кнопку з тим тембром, який щойно прозвучав.',true);}
+
+/* --- 11. Жанри живопису --- */
+T('genre',{g:2,ic:'🖌',t:'Жанри живопису',s:'Що зображено на картині',html:`
+<div class="panel">
+  <div class="task" id="gn-task"></div>
+  <svg viewBox="0 0 300 170" height="165" id="gn-svg"></svg>
+  <div class="row center" id="gn-btns"></div>
+  <div class="verdict" id="gn-v"></div>
+  <div class="row center" style="margin-top:8px"><button class="btn ghost small" onclick="gnNext()">Далі</button></div>
+  <div class="legend">Портрет — людина, пейзаж — природа, натюрморт — речі, анімалістичний — тварини, історичний — подія з минулого.</div>
+</div>`,init(){gnI=0;gnOk=0;gnDraw();}});
+const GN=['портрет','пейзаж','натюрморт','анімалістичний'];
+let gnI=0,gnOk=0;
+function gnDraw(){if(!document.querySelector('#gn-svg'))return;const k=gnI%4;let s='<rect x="0" y="0" width="300" height="170" fill="#FDFBF5" rx="8" stroke="#C9C6BB" stroke-width="3"/>';
+  if(k===0)s+='<circle cx="150" cy="70" r="34" fill="#E8C39E"/><path d="M 108 160 C 108 110 192 110 192 160 Z" fill="#9333EA"/>'+
+    '<circle cx="138" cy="66" r="4" fill="#1E2A3A"/><circle cx="162" cy="66" r="4" fill="#1E2A3A"/>';
+  if(k===1)s+='<rect x="4" y="100" width="292" height="64" fill="#9EC98A"/><path d="M 20 104 L 90 40 L 160 104 Z" fill="#8B9AA8"/>'+
+    '<path d="M 120 104 L 200 34 L 280 104 Z" fill="#7A8896"/><circle cx="245" cy="40" r="18" fill="#FFD84D"/>';
+  if(k===2)s+='<rect x="60" y="120" width="180" height="10" fill="#B8965A"/><ellipse cx="110" cy="112" rx="26" ry="20" fill="#D93025"/>'+
+    '<ellipse cx="160" cy="116" rx="18" ry="14" fill="#F2C200"/><path d="M 200 116 q 12 -46 26 0 z" fill="#4E8C3F"/>';
+  if(k===3)s+='<ellipse cx="150" cy="110" rx="60" ry="34" fill="#B8965A"/><circle cx="212" cy="86" r="24" fill="#B8965A"/>'+
+    '<circle cx="220" cy="80" r="4" fill="#1E2A3A"/><path d="M 96 130 l -10 26 M 130 134 l -6 26 M 172 134 l 6 26" stroke="#8B6B3E" stroke-width="7"/>';
+  $('#gn-svg').innerHTML=s;
+  $('#gn-task').innerHTML='Який це жанр?<span class="chip">'+gnOk+' з 4</span>';
+  $('#gn-btns').innerHTML=GN.map((o,i)=>'<button class="btn ghost small" onclick="gnPick('+i+')">'+o+'</button>').join('');
+  hide('#gn-v');}
+function gnPick(i){const k=gnI%4;
+  if(i===k){gnOk++;if(gnOk>=4)mark('genre');
+    say('#gn-v','Так, це '+GN[k]+'.',true);gnI++;setTimeout(gnDraw,1100);}
+  else say('#gn-v','Ні. Подивись, що саме є головним на картині.',false);}
+function gnNext(){gnI++;gnDraw();}
+
+/* --- 12. Оркестр --- */
+T('orch',{g:2,ic:'🎻',t:'Групи оркестру',s:'Хто де сидить',html:`
+<div class="panel">
+  <div class="task" id="oc-task">Обери інструмент, потім — його групу.</div>
+  <div class="cards" id="oc-pool"></div>
+  <div class="row center" id="oc-btns"></div>
+  <div class="verdict" id="oc-v"></div>
+  <div class="legend">Струнні сидять попереду — їх найбільше й вони найтихіші. Ударні ставлять позаду: вони й так перекриють усіх.</div>
+</div>`,init(){ocInit();}});
+const OC=[{n:'скрипка',k:0},{n:'віолончель',k:0},{n:'контрабас',k:0},{n:'арфа',k:0},
+ {n:'флейта',k:1},{n:'труба',k:1},{n:'кларнет',k:1},{n:'валторна',k:1},
+ {n:'барабан',k:2},{n:'тарілки',k:2},{n:'ксилофон',k:2},{n:'бандура',k:3},{n:'сопілка',k:3}];
+const OCN=['струнні','духові','ударні','народні українські'];
+let ocSel=-1,ocOk=0,ocLeft=[];
+function ocInit(){ocSel=-1;ocOk=0;ocLeft=OC.map((_,i)=>i);hide('#oc-v');
+  $('#oc-btns').innerHTML=OCN.map((n,i)=>'<button class="btn ghost small" onclick="ocPut('+i+')">'+n+'</button>').join('');
+  ocDraw();}
+function ocDraw(){if(!document.querySelector('#oc-pool'))return;const box=$('#oc-pool');box.innerHTML='';
+  ocLeft.forEach(i=>{const b=document.createElement('button');b.className='card2'+(ocSel===i?' sel':'');
+    b.textContent=OC[i].n;(function(k){b.onclick=()=>{ocSel=k;ocDraw();};})(i);box.appendChild(b);});
+  $('#oc-task').innerHTML='Обери інструмент, потім групу.<span class="chip">'+ocOk+' з '+OC.length+'</span>';}
+function ocPut(k){if(ocSel<0)return say('#oc-v','Спершу обери інструмент.',false);
+  if(OC[ocSel].k===k){ocOk++;ocLeft=ocLeft.filter(i=>i!==ocSel);ocSel=-1;hide('#oc-v');ocDraw();
+    if(!ocLeft.length){mark('orch');say('#oc-v','Готово. Бандура й сопілка — не частина симфонічного оркестру, зате основа народного.',true);}}
+  else say('#oc-v','Ні. Подумай, як із цього інструмента добувають звук: смичком, диханням чи ударом?',false);}
+
+/* --- 13. Народне мистецтво --- */
+T('folk',{g:2,ic:'🪆',t:'Народне мистецтво',s:'Впізнай техніку',html:`
+<div class="panel">
+  <div class="task" id="fk-task"></div>
+  <div class="opts" id="fk-opts"></div>
+  <div class="verdict" id="fk-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="fkNext()">Далі</button></div>
+  <div class="legend">Петриківський розпис і українська писанка внесені до списків нематеріальної спадщини ЮНЕСКО.</div>
+</div>`,init(){fkI=0;fkOk=0;fkDraw();}});
+const FK=[{q:'Розпис із квітами й ягодами, який роблять пензликом із котячої шерсті, а часто й просто пальцем.',
+  o:['петриківський розпис','писанка','мотанка'],a:0,r:'Осередок — село Петриківка на Дніпропетровщині.'},
+ {q:'Яйце, розписане воском і фарбами шар за шаром.',o:['писанка','крашанка','мотанка'],a:0,
+  r:'Крашанка — просто пофарбована одним кольором, без візерунка.'},
+ {q:'Лялька без обличчя, зроблена без голки й ножиць.',o:['мотанка','петриківка','кераміка'],a:0,
+  r:'Обличчя не малювали, щоб у ляльку не «вселився» дух — вона оберіг.'},
+ {q:'Осередок гончарства на Полтавщині, відомий своїм посудом.',o:['Опішня','Косів','Решетилівка'],a:0,
+  r:'Косів — це кераміка Прикарпаття, Решетилівка — килими й вишивка.'},
+ {q:'Художниця, яка малювала фантастичних звірів і не мала академічної освіти.',
+  o:['Марія Примаченко','Катерина Білокур','Тетяна Яблонська'],a:0,r:'Її роботами захоплювався Пікассо.'}];
+let fkI=0,fkOk=0;
+function fkDraw(){if(!document.querySelector('#fk-opts'))return;const t=FK[fkI];$('#fk-task').innerHTML=t.q+'<span class="chip">'+fkOk+' з 4</span>';
+  const box=$('#fk-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){fkOk++;if(fkOk>=4)mark('folk');say('#fk-v','Так. '+t.r,true);}
+      else say('#fk-v','Ні. '+t.r,false);};box.appendChild(b);});
+  hide('#fk-v');}
+function fkNext(){fkI=(fkI+1)%FK.length;fkDraw();}
+
+/* --- 14. Плани в кіно --- */
+T('shot',{g:3,ic:'🎬',t:'Плани в кіно',s:'Що показати глядачеві',html:`
+<div class="panel">
+  <div class="task" id="sh-task"></div>
+  <svg viewBox="0 0 300 170" height="165" id="sh-svg"></svg>
+  <div class="row center" id="sh-btns"></div>
+  <div class="verdict" id="sh-v"></div>
+  <div class="row center" style="margin-top:8px"><button class="btn ghost small" onclick="shNext()">Далі</button></div>
+  <div class="legend">Крупний план показує почуття, загальний — де це відбувається. Режисер чергує їх, щоб глядач і бачив світ, і співпереживав герою.</div>
+</div>`,init(){shI=0;shOk=0;shDraw();}});
+const SH=[{q:'Треба показати, що герой злякався. Який план обрати?',a:0},
+ {q:'Треба показати, що армія стоїть перед величезним замком.',a:2},
+ {q:'Герой розмовляє з другом на лавці — видно обох по пояс.',a:1},
+ {q:'Глядач має помітити сльозу на щоці.',a:0}];
+const SHN=['крупний','середній','загальний'];
+let shI=0,shOk=0;
+function shDraw(){if(!document.querySelector('#sh-svg'))return;const t=SH[shI],k=t.a;
+  let s='<rect x="0" y="0" width="300" height="170" fill="#1E2A3A" rx="8"/>';
+  if(k===0)s+='<circle cx="150" cy="90" r="72" fill="#E8C39E"/><circle cx="126" cy="76" r="7" fill="#1E2A3A"/><circle cx="176" cy="76" r="7" fill="#1E2A3A"/><path d="M 124 124 q 26 -18 52 0" stroke="#1E2A3A" stroke-width="4" fill="none"/>';
+  if(k===1)s+='<circle cx="110" cy="60" r="24" fill="#E8C39E"/><path d="M 78 170 C 78 94 142 94 142 170 Z" fill="#9333EA"/>'+
+    '<circle cx="200" cy="64" r="22" fill="#E8C39E"/><path d="M 170 170 C 170 100 230 100 230 170 Z" fill="#0E7C66"/>';
+  if(k===2)s+='<rect x="0" y="120" width="300" height="50" fill="#4E6B4A"/><path d="M 90 120 L 90 50 L 150 24 L 210 50 L 210 120 Z" fill="#8B8578"/>'+
+    '<rect x="140" y="86" width="20" height="34" fill="#3A3A3A"/>'+
+    Array.from({length:9},(_,i)=>'<circle cx="'+(24+i*30)+'" cy="146" r="6" fill="#D9CFC0"/>').join('');
+  $('#sh-svg').innerHTML=s;
+  $('#sh-task').innerHTML=t.q+'<span class="chip">'+shOk+' з 3</span>';
+  $('#sh-btns').innerHTML=SHN.map((o,i)=>'<button class="btn ghost small" onclick="shPick('+i+')">'+o+' план</button>').join('');
+  hide('#sh-v');}
+function shPick(i){const t=SH[shI];
+  if(i===t.a){shOk++;if(shOk>=3)mark('shot');
+    say('#sh-v','Так, тут потрібен '+SHN[t.a]+' план — саме він показує головне.',true);
+    shI=(shI+1)%SH.length;setTimeout(shDraw,1300);}
+  else say('#sh-v','Ні. Спитай себе: що глядач має роздивитись — обличчя, людей чи цілий світ?',false);}
+function shNext(){shI=(shI+1)%SH.length;shDraw();}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
