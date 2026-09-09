@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Історія руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#8B5E34; --accent-soft:#F2E9DE; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  .tl{position:relative;height:60px;margin:16px 0;background:#F4F2EC;border-radius:10px}
+  .tl .ax{position:absolute;left:2%;right:2%;top:28px;height:3px;background:#C9C6BB}
+  .tl .ev{position:absolute;top:14px;width:30px;height:30px;border-radius:50%;background:var(--accent);
+    color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;transform:translateX(-15px)}
+  .cards{display:grid;gap:8px;margin:10px 0}
+  .card2{border:2px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;text-align:left;font-size:15px}
+  .card2.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .card2.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .card2.no{border-color:var(--bad);background:var(--bad-soft)}
+  .slots{display:grid;gap:8px;margin:10px 0}
+  .slot{border:2px dashed var(--line);border-radius:12px;padding:9px 12px;min-height:46px;font-size:14px;color:var(--ink-2)}
+  .slot b{color:var(--ink)}
+  .dig{display:flex;flex-direction:column-reverse;gap:3px;margin:10px 0}
+  .layer{border-radius:8px;padding:12px;color:#fff;font-size:14px;text-align:center;cursor:pointer;position:relative}
+  .layer.hid{background:#B7A98F!important;color:#8B7B5E}
+  .word{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+  .word button{min-width:34px;height:46px;border-radius:9px;background:#F4F2EC;font-size:20px;font-weight:600}
+  .word button.pick{background:var(--accent);color:#fff}
+  .word button.gap{min-width:16px;background:transparent;color:var(--ink-2);font-size:22px}
+  .word button.gap.on{background:var(--volt);color:#fff;border-radius:6px}
+  .trans{font-size:24px;text-align:center;letter-spacing:.06em;margin:10px 0;font-weight:600}
+  .sent{font-size:18px;line-height:2.4;text-align:center;margin:12px 0}
+  .sent span{padding:2px 1px}
+  .sent .g{display:inline-block;width:16px;color:#C4C0B4;cursor:pointer;font-weight:700}
+  .sent .g.on{color:var(--bad);font-size:22px}
+  .sent .w{cursor:pointer;border-radius:5px;padding:2px 4px}
+  .sent .w.subj{background:#DCE9FF;box-shadow:inset 0 -3px 0 #2F6FE4}
+  .sent .w.pred{background:#E3F6EC;box-shadow:inset 0 -3px 0 #1F9D63}
+  .morph{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .morph div{border-radius:8px;padding:8px 10px;font-size:19px;font-weight:600;text-align:center}
+  .morph small{display:block;font-size:11px;font-weight:400;color:var(--ink-2);margin-top:2px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .pair button{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;font-size:14px;text-align:left}
+  .pair button.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pair button.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .bits{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+  .bit{width:44px;text-align:center}
+  .bit button{width:44px;height:52px;border-radius:10px;background:#EFEDE6;font-size:22px;font-weight:700;color:#B9B5A8}
+  .bit button.on{background:var(--accent);color:#fff}
+  .bit span{display:block;font-size:11px;color:var(--ink-2);margin-top:3px}
+  .pix{display:grid;width:min(100%,270px);margin:0 auto;gap:1px;background:#D8D3C4;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .pix button{aspect-ratio:1;border:0;background:#fff}
+  .pix button.on{background:#1E2A3A}
+  .rgrid{display:grid;width:min(100%,300px);margin:0 auto;gap:2px}
+  .rgrid div{aspect-ratio:1;border-radius:4px;background:#F4F2EC;display:grid;place-items:center;font-size:15px}
+  .rgrid div.rob{background:var(--accent-soft)}
+  .rgrid div.goal{background:#FFF3D4}
+  .rgrid div.wall{background:#8B8578}
+  .prog{display:flex;flex-wrap:wrap;gap:6px;min-height:48px;border:2px dashed var(--line);border-radius:12px;padding:8px;margin:10px 0}
+  .cmd{background:var(--accent-soft);border:1px solid var(--accent);border-radius:9px;padding:6px 10px;font-size:14px;font-weight:600}
+  .cmd.now{background:var(--volt-soft);border-color:var(--volt)}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:130px;justify-content:center}
+  .bars div{flex:1;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;position:relative;transition:height .2s}
+  .bars div.cmp{background:var(--volt)}
+  .bars div.done{background:var(--ok)}
+  .tree{font-size:15px;line-height:1.8}
+  .tree button{text-align:left}
+  .tree .fold{color:var(--accent);font-weight:600}
+  .mail{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;font-size:15px;line-height:1.7}
+  .mail mark{background:#FFF3D4;border-radius:4px;padding:1px 3px;cursor:pointer}
+  .mail mark.hit{background:var(--ok-soft);outline:2px solid var(--ok)}
+  .planet{cursor:pointer}
+  .molec{position:relative;height:150px;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#F7FAFF}
+  .mol{position:absolute;width:13px;height:13px;border-radius:50%;background:#2F6FE4}
+  .tank{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;position:relative;overflow:hidden;background:#EAF4FF}
+  .tank .surf{position:absolute;left:0;right:0;top:38%;height:2px;background:#5AA9EE}
+  .item{position:absolute;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;transition:top .5s ease}
+  .kbox{border:2px dashed var(--line);border-radius:12px;min-height:64px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .kcard{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;font-size:14px}
+  .kcard.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pyr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+  .lvl{border-radius:10px;padding:9px 14px;font-weight:600;color:#fff;text-align:center;transition:opacity .3s}
+  .lvl.dead{opacity:.25;text-decoration:line-through}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Історія руками</h1>
+    <p>Чотирнадцять приладів. Час і простір стають зрозумілими, коли їх можна посунути рукою.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='istoriya-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['Лічба часу','Простір і карта','Джерела','Люди й держава'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
+
+/* --- 1. Стрічка часу --- */
+T('tl',{g:0,ic:'📜',t:'Стрічка часу',s:'Розстав події за порядком',html:`
+<div class="panel">
+  <div class="task" id="tl-task"></div>
+  <div class="tl" id="tl-line"><div class="ax"></div></div>
+  <div class="cards" id="tl-cards"></div>
+  <div class="row center"><button class="btn" onclick="tlCheck()">Перевірити порядок</button>
+    <button class="btn ghost" onclick="tlLoad()">Заново</button></div>
+  <div class="verdict" id="tl-v"></div>
+  <div class="legend">Стрічка часу йде зліва направо: що лівіше — те давніше. Однакові відрізки на ній — однакова кількість років.</div>
+</div>`,init(){tlI=0;tlOk=0;tlLoad();}});
+const tlSets=[
+ [['Заснування Києва','бл. 482'],['Хрещення Русі','988'],['«Руська правда»','1036'],['Перша згадка «Україна»','1187']],
+ [['Битва під Берестечком','1651'],['Заснування Січі','бл. 1556'],['Гетьман Хмельницький починає війну','1648'],['Зруйнування Січі','1775']],
+ [['Проголошення УНР','1917'],['Голодомор','1932'],['Незалежність України','1991'],['Революція Гідності','2014']]];
+let tlI=0,tlOk=0,tlOrder=[],tlSel=null;
+function tlLoad(){const set=tlSets[tlI];tlOrder=set.map((_,i)=>i).sort(()=>Math.random()-.5);tlSel=null;hide('#tl-v');tlDraw();}
+function tlDraw(){const set=tlSets[tlI];
+  $('#tl-task').innerHTML='Розстав <b>'+set.length+'</b> події від найдавнішої до найновішої: тисни на дві картки, щоб поміняти їх місцями.<span class="chip">'+tlOk+' з 3</span>';
+  const box=$('#tl-cards');box.innerHTML='';
+  tlOrder.forEach((idx,pos)=>{const b=document.createElement('button');
+    b.className='card2'+(tlSel===pos?' sel':'');
+    b.innerHTML='<b>'+(pos+1)+'.</b> '+set[idx][0];
+    (function(k){b.onclick=()=>{if(tlSel===null){tlSel=k;}else{const t=tlOrder[tlSel];tlOrder[tlSel]=tlOrder[k];tlOrder[k]=t;tlSel=null;}tlDraw();};})(pos);
+    box.appendChild(b);});
+  const line=$('#tl-line');line.innerHTML='<div class="ax"></div>';
+  tlOrder.forEach((idx,pos)=>{const d=document.createElement('div');d.className='ev';
+    d.style.left=(6+pos*(88/(set.length-1)))+'%';d.textContent=pos+1;line.appendChild(d);});}
+function tlCheck(){const set=tlSets[tlI];
+  const ok=tlOrder.every((v,i)=>v===i);
+  if(ok){tlOk++;if(tlOk>=3)mark('tl');
+    say('#tl-v','Правильно: '+set.map(e=>e[0]+' ('+e[1]+')').join(' → ')+'.',true);}
+  else say('#tl-v','Порядок ще не той. Підказка: перша подія — '+set[0][0]+'.',false);}
+function tlNext(){tlI=(tlI+1)%tlSets.length;tlLoad();}
+
+/* --- 2. Рік і століття --- */
+T('cent',{g:0,ic:'🔢',t:'Рік і століття',s:'Чому 1700 — це XVII',html:`
+<div class="panel">
+  <div class="task">Пересувай рік — і дивись, до якого століття він належить. Зверни увагу на роки, що закінчуються на 00.</div>
+  <div class="big" id="ce-year"></div>
+  <input type="range" min="1" max="2026" value="988" id="ce-r" oninput="ceDraw()">
+  <div class="big" id="ce-cent" style="color:var(--accent)"></div>
+  <div class="hintline" id="ce-state"></div>
+  <div class="row center" style="margin-top:10px"><input type="number" id="ce-in" style="width:130px;text-align:center" placeholder="століття для 1700">
+    <button class="btn small" onclick="ceCheck()">Перевірити</button></div>
+  <div class="verdict" id="ce-v"></div>
+  <div class="legend">Століття рахують від одиниці: перше — це роки 1–100. Тому 1700 рік — останній рік XVII століття, а XVIII починається з 1701.</div>
+</div>`,init(){ceDraw();}});
+const ROM=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+function toRoman(n){let s='';ROM.forEach(([v,r])=>{while(n>=v){s+=r;n-=v;}});return s;}
+function ceDraw(){const y=+$('#ce-r').value,c=Math.ceil(y/100);
+  $('#ce-year').textContent=y+' рік';
+  $('#ce-cent').textContent=toRoman(c)+' століття';
+  const last=y%100===0;
+  $('#ce-state').textContent=last?'Рік закінчується на 00 — це ОСТАННІЙ рік свого століття.'
+    :'Століття '+c+' охоплює роки '+((c-1)*100+1)+'–'+(c*100)+'.';}
+function ceCheck(){const v=+$('#ce-in').value;
+  if(v===17){mark('cent');say('#ce-v','Так, 1700 — це XVII століття, а не XVIII. Століття закінчується роком, кратним 100.',true);}
+  else say('#ce-v','Ще ні. Постав повзунок на 1700 і подивись, що покаже прилад.',false);}
+
+/* --- 3. Римські цифри --- */
+T('roman',{g:0,ic:'Ⅻ',t:'Римські цифри',s:'Як читати дати на пам’ятниках',html:`
+<div class="panel">
+  <div class="task">Пересувай число — і дивись, як воно виглядає по-римськи.</div>
+  <div class="big" id="rm-n"></div>
+  <input type="range" min="1" max="2026" value="49" id="rm-r" oninput="rmDraw()">
+  <div class="big" id="rm-v2" style="color:var(--accent);letter-spacing:.05em"></div>
+  <div class="hintline" id="rm-state"></div>
+  <div class="row center" style="margin-top:10px"><input type="text" id="rm-in" style="width:150px;text-align:center" placeholder="запиши 2026">
+    <button class="btn small" onclick="rmCheck()">Перевірити</button>
+    <button class="btn ghost small" onclick="rmTask()">Інше завдання</button></div>
+  <div class="verdict" id="rm-v"></div>
+  <div class="legend">I=1, V=5, X=10, L=50, C=100, D=500, M=1000. Менша цифра перед більшою — віднімається: IX = 9, XL = 40.</div>
+</div>`,init(){rmT=2026;rmDraw();}});
+let rmT=2026;
+function rmDraw(){const n=+$('#rm-r').value;$('#rm-n').textContent=n;
+  $('#rm-v2').textContent=toRoman(n);
+  const parts=[];let x=n;ROM.forEach(([v,r])=>{while(x>=v){parts.push(r+'='+v);x-=v;}});
+  $('#rm-state').textContent=parts.join(' + ');}
+function rmTask(){rmT=[2026,1991,1648,988,1775][Math.floor(Math.random()*5)];
+  say('#rm-v','Запиши римськими цифрами число '+rmT+'.',true);}
+function rmCheck(){const v=$('#rm-in').value.trim().toUpperCase().replace(/І/g,'I').replace(/Х/g,'X').replace(/М/g,'M').replace(/С/g,'C').replace(/Д/g,'D').replace(/Л/g,'L').replace(/В/g,'V');
+  if(v===toRoman(rmT)){mark('roman');say('#rm-v','Так, '+rmT+' = '+toRoman(rmT)+'.',true);}
+  else say('#rm-v','Ще ні. '+rmT+' — це '+toRoman(rmT)+'. Спробуй інше число: натисни «інше завдання».',false);}
+
+/* --- 4. До нашої ери --- */
+T('bce',{g:0,ic:'⏳',t:'До нашої ери',s:'Як рахувати через нуль',html:`
+<div class="panel">
+  <div class="task" id="bc-task"></div>
+  <svg viewBox="0 0 320 110" height="105" id="bc-svg"></svg>
+  <div class="row"><div style="flex:1">подія A<input type="range" min="-800" max="2026" step="1" value="-480" id="bc-a" oninput="bcDraw()"></div></div>
+  <div class="row"><div style="flex:1">подія B<input type="range" min="-800" max="2026" step="1" value="1991" id="bc-b" oninput="bcDraw()"></div></div>
+  <div class="big" id="bc-diff"></div>
+  <div class="row center"><input type="number" id="bc-in" style="width:130px;text-align:center" placeholder="скільки років?">
+    <button class="btn" onclick="bcCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="bcNext()">Далі</button></div>
+  <div class="verdict" id="bc-v"></div>
+  <div class="legend">Роки до н. е. ідуть у зворотному порядку: 500 до н. е. давніше за 200 до н. е. Щоб дізнатись проміжок через межу ер, числа додають. Цікаво, що нульового року не існує: після 1 р. до н. е. одразу настає 1 р. н. е.</div>
+</div>`,init(){bcI=0;bcOk=0;bcLoad();}});
+const bcT=[{a:-50,b:150,q:'Скільки років минуло від 50 р. до н. е. до 150 р. н. е.?',r:200},
+ {a:-776,b:2026,q:'Перші Олімпійські ігри — 776 р. до н. е. Скільки років тому це було?',r:2802},
+ {a:988,b:1991,q:'Скільки років від хрещення Русі до Незалежності?',r:1003},
+ {a:-480,b:1991,q:'Скільки років від битви під Фермопілами (480 до н. е.) до 1991?',r:2470}];
+let bcI=0,bcOk=0;
+function bcLoad(){const t=bcT[bcI];$('#bc-a').value=t.a;$('#bc-b').value=t.b;
+  $('#bc-task').innerHTML=t.q+'<span class="chip">'+bcOk+' з 3</span>';$('#bc-in').value='';hide('#bc-v');bcDraw();}
+function bcYear(v){return v<0?Math.abs(v)+' до н.е.':v+' н.е.';}
+function bcDraw(){const a=+$('#bc-a').value,b=+$('#bc-b').value;
+  const pos=v=>16+((v+800)/2826)*288;
+  let s='<line x1="10" y1="60" x2="310" y2="60" stroke="#C9C6BB" stroke-width="3"/>';
+  s+='<line x1="'+pos(0)+'" y1="40" x2="'+pos(0)+'" y2="80" stroke="#8B5E34" stroke-width="3"/>'+
+     '<text x="'+pos(0)+'" y="98" text-anchor="middle" font-size="11" fill="#8B5E34">0</text>';
+  s+='<line x1="'+pos(Math.min(a,b))+'" y1="60" x2="'+pos(Math.max(a,b))+'" y2="60" stroke="#8B5E34" stroke-width="6"/>';
+  s+='<circle cx="'+pos(a)+'" cy="60" r="8" fill="#2F6FE4"/><text x="'+pos(a)+'" y="34" text-anchor="middle" font-size="11">A</text>';
+  s+='<circle cx="'+pos(b)+'" cy="60" r="8" fill="#E9A800"/><text x="'+pos(b)+'" y="34" text-anchor="middle" font-size="11">B</text>';
+  $('#bc-svg').innerHTML=s;
+  const diff=Math.abs(b-a);
+  $('#bc-diff').textContent=bcYear(a)+' → '+bcYear(b)+' = '+diff+' років';}
+function bcCheck(){const t=bcT[bcI],v=+$('#bc-in').value;
+  if(v===t.r){bcOk++;if(bcOk>=3)mark('bce');
+    say('#bc-v','Так, '+t.r+'. '+(t.a<0&&t.b>0?'Роки до н. е. і н. е. просто додають: '+Math.abs(t.a)+' + '+t.b+'.':'Тут звичайне віднімання.'),true);
+    bcI=(bcI+1)%bcT.length;setTimeout(bcLoad,1400);}
+  else say('#bc-v','Ще ні. Постав повзунки на потрібні роки — прилад покаже проміжок.',false);}
+function bcNext(){bcI=(bcI+1)%bcT.length;bcLoad();}
+
+/* --- 5. Періодизація --- */
+T('period',{g:0,ic:'🗂',t:'Епохи',s:'Розклади події по періодах',html:`
+<div class="panel">
+  <div class="task" id="pe-task"></div>
+  <div class="cards" id="pe-pool"></div>
+  <div class="row center" id="pe-btns"></div>
+  <div class="hintline" id="pe-state"></div>
+  <div class="verdict" id="pe-v"></div>
+  <div class="legend">Стародавній світ закінчується 476 роком — падінням Західної Римської імперії. Новітній час починається з XX століття.</div>
+</div>`,init(){peInit();}});
+const PE=[{n:'Заснування Риму',k:0},{n:'Хрещення Русі',k:1},{n:'Козацька Січ',k:2},
+ {n:'Трипільська культура',k:0},{n:'«Руська правда» Ярослава',k:1},{n:'Проголошення УНР',k:3},
+ {n:'Незалежність України',k:3},{n:'Гетьман Хмельницький',k:2},{n:'Київська Русь',k:1}];
+const PEN=['Стародавній світ','Середні віки','Новий час','Новітній час'];
+let peSel=-1,peOk=0,peLeft=[];
+function peInit(){peSel=-1;peOk=0;peLeft=PE.map((_,i)=>i);hide('#pe-v');
+  $('#pe-btns').innerHTML=PEN.map((n,i)=>'<button class="btn ghost small" onclick="pePut('+i+')">'+n+'</button>').join('');
+  peDraw();}
+function peDraw(){const box=$('#pe-pool');box.innerHTML='';
+  peLeft.forEach(i=>{const b=document.createElement('button');b.className='card2'+(peSel===i?' sel':'');
+    b.textContent=PE[i].n;(function(k){b.onclick=()=>{peSel=k;peDraw();};})(i);box.appendChild(b);});
+  $('#pe-task').innerHTML='Обери подію, потім епоху.<span class="chip">'+peOk+' з '+PE.length+'</span>';
+  $('#pe-state').textContent=peLeft.length?'Лишилось: '+peLeft.length:'';}
+function pePut(k){if(peSel<0)return say('#pe-v','Спершу обери подію.',false);
+  if(PE[peSel].k===k){peOk++;peLeft=peLeft.filter(i=>i!==peSel);peSel=-1;hide('#pe-v');peDraw();
+    if(!peLeft.length){mark('period');say('#pe-v','Усе розкладено. Межі епох умовні: історики домовились про них заради зручності.',true);}}
+  else say('#pe-v','«'+PE[peSel].n+'» — не '+PEN[k].toLowerCase()+'. Подумай, у якому це столітті.',false);}
+
+/* --- 6. Регіони України --- */
+T('regions',{g:1,ic:'🗺',t:'Історичні регіони',s:'Звідки взялися ці назви',html:`
+<div class="panel">
+  <div class="task">Тисни на регіон — дізнаєшся, звідки його назва.</div>
+  <svg viewBox="0 0 320 220" height="215" id="rg-svg"></svg>
+  <div class="hintline" id="rg-info">Обери регіон на карті.</div>
+  <div class="verdict" id="rg-v"></div>
+  <div class="legend">Історичні регіони не збігаються з областями: області — сучасний поділ, а регіони склалися впродовж століть.</div>
+</div>`,init(){rgSeen={};rgDraw();}});
+const RG=[{n:'Галичина',x:52,y:96,f:'Назва від міста Галич — столиці Галицького князівства. Тривалий час була під Австрією, тому тут особливий побут і говірка.'},
+ {n:'Волинь',x:78,y:52,f:'Від давнього міста Волинь. Край лісів і боліт, згадується ще в літописах X століття.'},
+ {n:'Закарпаття',x:26,y:140,f:'«За Карпатами» — з погляду Києва. Було під Угорщиною, Чехословаччиною, і лише 1945 року увійшло до України.'},
+ {n:'Поділля',x:112,y:118,f:'Від «долу» — низини понад Дністром. Родючі землі, багато старовинних фортець.'},
+ {n:'Полісся',x:140,y:44,f:'«По лісу» — лісовий край на півночі. Тут збереглося чимало давніх обрядів.'},
+ {n:'Наддніпрянщина',x:172,y:96,f:'Землі обабіч Дніпра, серце давньої Русі й козацької держави.'},
+ {n:'Слобожанщина',x:238,y:74,f:'Від «слобід» — поселень, де новоприбулим давали пільги: кілька років не платити податків.'},
+ {n:'Запоріжжя',x:206,y:148,f:'«За порогами» Дніпра. Тут була Січ — козацька республіка.'},
+ {n:'Донеччина',x:268,y:120,f:'Від річки Сіверський Донець. Промисловий край із XIX століття.'},
+ {n:'Бессарабія',x:126,y:186,f:'Південь між Дністром і Дунаєм. Тут, у Кілії, живуть українці, болгари, молдовани, гагаузи.'},
+ {n:'Таврія',x:206,y:196,f:'Давня назва Криму й степів на північ від нього — від племені таврів.'}];
+let rgSeen={};
+function rgDraw(){let s='<path d="M 20 100 L 60 40 L 150 26 L 250 44 L 300 92 L 286 150 L 230 208 L 150 206 L 96 176 L 40 150 Z" fill="#F2E9DE" stroke="#8B5E34" stroke-width="2"/>';
+  RG.forEach((r,i)=>{s+='<circle cx="'+r.x+'" cy="'+r.y+'" r="9" fill="'+(rgSeen[i]?'#8B5E34':'#fff')+'" stroke="#8B5E34" stroke-width="2" style="cursor:pointer" onclick="rgPick('+i+')"/>'+
+    '<text x="'+r.x+'" y="'+(r.y-13)+'" text-anchor="middle" font-size="9" fill="#5B6779">'+r.n+'</text>';});
+  $('#rg-svg').innerHTML=s;}
+function rgPick(i){rgSeen[i]=1;$('#rg-info').innerHTML='<b>'+RG[i].n+'</b> — '+RG[i].f;rgDraw();
+  if(Object.keys(rgSeen).length>=6){mark('regions');
+    say('#rg-v','Помічаєш? Назви пояснюють самі себе: Полісся — по лісу, Закарпаття — за Карпатами, Слобожанщина — від слобід.',true);}}
+
+/* --- 7. Держави на наших землях --- */
+T('states',{g:1,ic:'🏛',t:'Хто тут володарював',s:'Повзунок століть',html:`
+<div class="panel">
+  <div class="task">Пересувай рік — і дивись, яка держава була на цих землях.</div>
+  <div class="big" id="sv-year"></div>
+  <input type="range" min="900" max="2026" value="1000" id="sv-r" oninput="svDraw()">
+  <div class="big" id="sv-name" style="color:var(--accent);font-size:20px"></div>
+  <div class="hintline" id="sv-info"></div>
+  <div class="verdict" id="sv-v"></div>
+  <div class="legend">Українська державність не почалася 1991 року: вона переривалась і відновлювалась — Русь, козацька держава, УНР, сучасна Україна.</div>
+</div>`,init(){svSeen={};svDraw();}});
+const SV=[{to:1240,n:'Київська Русь',f:'Держава з центром у Києві. Розквіт за Володимира Великого й Ярослава Мудрого.'},
+ {to:1340,n:'Галицько-Волинська держава',f:'Продовжила традицію Русі на заході. Король Данило Галицький.'},
+ {to:1569,n:'Литовська доба',f:'Більшість українських земель — у складі Великого князівства Литовського, де діяли руські закони й мова.'},
+ {to:1648,n:'Річ Посполита',f:'Після Люблінської унії землі перейшли до Польщі. Саме тоді зростає козацтво.'},
+ {to:1764,n:'Козацька держава (Гетьманщина)',f:'Постала внаслідок війни під проводом Богдана Хмельницького 1648 року.'},
+ {to:1917,n:'Російська та Австрійська імперії',f:'Україну поділено між двома імперіями; мову забороняли Валуєвським циркуляром і Емським указом.'},
+ {to:1921,n:'УНР і ЗУНР',f:'Українська революція: проголошено незалежність, ухвалено Універсали, відбулося Злуки 22 січня 1919 року.'},
+ {to:1991,n:'СРСР',f:'Радянська доба: Голодомор 1932–1933, репресії, Друга світова війна, Чорнобиль.'},
+ {to:2026,n:'Незалежна Україна',f:'24 серпня 1991 року Верховна Рада проголосила незалежність, підтверджену референдумом 1 грудня.'}];
+let svSeen={};
+function svDraw(){const y=+$('#sv-r').value;
+  const s=SV.find(x=>y<=x.to)||SV[SV.length-1];
+  $('#sv-year').textContent=y+' рік';$('#sv-name').textContent=s.n;$('#sv-info').textContent=s.f;
+  svSeen[s.n]=1;
+  if(Object.keys(svSeen).length>=6){mark('states');
+    say('#sv-v','Ти пройшов понад тисячу років. Зверни увагу: періоди без власної держави чергуються з періодами її відновлення.',true);}}
+
+/* --- 8. Види джерел --- */
+T('src',{g:2,ic:'📦',t:'Види джерел',s:'Речові, писемні, усні, етнографічні',html:`
+<div class="panel">
+  <div class="task" id="sc-task">Обери знахідку, потім — тип джерела.</div>
+  <div class="cards" id="sc-pool"></div>
+  <div class="row center" id="sc-btns"></div>
+  <div class="verdict" id="sc-v"></div>
+  <div class="legend">Речові джерела не можна «переписати» на чиюсь користь — тому археологію часто вважають найчеснішим свідком.</div>
+</div>`,init(){scInit();}});
+const SC=[{n:'глиняний горщик із розкопок',k:0},{n:'літопис Нестора',k:1},
+ {n:'пісня, яку співала прабабуся',k:2},{n:'весільний обряд',k:3},
+ {n:'монета часів Русі',k:0},{n:'лист із фронту',k:1},{n:'вишиванка з Полтавщини',k:3},
+ {n:'легенда про заснування міста',k:2},{n:'кам’яна сокира',k:0},{n:'шкільний журнал 1950 року',k:1}];
+const SCN=['речові','писемні','усні','етнографічні'];
+let scSel=-1,scOk=0,scLeft=[];
+function scInit(){scSel=-1;scOk=0;scLeft=SC.map((_,i)=>i);hide('#sc-v');
+  $('#sc-btns').innerHTML=SCN.map((n,i)=>'<button class="btn ghost small" onclick="scPut('+i+')">'+n+'</button>').join('');
+  scDraw();}
+function scDraw(){const box=$('#sc-pool');box.innerHTML='';
+  scLeft.forEach(i=>{const b=document.createElement('button');b.className='card2'+(scSel===i?' sel':'');
+    b.textContent=SC[i].n;(function(k){b.onclick=()=>{scSel=k;scDraw();};})(i);box.appendChild(b);});
+  $('#sc-task').innerHTML='Обери знахідку, потім тип джерела.<span class="chip">'+scOk+' з '+SC.length+'</span>';}
+function scPut(k){if(scSel<0)return say('#sc-v','Спершу обери знахідку.',false);
+  if(SC[scSel].k===k){scOk++;scLeft=scLeft.filter(i=>i!==scSel);scSel=-1;hide('#sc-v');scDraw();
+    if(!scLeft.length){mark('src');say('#sc-v','Усе розподілено. Найкраще, коли історик має джерела різних типів: тоді їх можна звірити між собою.',true);}}
+  else say('#sc-v','Ні. «'+SC[scSel].n+'» — це інший тип. Подумай: це річ, текст, розповідь чи звичай?',false);}
+
+/* --- 9. Первинне чи вторинне --- */
+T('prim',{g:2,ic:'🔍',t:'Первинне чи вторинне',s:'Хто це бачив на власні очі',html:`
+<div class="panel">
+  <div class="task" id="pm-task"></div>
+  <div class="row center"><button class="btn" onclick="pmPick(0)">первинне</button>
+    <button class="btn ghost" onclick="pmPick(1)">вторинне</button></div>
+  <div class="verdict" id="pm-v"></div>
+  <div class="row center" style="margin-top:8px"><button class="btn ghost small" onclick="pmNext()">Далі</button></div>
+  <div class="legend">Первинне джерело створив учасник або свідок події. Вторинне — це вже чиясь розповідь про джерела: підручник, стаття, фільм.</div>
+</div>`,init(){pmI=0;pmOk=0;pmDraw();}});
+const pmT=[{s:'Щоденник солдата, написаний під час війни',a:0,r:'Писав учасник просто тоді, коли все відбувалося.'},
+ {s:'Підручник історії для 5 класу',a:1,r:'Автори переказують те, що дізналися з джерел.'},
+ {s:'Фотографія вулиці, зроблена 1930 року',a:0,r:'Знімок зафіксував момент безпосередньо.'},
+ {s:'Стаття у Вікіпедії про Козацьку добу',a:1,r:'Це переказ, до того ж написаний користувачами — треба перевіряти посилання.'},
+ {s:'Указ гетьмана з його печаткою',a:0,r:'Документ самої доби.'},
+ {s:'Історичний фільм про Хмельницького',a:1,r:'Художня версія подій, ще й з вигадками для сюжету.'}];
+let pmI=0,pmOk=0;
+function pmDraw(){$('#pm-task').innerHTML=pmT[pmI].s+'<span class="chip">'+pmOk+' з 4</span>';hide('#pm-v');}
+function pmPick(i){const t=pmT[pmI];
+  if(i===t.a){pmOk++;if(pmOk>=4)mark('prim');pmDraw();say('#pm-v','Так. '+t.r,true);}
+  else say('#pm-v','Ні. '+t.r,false);}
+function pmNext(){pmI=(pmI+1)%pmT.length;pmDraw();}
+
+/* --- 10. Археологічні шари --- */
+T('dig',{g:2,ic:'⛏',t:'Розкоп',s:'Що глибше — те давніше',html:`
+<div class="panel">
+  <div class="task" id="dg-task">Копай шар за шаром. Що глибше — то давніші знахідки.</div>
+  <div class="dig" id="dg-box"></div>
+  <div class="hintline" id="dg-info"></div>
+  <div class="row center"><button class="btn ghost" onclick="dgInit()">Закопати назад</button></div>
+  <div class="verdict" id="dg-v"></div>
+  <div class="legend">Це називають законом послідовності шарів. Якщо в глибокому шарі трапляється сучасна річ — значить, ґрунт хтось перекопав.</div>
+</div>`,init(){dgInit();}});
+const DG=[{n:'Сучасний шар',c:'#7BC47F',y:'наші дні',f:'Асфальт, пластик, монети гривні.'},
+ {n:'XX століття',c:'#9BB37A',y:'1900-ті',f:'Скляні пляшки, радянські монети, гільзи.'},
+ {n:'Козацька доба',c:'#B49A6A',y:'XVII ст.',f:'Люльки, підкови, уламки шабель.'},
+ {n:'Княжа доба',c:'#A8845C',y:'XI ст.',f:'Скляні браслети, срібні гривні, хрестики-енколпіони.'},
+ {n:'Трипільська культура',c:'#8B6B4A',y:'бл. 4000 до н.е.',f:'Розписана кераміка, глиняні фігурки, залишки хат.'}];
+let dgOpen=0;
+function dgInit(){dgOpen=0;hide('#dg-v');$('#dg-info').textContent='Тисни на верхній шар, щоб копнути.';dgDraw();}
+function dgDraw(){const box=$('#dg-box');box.innerHTML='';
+  DG.forEach((l,i)=>{const d=document.createElement('div');
+    d.className='layer'+(i>dgOpen?' hid':'');d.style.background=l.c;
+    d.textContent=i<=dgOpen?l.n+' · '+l.y:'? ? ?';
+    (function(k){d.onclick=()=>dgTap(k);})(i);box.appendChild(d);});}
+function dgTap(i){if(i>dgOpen)return say('#dg-v','Спершу треба зняти верхні шари — копають зверху вниз.',false);
+  $('#dg-info').innerHTML='<b>'+DG[i].n+'</b> ('+DG[i].y+') — '+DG[i].f;
+  if(i===dgOpen&&dgOpen<DG.length-1){dgOpen++;dgDraw();hide('#dg-v');}
+  if(dgOpen>=DG.length-1){mark('dig');
+    say('#dg-v','Ти дійшов до трипільського шару — це майже 6 тисяч років. Кожен шар лежить точно над давнішим, тому археолог може датувати знахідку за глибиною.',true);}}
+
+/* --- 11. Топоніміка --- */
+T('topo',{g:2,ic:'🏷',t:'Звідки назва',s:'Топоніми як джерело',html:`
+<div class="panel">
+  <div class="task" id="tp-task"></div>
+  <div class="opts" id="tp-opts"></div>
+  <div class="verdict" id="tp-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="tpNext()">Далі</button></div>
+  <div class="legend">Назви річок — найдавніші зі слів, які ми знаємо: вони переживають народи й держави.</div>
+</div>`,init(){tpI=0;tpOk=0;tpDraw();}});
+const tpT=[{q:'Київська вулиця <b>Кожум’яки</b> названа так, бо…',
+  o:['тут жили ремісники, що вичиняли шкіри','тут був князівський палац','так звали річку'],a:0,
+  r:'Кожум’яка — той, хто м’яв шкури. Назва зберегла ремесло цілого кварталу.'},
+ {q:'Місто <b>Львів</b> дістало назву від…',o:['імені князя Лева','слова «лев» на гербі','назви річки'],a:0,
+  r:'Данило Галицький назвав місто на честь сина Лева.'},
+ {q:'Село <b>Гончарівка</b> найімовірніше вказує на…',o:['ремесло мешканців','прізвище власника','форму пагорба'],a:0,
+  r:'Такі назви масово походять від занять: Кузнеці, Бондарі, Гончарі.'},
+ {q:'Назва <b>Кілія</b> має давнє грецьке коріння й пов’язана з…',o:['портовим поселенням на Дунаї','ім’ям князя','назвою степу'],a:0,
+  r:'Місто на Дунаї згадується ще в часи античної та генуезької торгівлі.'},
+ {q:'Чому назви річок зазвичай найдавніші?',o:['Річки не зникають, і назву переймають нові мешканці','Їх легше вимовляти','Так вирішили картографи'],a:0,
+  r:'Дніпро, Дунай, Дністер мають назви ще доскіфських часів.'}];
+let tpI=0,tpOk=0;
+function tpDraw(){const t=tpT[tpI];$('#tp-task').innerHTML=t.q+'<span class="chip">'+tpOk+' з 4</span>';
+  const box=$('#tp-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){tpOk++;if(tpOk>=4)mark('topo');say('#tp-v','Так. '+t.r,true);}
+      else say('#tp-v','Ні. '+t.r,false);};box.appendChild(b);});
+  hide('#tp-v');}
+function tpNext(){tpI=(tpI+1)%tpT.length;tpDraw();}
+
+/* --- 12. Родовід --- */
+T('family',{g:3,ic:'🌳',t:'Родовід',s:'Ким тобі доводиться…',html:`
+<div class="panel">
+  <div class="task">Тисни на людину в дереві — і подивись, ким вона тобі доводиться.</div>
+  <svg viewBox="0 0 320 210" height="205" id="fm-svg"></svg>
+  <div class="hintline" id="fm-info">Обери когось у дереві.</div>
+  <div class="row center"><button class="btn" onclick="fmAsk()">Питання</button></div>
+  <div class="verdict" id="fm-v"></div>
+  <div class="legend">Покоління рахують угору: батьки, дід і баба, прадід і прабабуся. Кожне покоління — це приблизно 25–30 років.</div>
+</div>`,init(){fmSeen={};fmDraw();}});
+const FM=[{n:'прадід',x:80,y:24,r:'Батько твого діда. Народився приблизно за 75 років до тебе — це вже інша епоха.'},
+ {n:'прабабуся',x:150,y:24,r:'Мати твого діда або баби.'},
+ {n:'дідусь',x:70,y:82,r:'Батько твого тата або мами.'},
+ {n:'бабуся',x:140,y:82,r:'Мати твого тата або мами.'},
+ {n:'тато',x:104,y:140,r:'Твій батько — перше покоління вгору.'},
+ {n:'мама',x:196,y:140,r:'Твоя мати.'},
+ {n:'ти',x:150,y:190,r:'Це ти. Далі рід продовжується вниз.'},
+ {n:'дядько',x:246,y:82,r:'Брат твого тата або мами. Його діти — твої двоюрідні брати й сестри.'},
+ {n:'двоюрідний брат',x:262,y:140,r:'Син твого дядька або тітки. Спільні в вас — дід і баба.'}];
+let fmSeen={};
+function fmDraw(){let s='';
+  const link=(a,b)=>{s+='<line x1="'+FM[a].x+'" y1="'+(FM[a].y+13)+'" x2="'+FM[b].x+'" y2="'+(FM[b].y-13)+'" stroke="#C9C6BB" stroke-width="2"/>';};
+  link(0,2);link(1,2);link(0,7);link(2,4);link(3,4);link(4,6);link(5,6);link(7,8);
+  FM.forEach((p,i)=>{s+='<circle cx="'+p.x+'" cy="'+p.y+'" r="13" fill="'+(p.n==='ти'?'#8B5E34':fmSeen[i]?'#F2E9DE':'#fff')+'" stroke="#8B5E34" stroke-width="2" style="cursor:pointer" onclick="fmPick('+i+')"/>'+
+    '<text x="'+p.x+'" y="'+(p.y+29)+'" text-anchor="middle" font-size="9" fill="#5B6779">'+p.n+'</text>';});
+  $('#fm-svg').innerHTML=s;}
+function fmPick(i){fmSeen[i]=1;$('#fm-info').innerHTML='<b>'+FM[i].n+'</b> — '+FM[i].r;fmDraw();
+  if(Object.keys(fmSeen).length>=5)mark('family');}
+function fmAsk(){say('#fm-v','Скільки в тебе прапрадідів і прапрабабусь разом? Відповідь: <b>16</b> — на кожне покоління вгору кількість предків подвоюється: 2 батьки, 4 діди й баби, 8 прадідів, 16 прапрадідів.',true);mark('family');}
+
+/* --- 13. Гілки влади --- */
+T('power',{g:3,ic:'⚖️',t:'Три гілки влади',s:'Хто що робить у державі',html:`
+<div class="panel">
+  <div class="task" id="pw-task">Обери повноваження, потім гілку влади, якій воно належить.</div>
+  <div class="cards" id="pw-pool"></div>
+  <div class="row center" id="pw-btns"></div>
+  <div class="verdict" id="pw-v"></div>
+  <div class="legend">Влада поділена навмисне: щоб той, хто ухвалює закони, не судив за ними сам. Це називають системою стримувань і противаг.</div>
+</div>`,init(){pwInit();}});
+const PW=[{n:'ухвалює закони',k:0},{n:'обирається народом на 5 років',k:0},
+ {n:'керує міністерствами',k:1},{n:'виконує закони й стежить за господарством',k:1},
+ {n:'розглядає спори між людьми',k:2},{n:'вирішує, чи винна людина',k:2},
+ {n:'ухвалює державний бюджет',k:0},{n:'призначає стипендії та виплати',k:1},
+ {n:'скасовує незаконне рішення чиновника',k:2}];
+const PWN=['Верховна Рада (законодавча)','Уряд (виконавча)','Суди (судова)'];
+let pwSel=-1,pwOk=0,pwLeft=[];
+function pwInit(){pwSel=-1;pwOk=0;pwLeft=PW.map((_,i)=>i);hide('#pw-v');
+  $('#pw-btns').innerHTML=PWN.map((n,i)=>'<button class="btn ghost small" onclick="pwPut('+i+')">'+n+'</button>').join('');
+  pwDraw();}
+function pwDraw(){const box=$('#pw-pool');box.innerHTML='';
+  pwLeft.forEach(i=>{const b=document.createElement('button');b.className='card2'+(pwSel===i?' sel':'');
+    b.textContent=PW[i].n;(function(k){b.onclick=()=>{pwSel=k;pwDraw();};})(i);box.appendChild(b);});
+  $('#pw-task').innerHTML='Обери повноваження, потім гілку влади.<span class="chip">'+pwOk+' з '+PW.length+'</span>';}
+function pwPut(k){if(pwSel<0)return say('#pw-v','Спершу обери повноваження.',false);
+  if(PW[pwSel].k===k){pwOk++;pwLeft=pwLeft.filter(i=>i!==pwSel);pwSel=-1;hide('#pw-v');pwDraw();
+    if(!pwLeft.length){mark('power');say('#pw-v','Розподілено правильно. Саме такий поділ записано в Конституції України 1996 року.',true);}}
+  else say('#pw-v','Ні, це повноваження іншої гілки. Хто пише правила, хто їх виконує, а хто судить?',false);}
+
+/* --- 14. Дати незалежності --- */
+T('dates',{g:3,ic:'🇺🇦',t:'Дати, які варто знати',s:'Стрічка новітньої історії',html:`
+<div class="panel">
+  <div class="task" id="dt-task"></div>
+  <div class="opts" id="dt-opts"></div>
+  <div class="verdict" id="dt-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="dtNext()">Далі</button></div>
+  <div class="legend">Дати самі по собі мало варті. Важливо, що саме змінилося після кожної з них.</div>
+</div>`,init(){dtI=0;dtOk=0;dtDraw();}});
+const dtT=[{q:'Коли Верховна Рада проголосила незалежність України?',o:['24 серпня 1991','1 грудня 1991','28 червня 1996'],a:0,
+  r:'24 серпня 1991 — Акт проголошення. 1 грудня його підтвердив референдум: «за» — понад 90%.'},
+ {q:'Коли ухвалили Конституцію України?',o:['28 червня 1996','24 серпня 1991','22 січня 1919'],a:0,
+  r:'Тому 28 червня — День Конституції.'},
+ {q:'Що сталося 22 січня 1919 року?',o:['Злука УНР і ЗУНР','Проголошення незалежності','Ухвалення Конституції'],a:0,
+  r:'Акт Злуки об’єднав східні й західні українські землі. Тепер це День Соборності.'},
+ {q:'Коли стався Голодомор?',o:['1932–1933','1941–1945','1986'],a:0,
+  r:'Штучний голод, визнаний геноцидом українського народу.'},
+ {q:'Коли Україна стала кандидатом у члени Євросоюзу?',o:['2022','2014','1991'],a:0,
+  r:'Статус кандидата надано в червні 2022 року.'}];
+let dtI=0,dtOk=0;
+function dtDraw(){const t=dtT[dtI];$('#dt-task').innerHTML=t.q+'<span class="chip">'+dtOk+' з 4</span>';
+  const box=$('#dt-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){dtOk++;if(dtOk>=4)mark('dates');say('#dt-v','Так. '+t.r,true);}
+      else say('#dt-v','Ні. '+t.r,false);};box.appendChild(b);});
+  hide('#dt-v');}
+function dtNext(){dtI=(dtI+1)%dtT.length;dtDraw();}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
