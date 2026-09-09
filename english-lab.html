@@ -282,7 +282,7 @@ function ckPhrase(h,m){
   if(m===30)return 'half past '+NUM[h];
   if(m<30)return MIN[m]+' past '+NUM[h];
   return MIN[60-m]+' to '+NUM[h===12?1:h+1];}
-function ckDraw(){const h=+$('#ck-h').value,m=+$('#ck-m').value;
+function ckDraw(){if(!document.querySelector('#ck-h'))return;const h=+$('#ck-h').value,m=+$('#ck-m').value;
   const ha=(h%12+m/60)/12*2*Math.PI-Math.PI/2,ma=m/60*2*Math.PI-Math.PI/2;
   let s='<circle cx="100" cy="100" r="88" fill="#fff" stroke="#C9C6BB" stroke-width="4"/>';
   for(let i=1;i<=12;i++){const a=i/12*2*Math.PI-Math.PI/2;
@@ -318,7 +318,7 @@ const PLU=[['box','boxes','після -x додаємо -es'],['city','cities','
  ['child','children','виняток'],['foot','feet','виняток'],['mouse','mice','виняток'],
  ['sheep','sheep','не змінюється'],['story','stories','y → ies'],['bus','buses','після -s додаємо -es']];
 let plI=0,plOk=0;
-function plDraw(){const t=PLU[plI];$('#pl-task').innerHTML='One <b>'+t[0]+'</b> — many …?<span class="chip">'+plOk+' з 6</span>';
+function plDraw(){if(!document.querySelector('#pl-in'))return;const t=PLU[plI];$('#pl-task').innerHTML='One <b>'+t[0]+'</b> — many …?<span class="chip">'+plOk+' з 6</span>';
   $('#pl-word').textContent=t[0];$('#pl-in').value='';$('#pl-state').textContent='';hide('#pl-v');}
 function plCheck(){const t=PLU[plI],v=$('#pl-in').value.trim().toLowerCase();
   if(v===t[1]){plOk++;if(plOk>=6)mark('plural');speak(t[1]);
@@ -339,7 +339,7 @@ T('prep',{g:0,ic:'📦',t:'Where is the ball?',s:'in, on, under, behind, next to
 </div>`,init(){ppI=0;ppOk=0;ppDraw();}});
 const PP=['in','on','under','behind','next to','in front of'];
 let ppI=0,ppOk=0;
-function ppDraw(){const p=PP[ppI];
+function ppDraw(){if(!document.querySelector('#pp-svg'))return;const p=PP[ppI];
   const box={x:110,y:70,w:80,h:60};
   const pos={'in':[150,100],'on':[150,56],'under':[150,146],'behind':[150,60],'next to':[228,116],'in front of':[150,150]};
   const c=pos[p];
@@ -378,7 +378,7 @@ const ORD=[{s:['I','play','football','in the park','every Sunday'],u:'Я щон�
  {s:['My brother','does','his homework','after school'],u:'Мій брат робить домашку після школи.'}];
 let orI=0,orOk=0,orCur=[],orLeft=[];
 function orLoad(){const t=ORD[orI];orCur=[];orLeft=t.s.map((_,i)=>i).sort(()=>Math.random()-.5);hide('#or-v');orDraw();}
-function orDraw(){const t=ORD[orI];
+function orDraw(){if(!document.querySelector('#or-build'))return;const t=ORD[orI];
   $('#or-task').innerHTML='Склади англійське речення: «'+t.u+'»<span class="chip">'+orOk+' з 3</span>';
   const bu=$('#or-build');bu.innerHTML='';
   orCur.forEach((idx,pos)=>{const d=document.createElement('button');d.className='tile';d.textContent=t.s[idx];
@@ -411,7 +411,7 @@ const TB=[{s:'I … from Ukraine.',o:['am','is','are'],a:0},
  {s:'Mike and I … in the same class.',o:['am','is','are'],a:2},
  {s:'He … not at home.',o:['am','is','are'],a:1}];
 let tbI=0,tbOk=0;
-function tbDraw(){const t=TB[tbI];$('#tb-task').innerHTML=t.s+'<span class="chip">'+tbOk+' з 5</span>';
+function tbDraw(){if(!document.querySelector('#tb-btns'))return;const t=TB[tbI];$('#tb-task').innerHTML=t.s+'<span class="chip">'+tbOk+' з 5</span>';
   $('#tb-btns').innerHTML=t.o.map((o,i)=>'<button class="btn ghost" onclick="tbPick('+i+')">'+o+'</button>').join('');
   $('#tb-state').textContent='';hide('#tb-v');}
 function tbPick(i){const t=TB[tbI];
@@ -437,7 +437,7 @@ const HV=[{s:'She … a new bike.',o:['have got','has got'],a:1},
  {s:'We … a big garden.',o:['have got','has got'],a:0},
  {s:'Tom … got any money.',o:["haven't","hasn't"],a:1}];
 let hvI=0,hvOk=0;
-function hvDraw(){const t=HV[hvI];$('#hv-task').innerHTML=t.s+'<span class="chip">'+hvOk+' з 4</span>';
+function hvDraw(){if(!document.querySelector('#hv-btns'))return;const t=HV[hvI];$('#hv-task').innerHTML=t.s+'<span class="chip">'+hvOk+' з 4</span>';
   $('#hv-btns').innerHTML=t.o.map((o,i)=>'<button class="btn ghost" onclick="hvPick('+i+')">'+o+'</button>').join('');
   hide('#hv-v');}
 function hvPick(i){const t=HV[hvI];
@@ -466,7 +466,7 @@ const PS=[{s:'My brother … (study) English every day.',a:['studies'],r:'y пі
  {s:'… he play football? (питання)',a:['does'],r:'he → Does he play…?'},
  {s:'My parents … (work) in Kiliia.',a:['work'],r:'множина → без -s'}];
 let psI=0,psOk=0;
-function psDraw(){const t=PS[psI];$('#ps-task').innerHTML=t.s+'<span class="chip">'+psOk+' з 5</span>';
+function psDraw(){if(!document.querySelector('#ps-in'))return;const t=PS[psI];$('#ps-task').innerHTML=t.s+'<span class="chip">'+psOk+' з 5</span>';
   $('#ps-in').value='';$('#ps-state').textContent='';hide('#ps-v');}
 function psCheck(){const t=PS[psI],v=$('#ps-in').value.trim().toLowerCase();
   if(t.a.indexOf(v)>=0){psOk++;if(psOk>=5)mark('psimple');
@@ -491,7 +491,7 @@ const CO=[{s:'Look! The cat … the mouse.',o:['chases','is chasing'],a:1,r:'Loo
  {s:'She … her job. (love)',o:['loves','is loving'],a:0,r:'Дієслова почуттів у Continuous не вживають.'},
  {s:'Listen! Someone … the piano.',o:['plays','is playing'],a:1,r:'Listen! — зараз.'}];
 let coI=0,coOk=0;
-function coDraw(){const t=CO[coI];$('#co-task').innerHTML=t.s+'<span class="chip">'+coOk+' з 4</span>';
+function coDraw(){if(!document.querySelector('#co-btns'))return;const t=CO[coI];$('#co-task').innerHTML=t.s+'<span class="chip">'+coOk+' з 4</span>';
   $('#co-btns').innerHTML=t.o.map((o,i)=>'<button class="btn ghost" onclick="coPick('+i+')">'+o+'</button>').join('');
   $('#co-state').textContent='';hide('#co-v');}
 function coPick(i){const t=CO[coI];
@@ -514,7 +514,7 @@ T('can',{g:2,ic:'💪',t:'can / can’t',s:'Що ти вмієш',html:`
 const CN=[['swim','плавати'],['ride a bike','їздити на велосипеді'],['play the guitar','грати на гітарі'],
  ['cook','готувати'],['draw','малювати'],['skate','кататись на ковзанах'],['speak English','говорити англійською'],['sing','співати']];
 let cnSel={};
-function cnDraw(){const box=$('#cn-list');box.innerHTML='';
+function cnDraw(){if(!document.querySelector('#cn-list'))return;const box=$('#cn-list');box.innerHTML='';
   CN.forEach((c,i)=>{const b=document.createElement('button');b.className=cnSel[i]?'on':'';
     b.textContent=c[0];(function(k){b.onclick=()=>{cnSel[k]=!cnSel[k];cnDraw();};})(i);box.appendChild(b);});
   const can=CN.filter((_,i)=>cnSel[i]).map(c=>c[0]),cant=CN.filter((_,i)=>!cnSel[i]).map(c=>c[0]);
@@ -543,7 +543,7 @@ const PWT=[{s:'I … at home yesterday.',o:['was','were'],a:0},
  {s:'There … a lot of people there.',o:['was','were'],a:1},
  {s:'The film … really good.',o:['was','were'],a:0}];
 let pwI=0,pwOk=0;
-function pwDraw(){const t=PWT[pwI];$('#pw-task').innerHTML=t.s+'<span class="chip">'+pwOk+' з 4</span>';
+function pwDraw(){if(!document.querySelector('#pw-btns'))return;const t=PWT[pwI];$('#pw-task').innerHTML=t.s+'<span class="chip">'+pwOk+' з 4</span>';
   $('#pw-btns').innerHTML=t.o.map((o,i)=>'<button class="btn ghost" onclick="pwPick('+i+')">'+o+'</button>').join('');
   hide('#pw-v');}
 function pwPick(i){const t=PWT[pwI];
@@ -567,7 +567,7 @@ const WHT=[{s:'… do you live? — In Kiliia.',a:2},{s:'… is your birthday? �
  {s:'… is your best friend? — Mykola.',a:0},{s:'… do you play tennis? — Twice a week.',a:5},
  {s:'… are you late? — Because the bus was late.',a:4},{s:'… do you want for lunch? — A sandwich.',a:1}];
 let whI=0,whOk=0;
-function whDraw(){const t=WHT[whI];$('#wh-task').innerHTML=t.s+'<span class="chip">'+whOk+' з 4</span>';
+function whDraw(){if(!document.querySelector('#wh-btns'))return;const t=WHT[whI];$('#wh-task').innerHTML=t.s+'<span class="chip">'+whOk+' з 4</span>';
   $('#wh-btns').innerHTML=WH.map((o,i)=>'<button class="btn ghost small" onclick="whPick('+i+')">'+o+'</button>').join('');
   hide('#wh-v');}
 function whPick(i){const t=WHT[whI];
@@ -593,7 +593,7 @@ const DL=[{n:'Знайомство',s:['Hello! What’s your name?','My name is 
  {n:'У магазині',s:['Excuse me, how much is this T-shirt?','It’s 250 hryvnias.','Have you got it in blue?','Yes, here you are.','Great, I’ll take it.']}];
 let dlI=0,dlOk=0,dlOrder=[],dlSel=null;
 function dlLoad(){const t=DL[dlI];dlOrder=t.s.map((_,i)=>i).sort(()=>Math.random()-.5);dlSel=null;hide('#dl-v');dlDraw();}
-function dlDraw(){const t=DL[dlI];
+function dlDraw(){if(!document.querySelector('#dl-list'))return;const t=DL[dlI];
   $('#dl-task').innerHTML='<b>'+t.n+'.</b> Постав репліки по порядку — тисни на дві, щоб поміняти місцями.<span class="chip">'+dlOk+' з 3</span>';
   const box=$('#dl-list');box.innerHTML='';
   dlOrder.forEach((idx,pos)=>{const b=document.createElement('button');
@@ -624,7 +624,7 @@ const CU=[{q:'Скільки країн входить до складу the UK?
  {q:'Прапор Великої Британії називають',o:['the Union Jack','the Stars and Stripes','the Maple Leaf'],a:0,
   r:'Stars and Stripes — прапор США, Maple Leaf — Канади.'}];
 let cuI=0,cuOk=0;
-function cuDraw(){const t=CU[cuI];$('#cu-task').innerHTML=t.q+'<span class="chip">'+cuOk+' з 4</span>';
+function cuDraw(){if(!document.querySelector('#cu-opts'))return;const t=CU[cuI];$('#cu-task').innerHTML=t.q+'<span class="chip">'+cuOk+' з 4</span>';
   const box=$('#cu-opts');box.innerHTML='';
   t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
     b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
@@ -652,7 +652,7 @@ const VC=[['school bag','шкільна сумка'],['timetable','розкла�
  ['rubber','гумка'],['ruler','лінійка'],['whiteboard','дошка'],['pencil case','пенал'],
  ['library','бібліотека'],['canteen','їдальня']];
 let vcI=0,vcKnown=0;
-function vcDraw(){$('#vc-word').textContent=VC[vcI][0];$('#vc-tr').textContent='';
+function vcDraw(){if(!document.querySelector('#vc-word'))return;$('#vc-word').textContent=VC[vcI][0];$('#vc-tr').textContent='';
   $('#vc-task').innerHTML='Слово '+(vcI+1)+' з '+VC.length+'<span class="chip">знаю: '+vcKnown+'</span>';
   $('#vc-state').textContent='Спершу послухай, потім вимов уголос, і аж тоді дивись переклад.';hide('#vc-v');}
 function vcShow(){$('#vc-tr').textContent=VC[vcI][1];}
