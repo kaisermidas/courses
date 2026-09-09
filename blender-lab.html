@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Blender руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#EA7600; --accent-soft:#FFEEDC; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  .vp{background:#3B3B3B;border-radius:12px;position:relative;overflow:hidden}
+  .vp canvas{display:block;width:100%;touch-action:none}
+  .hud{position:absolute;left:10px;top:8px;color:#C8C8C8;font-size:12px;line-height:1.5;pointer-events:none}
+  .keyrow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:10px 0}
+  .kbd{border:1px solid var(--line);border-bottom-width:3px;border-radius:8px;padding:7px 12px;
+    background:#fff;font-size:15px;font-weight:600;min-width:40px;text-align:center}
+  .kbd.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .stack{display:grid;gap:6px;margin:10px 0}
+  .mod{border:2px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff;text-align:left;font-size:15px;display:flex;gap:8px;align-items:center}
+  .mod.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .mod i{font-style:normal;color:var(--ink-2);font-size:13px}
+  .sphere{width:150px;height:150px;border-radius:50%;margin:10px auto;position:relative}
+  .keys{display:flex;justify-content:center;margin:14px 0;position:relative;height:130px}
+  .wkey{width:13%;max-width:44px;height:130px;background:#fff;border:1px solid #C9C6BB;border-radius:0 0 7px 7px;
+    display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:12px;color:var(--ink-2)}
+  .wkey:active,.wkey.on{background:var(--accent-soft)}
+  .seq{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:10px 0}
+  .seq button{aspect-ratio:1;border-radius:8px;background:#F0EAF7;border:1px solid var(--line)}
+  .seq button.on{background:var(--accent);border-color:var(--accent)}
+  .seq button.now{outline:3px solid var(--volt);outline-offset:-3px}
+  .seqrow{display:grid;grid-template-columns:76px 1fr;gap:8px;align-items:center;margin-bottom:5px}
+  .seqrow span{font-size:13px;color:var(--ink-2)}
+  .swatch{width:100%;height:78px;border-radius:12px;border:2px solid var(--line)}
+  .mix{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
+  .canvasbox{display:grid;place-items:center;margin:10px 0}
+  .sayw{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:12px 0}
+  .sayw button{border:1px solid var(--line);border-radius:11px;padding:9px 13px;background:#fff;font-size:16px}
+  .sayw button.on{border-color:var(--accent);background:var(--accent-soft)}
+  .build{display:flex;flex-wrap:wrap;gap:6px;min-height:52px;border:2px dashed var(--line);
+    border-radius:12px;padding:9px;margin:10px 0;align-items:flex-start}
+  .tile{border:1px solid var(--accent);background:var(--accent-soft);border-radius:9px;padding:7px 11px;font-size:15px}
+  .bank{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+  .bank button{border:1px solid var(--line);border-radius:9px;padding:7px 11px;background:#fff;font-size:15px}
+  .clockf{margin:0 auto;display:block}
+  .plate{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0}
+  .zone{border:2px dashed var(--line);border-radius:12px;min-height:74px;padding:8px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+  .zone b{width:100%;font-size:13px;color:var(--ink-2);font-weight:600}
+  .food{border:1px solid var(--line);border-radius:9px;padding:5px 9px;background:#fff;font-size:14px}
+  .food.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .sugar{display:flex;flex-wrap:wrap;gap:3px;margin:8px 0}
+  .cube{width:17px;height:17px;background:#fff;border:2px solid #C9C6BB;border-radius:3px}
+  .day{display:flex;height:34px;border-radius:8px;overflow:hidden;margin:10px 0;border:1px solid var(--line)}
+  .day div{display:grid;place-items:center;font-size:11px;color:#fff;font-weight:600}
+  .scene{position:relative;border-radius:12px;overflow:hidden;background:#F2F6F4}
+  .hot{position:absolute;border-radius:50%;border:2px dashed transparent;cursor:pointer}
+  .hot.found{border-color:var(--ok);background:rgba(31,157,99,.18)}
+  .steps{display:grid;gap:8px;margin:10px 0}
+  .step{border:2px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;text-align:left;font-size:15px}
+  .step.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .step .num{display:inline-block;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:12px;text-align:center;line-height:22px;margin-right:8px}
+  .breathe{width:150px;height:150px;border-radius:50%;background:var(--accent-soft);border:3px solid var(--accent);
+    margin:14px auto;display:grid;place-items:center;font-size:19px;font-weight:600;transition:transform 1s linear}
+  .tl{position:relative;height:60px;margin:16px 0;background:#F4F2EC;border-radius:10px}
+  .tl .ax{position:absolute;left:2%;right:2%;top:28px;height:3px;background:#C9C6BB}
+  .tl .ev{position:absolute;top:14px;width:30px;height:30px;border-radius:50%;background:var(--accent);
+    color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;transform:translateX(-15px)}
+  .cards{display:grid;gap:8px;margin:10px 0}
+  .card2{border:2px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;text-align:left;font-size:15px}
+  .card2.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .card2.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .card2.no{border-color:var(--bad);background:var(--bad-soft)}
+  .slots{display:grid;gap:8px;margin:10px 0}
+  .slot{border:2px dashed var(--line);border-radius:12px;padding:9px 12px;min-height:46px;font-size:14px;color:var(--ink-2)}
+  .slot b{color:var(--ink)}
+  .dig{display:flex;flex-direction:column-reverse;gap:3px;margin:10px 0}
+  .layer{border-radius:8px;padding:12px;color:#fff;font-size:14px;text-align:center;cursor:pointer;position:relative}
+  .layer.hid{background:#B7A98F!important;color:#8B7B5E}
+  .word{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+  .word button{min-width:34px;height:46px;border-radius:9px;background:#F4F2EC;font-size:20px;font-weight:600}
+  .word button.pick{background:var(--accent);color:#fff}
+  .word button.gap{min-width:16px;background:transparent;color:var(--ink-2);font-size:22px}
+  .word button.gap.on{background:var(--volt);color:#fff;border-radius:6px}
+  .trans{font-size:24px;text-align:center;letter-spacing:.06em;margin:10px 0;font-weight:600}
+  .sent{font-size:18px;line-height:2.4;text-align:center;margin:12px 0}
+  .sent span{padding:2px 1px}
+  .sent .g{display:inline-block;width:16px;color:#C4C0B4;cursor:pointer;font-weight:700}
+  .sent .g.on{color:var(--bad);font-size:22px}
+  .sent .w{cursor:pointer;border-radius:5px;padding:2px 4px}
+  .sent .w.subj{background:#DCE9FF;box-shadow:inset 0 -3px 0 #2F6FE4}
+  .sent .w.pred{background:#E3F6EC;box-shadow:inset 0 -3px 0 #1F9D63}
+  .morph{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .morph div{border-radius:8px;padding:8px 10px;font-size:19px;font-weight:600;text-align:center}
+  .morph small{display:block;font-size:11px;font-weight:400;color:var(--ink-2);margin-top:2px}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .pair button{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;font-size:14px;text-align:left}
+  .pair button.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pair button.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .bits{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+  .bit{width:44px;text-align:center}
+  .bit button{width:44px;height:52px;border-radius:10px;background:#EFEDE6;font-size:22px;font-weight:700;color:#B9B5A8}
+  .bit button.on{background:var(--accent);color:#fff}
+  .bit span{display:block;font-size:11px;color:var(--ink-2);margin-top:3px}
+  .pix{display:grid;width:min(100%,270px);margin:0 auto;gap:1px;background:#D8D3C4;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .pix button{aspect-ratio:1;border:0;background:#fff}
+  .pix button.on{background:#1E2A3A}
+  .rgrid{display:grid;width:min(100%,300px);margin:0 auto;gap:2px}
+  .rgrid div{aspect-ratio:1;border-radius:4px;background:#F4F2EC;display:grid;place-items:center;font-size:15px}
+  .rgrid div.rob{background:var(--accent-soft)}
+  .rgrid div.goal{background:#FFF3D4}
+  .rgrid div.wall{background:#8B8578}
+  .prog{display:flex;flex-wrap:wrap;gap:6px;min-height:48px;border:2px dashed var(--line);border-radius:12px;padding:8px;margin:10px 0}
+  .cmd{background:var(--accent-soft);border:1px solid var(--accent);border-radius:9px;padding:6px 10px;font-size:14px;font-weight:600}
+  .cmd.now{background:var(--volt-soft);border-color:var(--volt)}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:130px;justify-content:center}
+  .bars div{flex:1;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;position:relative;transition:height .2s}
+  .bars div.cmp{background:var(--volt)}
+  .bars div.done{background:var(--ok)}
+  .tree{font-size:15px;line-height:1.8}
+  .tree button{text-align:left}
+  .tree .fold{color:var(--accent);font-weight:600}
+  .mail{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;font-size:15px;line-height:1.7}
+  .mail mark{background:#FFF3D4;border-radius:4px;padding:1px 3px;cursor:pointer}
+  .mail mark.hit{background:var(--ok-soft);outline:2px solid var(--ok)}
+  .planet{cursor:pointer}
+  .molec{position:relative;height:150px;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#F7FAFF}
+  .mol{position:absolute;width:13px;height:13px;border-radius:50%;background:#2F6FE4}
+  .tank{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;position:relative;overflow:hidden;background:#EAF4FF}
+  .tank .surf{position:absolute;left:0;right:0;top:38%;height:2px;background:#5AA9EE}
+  .item{position:absolute;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;transition:top .5s ease}
+  .kbox{border:2px dashed var(--line);border-radius:12px;min-height:64px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .kcard{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;font-size:14px}
+  .kcard.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pyr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+  .lvl{border-radius:10px;padding:9px 14px;font-weight:600;color:#fff;text-align:center;transition:opacity .3s}
+  .lvl.dead{opacity:.25;text-decoration:line-through}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Blender руками</h1>
+    <p>Чотирнадцять приладів. Куб слухається клавіш, матеріал змінюється на очах, а модифікатори працюють по-справжньому.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='blender-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['В’юпорт і навігація','Моделювання','Матеріали й світло','Камера, рендер, робота'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
+
+
+
+
+
+/* --- спільний 3D-рушій --- */
+const CUBE={v:[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]],
+  f:[[0,1,2,3],[4,5,6,7],[0,1,5,4],[2,3,7,6],[1,2,6,5],[0,3,7,4]]};
+function rotP(p,rx,ry){let [x,y,z]=p;
+  let c=Math.cos(ry),s=Math.sin(ry);[x,z]=[x*c+z*s,-x*s+z*c];
+  c=Math.cos(rx);s=Math.sin(rx);[y,z]=[y*c-z*s,y*s+z*c];
+  return [x,y,z];}
+function proj(p,cam,w,h,ortho){const d=cam.dist||6,f=cam.f||2.2;
+  const z=p[2]+d;const k=ortho?f*0.55:f*d/Math.max(0.6,z);
+  return [w/2+p[0]*k*w/6,h/2-p[1]*k*w/6];}
+function drawMesh(ctx,obj,cam,opt){
+  const w=ctx.canvas.width,h=ctx.canvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#3B3B3B';ctx.fillRect(0,0,w,h);
+  // сітка підлоги
+  ctx.strokeStyle='#4E4E4E';ctx.lineWidth=1;
+  for(let i=-3;i<=3;i++){
+    const a=proj(rotP([i,-1.001,-3],cam.rx,cam.ry),cam,w,h,opt.ortho);
+    const b=proj(rotP([i,-1.001,3],cam.rx,cam.ry),cam,w,h,opt.ortho);
+    const c=proj(rotP([-3,-1.001,i],cam.rx,cam.ry),cam,w,h,opt.ortho);
+    const d=proj(rotP([3,-1.001,i],cam.rx,cam.ry),cam,w,h,opt.ortho);
+    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(c[0],c[1]);ctx.lineTo(d[0],d[1]);ctx.stroke();}
+  // осі
+  if(opt.axes){const O=proj(rotP([0,-1,0],cam.rx,cam.ry),cam,w,h,opt.ortho);
+    [[[3,-1,0],'#E0413E','X'],[[0,-1,3],'#4CA64C','Y'],[[0,2,0],'#3B7FD6','Z']].forEach(a=>{
+      const P=proj(rotP(a[0],cam.rx,cam.ry),cam,w,h,opt.ortho);
+      ctx.strokeStyle=a[1];ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(O[0],O[1]);ctx.lineTo(P[0],P[1]);ctx.stroke();
+      ctx.fillStyle=a[1];ctx.font='12px sans-serif';ctx.fillText(a[2],P[0]+3,P[1]);});}
+  // об'єкт
+  const S=obj.scale||[1,1,1],T=obj.pos||[0,0,0],R=obj.rot||0;
+  const pts=CUBE.v.map(p=>{
+    let x=p[0]*S[0],y=p[1]*S[1],z=p[2]*S[2];
+    const c=Math.cos(R),s=Math.sin(R);[x,y]=[x*c-y*s,x*s+y*c];
+    return rotP([x+T[0],y+T[1],z+T[2]],cam.rx,cam.ry);});
+  const faces=CUBE.f.map(f=>({f:f,z:f.reduce((a,i)=>a+pts[i][2],0)/4}));
+  faces.sort((a,b)=>b.z-a.z);
+  faces.forEach(o=>{const pr=o.f.map(i=>proj(pts[i],cam,w,h,opt.ortho));
+    const light=0.45+0.55*Math.max(0,Math.min(1,(o.z+2.4)/4));
+    ctx.beginPath();ctx.moveTo(pr[0][0],pr[0][1]);pr.slice(1).forEach(p=>ctx.lineTo(p[0],p[1]));ctx.closePath();
+    const base=opt.sel?[234,118,0]:[190,190,190];
+    ctx.fillStyle='rgb('+base.map(c=>Math.round(c*light)).join(',')+')';ctx.fill();
+    if(opt.wire){ctx.strokeStyle=opt.sel?'#FFB86B':'#2A2A2A';ctx.lineWidth=1.5;ctx.stroke();}
+    if(opt.verts)pr.forEach(p=>{ctx.fillStyle='#111';ctx.fillRect(p[0]-2,p[1]-2,4,4);});});}
+function orbit(canvas,cam,redraw){
+  if(canvas.dataset.b)return;canvas.dataset.b=1;let on=false,lx=0,ly=0;
+  canvas.addEventListener('pointerdown',e=>{on=true;lx=e.clientX;ly=e.clientY;canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{if(!on)return;e.preventDefault();
+    cam.ry+=(e.clientX-lx)*0.01;cam.rx+=(e.clientY-ly)*0.01;
+    cam.rx=Math.max(-1.4,Math.min(1.4,cam.rx));lx=e.clientX;ly=e.clientY;redraw();});
+  canvas.addEventListener('pointerup',()=>on=false);}
+
+/* --- 1. G, R, S --- */
+T('grs',{g:0,ic:'🎯',t:'G, R, S і осі',s:'Три клавіші, якими роблять усе',html:`
+<div class="panel">
+  <div class="task" id="gr-task"></div>
+  <div class="vp"><canvas id="gr-c" width="600" height="380"></canvas><div class="hud" id="gr-hud"></div></div>
+  <div class="keyrow" id="gr-keys"></div>
+  <div class="keyrow" id="gr-ax"></div>
+  <div class="row center"><button class="btn" onclick="grCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="grReset()">Скинути</button>
+    <button class="btn ghost" onclick="grNext()">Інше завдання</button></div>
+  <div class="verdict" id="gr-v"></div>
+  <div class="legend">Схема завжди однакова: клавіша дії, потім вісь, потім число. G Z 3 — посунути на три метри вгору. Крути сцену пальцем, щоб роздивитись.</div>
+</div>`,init(){grInit();}});
+const grT=[{n:'Посунь куб на 2 по осі X',check:o=>Math.abs(o.pos[0]-2)<0.01&&Math.abs(o.pos[1])<.01,keys:'G X 2'},
+ {n:'Підніми куб на 2 по осі Z (угору)',check:o=>Math.abs(o.pos[1]-2)<0.01,keys:'G Z 2'},
+ {n:'Зменш куб удвічі по всіх осях',check:o=>Math.abs(o.scale[0]-0.5)<0.01&&Math.abs(o.scale[1]-0.5)<0.01,keys:'S 0.5'},
+ {n:'Розтягни куб удвічі тільки по Z',check:o=>Math.abs(o.scale[1]-2)<0.01&&Math.abs(o.scale[0]-1)<0.01,keys:'S Z 2'},
+ {n:'Оберни куб на 45°',check:o=>Math.abs(o.rot-Math.PI/4)<0.02,keys:'R 45'}];
+let grI=0,grOk=0,grObj={pos:[0,0,0],scale:[1,1,1],rot:0},grCam={rx:0.45,ry:0.6},grMode='',grAxis='';
+function grInit(){grObj={pos:[0,0,0],scale:[1,1,1],rot:0};grMode='';grAxis='';grDraw();}
+function grReset(){grObj={pos:[0,0,0],scale:[1,1,1],rot:0};grMode='';grAxis='';hide('#gr-v');grDraw();}
+function grDraw(){const c=$('#gr-c');if(!c)return;
+  drawMesh(c.getContext('2d'),grObj,grCam,{axes:true,wire:true,sel:true});
+  orbit(c,grCam,grDraw);
+  $('#gr-hud').innerHTML='Object Mode<br>pos: '+grObj.pos.map(v=>v.toFixed(1)).join(', ')+
+    '<br>scale: '+grObj.scale.map(v=>v.toFixed(2)).join(', ')+'<br>rot Z: '+Math.round(grObj.rot*180/Math.PI)+'°';
+  $('#gr-keys').innerHTML=['G','R','S'].map(k=>'<button class="kbd'+(grMode===k?' on':'')+'" onclick="grKey(\''+k+'\')">'+k+'</button>').join('')
+    +'<button class="kbd" onclick="grKey(\'esc\')">Esc</button>';
+  $('#gr-ax').innerHTML=['X','Y','Z'].map(k=>'<button class="kbd'+(grAxis===k?' on':'')+'" onclick="grAx(\''+k+'\')">'+k+'</button>').join('')
+    +['-2','-0.5','0.5','2','45'].map(v=>'<button class="kbd" onclick="grVal('+v+')">'+v+'</button>').join('');
+  $('#gr-task').innerHTML='Завдання: <b>'+grT[grI].n+'</b><span class="chip">'+grOk+' з 4</span>';}
+function grKey(k){if(k==='esc'){grMode='';grAxis='';}else{grMode=k;grAxis='';}grDraw();}
+function grAx(a){if(!grMode)return say('#gr-v','Спершу натисни G, R або S — вісь сама по собі нічого не робить.',false);
+  grAxis=a;grDraw();}
+function grVal(v){if(!grMode)return say('#gr-v','Спершу обери дію: G — рух, R — поворот, S — масштаб.',false);
+  const ax=grAxis==='X'?0:grAxis==='Y'?2:grAxis==='Z'?1:-1;
+  if(grMode==='G'){if(ax<0)return say('#gr-v','Для руху вкажи вісь: X, Y або Z.',false);grObj.pos[ax]+=v;}
+  if(grMode==='S'){if(ax<0)grObj.scale=grObj.scale.map(s=>s*v);else grObj.scale[ax]*=v;}
+  if(grMode==='R')grObj.rot+=v*Math.PI/180;
+  grMode='';grAxis='';hide('#gr-v');grDraw();}
+function grCheck(){const t=grT[grI];
+  if(t.check(grObj)){grOk++;if(grOk>=4)mark('grs');
+    say('#gr-v','Так. У Blender це набирається як <b>'+t.keys+'</b> і Enter.',true);
+    grI=(grI+1)%grT.length;setTimeout(grReset,1600);}
+  else say('#gr-v','Ще ні. Пам’ятай: у Blender вісь Z — це «вгору», а не Y.',false);}
+function grNext(){grI=(grI+1)%grT.length;grReset();}
+
+/* --- 2. Види з NumPad --- */
+T('views',{g:0,ic:'🔭',t:'Види й проєкція',s:'NumPad 1, 3, 7 і клавіша 5',html:`
+<div class="panel">
+  <div class="task">Перемикай види. Клавіша 5 вмикає ортогональну проєкцію — без спотворень.</div>
+  <div class="vp"><canvas id="vw-c" width="600" height="360"></canvas><div class="hud" id="vw-hud"></div></div>
+  <div class="keyrow" id="vw-keys"></div>
+  <div class="hintline" id="vw-state"></div>
+  <div class="verdict" id="vw-v"></div>
+  <div class="legend">Для точного моделювання по референсу вмикають ортогональний вид: там паралельні лінії лишаються паралельними.</div>
+</div>`,init(){vwSeen={};vwOrtho=false;vwCam={rx:0.45,ry:0.6};vwDraw();}});
+let vwSeen={},vwOrtho=false,vwCam={rx:0.45,ry:0.6};
+function vwSet(name,rx,ry){vwCam.rx=rx;vwCam.ry=ry;vwSeen[name]=1;vwDraw();}
+function vwDraw(){const c=$('#vw-c');if(!c)return;
+  drawMesh(c.getContext('2d'),{pos:[0,0,0],scale:[1,1.4,1],rot:0.3},vwCam,{axes:true,wire:true,ortho:vwOrtho});
+  orbit(c,vwCam,vwDraw);
+  $('#vw-keys').innerHTML='<button class="kbd" onclick="vwSet(\'front\',0,0)">1 · спереду</button>'+
+    '<button class="kbd" onclick="vwSet(\'side\',0,1.5708)">3 · збоку</button>'+
+    '<button class="kbd" onclick="vwSet(\'top\',1.4,0)">7 · згори</button>'+
+    '<button class="kbd" onclick="vwSet(\'user\',0.45,0.6)">користувацький</button>'+
+    '<button class="kbd'+(vwOrtho?' on':'')+'" onclick="vwOrtho=!vwOrtho;vwSeen.ortho=1;vwDraw()">5 · орто</button>';
+  $('#vw-hud').innerHTML=(vwOrtho?'Orthographic':'Perspective')+'<br>Rot X '+Math.round(vwCam.rx*57)+'°<br>Rot Z '+Math.round(vwCam.ry*57)+'°';
+  $('#vw-state').textContent=vwOrtho?'Ортогональний вид: розміри не спотворюються — так зручно міряти.'
+    :'Перспектива: далеке здається меншим, як в оці людини.';
+  if(Object.keys(vwSeen).length>=4){mark('views');
+    say('#vw-v','Помічаєш? У перспективі задня грань куба менша за передню, а в ортогональному виді вони однакові. Тому по референсу моделюють саме в орто.',true);}}
+
+/* --- 3. 3D-курсор і origin --- */
+T('cursor',{g:0,ic:'🎯',t:'3D-курсор і Origin',s:'Чому об’єкт крутиться не там',html:`
+<div class="panel">
+  <div class="task" id="cu-task">Тисни на сцену — туди стане 3D-курсор. Потім спробуй обертання.</div>
+  <svg viewBox="0 0 300 200" height="195" id="cu-svg" style="background:#3B3B3B;border-radius:12px"></svg>
+  <div class="row center"><button class="btn ghost" onclick="cuOrigin()">Origin → у курсор</button>
+    <button class="btn ghost" onclick="cuSpin()">Обернути об’єкт</button>
+    <button class="btn ghost" onclick="cuReset()">Shift+C · скинути</button></div>
+  <div class="hintline" id="cu-state"></div>
+  <div class="verdict" id="cu-v"></div>
+  <div class="legend">Новий об’єкт завжди з’являється в позиції 3D-курсора. А обертається об’єкт навколо свого Origin — маленької помаранчевої точки.</div>
+</div>`,init(){cuCur=[150,100];cuOrg=[150,100];cuAng=0;cuDone=false;cuDraw();}});
+let cuCur=[150,100],cuOrg=[150,100],cuAng=0,cuDone=false;
+function cuDraw(){const a=cuAng,cx=cuOrg[0],cy=cuOrg[1];
+  const pts=[[-30,-22],[30,-22],[30,22],[-30,22]].map(p=>{
+    const x=p[0]*Math.cos(a)-p[1]*Math.sin(a),y=p[0]*Math.sin(a)+p[1]*Math.cos(a);
+    return [cx+x,cy+y];});
+  let s='<rect width="300" height="200" fill="#3B3B3B" rx="10"/>';
+  for(let i=0;i<=6;i++){s+='<line x1="'+(i*50)+'" y1="0" x2="'+(i*50)+'" y2="200" stroke="#4E4E4E"/>'+
+    '<line x1="0" y1="'+(i*33)+'" x2="300" y2="'+(i*33)+'" stroke="#4E4E4E"/>';}
+  s+='<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="#BEBEBE" stroke="#FFB86B" stroke-width="2"/>';
+  s+='<circle cx="'+cuOrg[0]+'" cy="'+cuOrg[1]+'" r="5" fill="#EA7600"/>';
+  s+='<circle cx="'+cuCur[0]+'" cy="'+cuCur[1]+'" r="10" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="4 3"/>'+
+     '<line x1="'+(cuCur[0]-14)+'" y1="'+cuCur[1]+'" x2="'+(cuCur[0]+14)+'" y2="'+cuCur[1]+'" stroke="#fff"/>'+
+     '<line x1="'+cuCur[0]+'" y1="'+(cuCur[1]-14)+'" x2="'+cuCur[0]+'" y2="'+(cuCur[1]+14)+'" stroke="#fff"/>';
+  const svg=$('#cu-svg');if(!svg)return;svg.innerHTML=s;
+  $('#cu-state').textContent='Курсор: '+cuCur.map(Math.round).join(', ')+' · Origin: '+cuOrg.map(Math.round).join(', ');
+  if(!svg.dataset.b){svg.dataset.b=1;
+    svg.addEventListener('pointerdown',e=>{const b=svg.getBoundingClientRect();
+      cuCur=[(e.clientX-b.left)/b.width*300,(e.clientY-b.top)/b.height*200];cuDraw();});}}
+function cuOrigin(){cuOrg=[cuCur[0],cuCur[1]];cuDraw();
+  say('#cu-v','Origin переїхав у курсор. У Blender це Object → Set Origin → Origin to 3D Cursor.',true);}
+function cuSpin(){cuAng+=Math.PI/6;cuDraw();
+  if(Math.abs(cuOrg[0]-150)>20||Math.abs(cuOrg[1]-100)>20){cuDone=true;mark('cursor');
+    say('#cu-v','Бачиш? Об’єкт крутиться навколо Origin, а не навколо себе. Якщо модель обертається «не там» — саме тут причина.',true);}
+  else say('#cu-v','Поки Origin у центрі об’єкта, обертання виглядає звично. Посунь курсор убік, натисни «Origin → у курсор» і оберни ще раз.',true);}
+function cuReset(){cuCur=[150,100];cuOrg=[150,100];cuAng=0;cuDraw();hide('#cu-v');}
+
+/* --- 4. Меш: вершини, ребра, грані --- */
+T('mesh',{g:1,ic:'🔺',t:'Вершини, ребра, грані',s:'Клавіші 1, 2, 3 в Edit Mode',html:`
+<div class="panel">
+  <div class="task" id="me-task"></div>
+  <div class="vp"><canvas id="me-c" width="600" height="340"></canvas><div class="hud" id="me-hud"></div></div>
+  <div class="keyrow" id="me-keys"></div>
+  <div class="hintline" id="me-state"></div>
+  <div class="verdict" id="me-v"></div>
+  <div class="legend">Куб має 8 вершин, 12 ребер і 6 граней. Формула Ейлера працює й тут: 8 − 12 + 6 = 2.</div>
+</div>`,init(){meM=0;meSeen={};meCam={rx:0.5,ry:0.7};meDraw();}});
+let meM=0,meSeen={},meCam={rx:0.5,ry:0.7};
+function meDraw(){const c=$('#me-c');if(!c)return;
+  drawMesh(c.getContext('2d'),{pos:[0,0,0],scale:[1,1,1],rot:0},meCam,
+    {axes:false,wire:true,sel:meM===2,verts:meM===0});
+  orbit(c,meCam,meDraw);
+  const names=['вершини (1)','ребра (2)','грані (3)'];
+  $('#me-keys').innerHTML=names.map((n,i)=>'<button class="kbd'+(meM===i?' on':'')+'" onclick="meSet('+i+')">'+n+'</button>').join('');
+  $('#me-hud').innerHTML='Edit Mode<br>'+['Vertex','Edge','Face'][meM]+' select<br>8 verts · 12 edges · 6 faces';
+  $('#me-state').textContent=['Вершина — точка в просторі. З них будується все інше.',
+    'Ребро — відрізок між двома вершинами.','Грань — площина, обмежена ребрами. У Blender краще, коли грань має чотири сторони.'][meM];
+  if(Object.keys(meSeen).length>=3){mark('mesh');
+    say('#me-v','Один і той самий меш можна редагувати з трьох боків. Вершини — для точності, ребра — для петель, грані — для витягування форми.',true);}}
+function meSet(i){meM=i;meSeen[i]=1;meDraw();}
+
+/* --- 5. Quads і трикутники --- */
+T('quads',{g:1,ic:'▧',t:'Quads проти трикутників',s:'Чому чотирикутники кращі',html:`
+<div class="panel">
+  <div class="task">Порівняй дві сітки. Обидві — той самий згин, але топологія різна.</div>
+  <svg viewBox="0 0 300 200" height="195" id="qd-svg"></svg>
+  <div style="font-size:14px;color:var(--ink-2)">згин: <b id="qd-aL">0</b>°</div>
+  <input type="range" min="0" max="70" value="0" id="qd-a" oninput="qdDraw()">
+  <div class="hintline" id="qd-state"></div>
+  <div class="verdict" id="qd-v"></div>
+  <div class="legend">Quad — чотирикутник. Такі грані рівномірно згладжуються модифікатором Subdivision і не «зминаються» при анімації. Трикутники лишають для того, що не рухається.</div>
+</div>`,init(){qdDraw();}});
+function qdDraw(){const a=+$('#qd-a').value;$('#qd-aL').textContent=a;
+  const r=a*Math.PI/180;
+  const bend=(x,y)=>{const k=Math.max(0,(x-70)/80);return [x, y + Math.sin(r)*k*k*44];};
+  let s='<rect width="300" height="200" fill="#3B3B3B" rx="10"/>';
+  s+='<text x="14" y="20" fill="#C8C8C8" font-size="12">quads</text>';
+  for(let i=0;i<5;i++)for(let j=0;j<2;j++){
+    const p=[[14+i*30,40+j*26],[44+i*30,40+j*26],[44+i*30,66+j*26],[14+i*30,66+j*26]].map(q=>bend(q[0],q[1]));
+    s+='<polygon points="'+p.map(q=>q[0].toFixed(1)+','+q[1].toFixed(1)).join(' ')+'" fill="#BEBEBE" stroke="#EA7600" stroke-width="1.2"/>';}
+  s+='<text x="14" y="126" fill="#C8C8C8" font-size="12">трикутники</text>';
+  for(let i=0;i<5;i++)for(let j=0;j<2;j++){
+    const q=[[14+i*30,146+j*26],[44+i*30,146+j*26],[44+i*30,172+j*26],[14+i*30,172+j*26]].map(q=>bend(q[0],q[1]));
+    s+='<polygon points="'+[q[0],q[1],q[2]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="#BEBEBE" stroke="#D8433B" stroke-width="1.2"/>';
+    s+='<polygon points="'+[q[0],q[2],q[3]].map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'" fill="#AFAFAF" stroke="#D8433B" stroke-width="1.2"/>';}
+  $('#qd-svg').innerHTML=s;
+  $('#qd-state').textContent=a>40?'На сильному згині трикутники дають нерівну поверхню — видно злами.':'Поки згин малий, різниці майже немає.';
+  if(a>=60){mark('quads');
+    say('#qd-v','Ось чому в моделюванні прагнуть quads: вони згинаються рівно. Трикутники з’являються самі при експорті в гру — і це нормально, головне не будувати на них те, що рухатиметься.',true);}}
+
+/* --- 6. Інструмент під задачу --- */
+T('tools',{g:1,ic:'🛠',t:'Який інструмент',s:'E, I, Ctrl+B, Ctrl+R',html:`
+<div class="panel">
+  <div class="task" id="tl-task"></div>
+  <div class="opts" id="tl-opts"></div>
+  <div class="verdict" id="tl-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="tlNext()">Далі</button></div>
+  <div class="legend">E — extrude, витягнути. I — inset, вставити грань усередину. Ctrl+B — bevel, фаска. Ctrl+R — loop cut, петля розрізу. K — knife, ніж.</div>
+</div>`,init(){tlI=0;tlOk=0;tlDraw();}});
+const tlT=[{q:'З плаского прямокутника треба зробити коробку — витягнути вгору.',o:['E (Extrude)','I (Inset)','Ctrl+B (Bevel)'],a:0,r:'Extrude витягує нову геометрію з виділеного.'},
+ {q:'Треба зробити на грані рамку — меншу грань усередині більшої.',o:['I (Inset)','E (Extrude)','K (Knife)'],a:0,r:'Inset вставляє грань усередину, зберігаючи форму.'},
+ {q:'Гострий кут куба треба зробити м’яким, зі скругленням.',o:['Ctrl+B (Bevel)','Ctrl+R (Loop cut)','E (Extrude)'],a:0,r:'Під час Bevel колесо миші додає сегменти — так виходить скруглення.'},
+ {q:'Треба додати геометрію посередині, щоб було де згинати.',o:['Ctrl+R (Loop cut)','I (Inset)','Ctrl+B (Bevel)'],a:0,r:'Loop cut додає петлю ребер по колу меша.'},
+ {q:'Дві окремі моделі треба зробити одним об’єктом.',o:['Ctrl+J (Join)','P (Separate)','M (Merge)'],a:0,r:'Ctrl+J об’єднує об’єкти, P — навпаки, відділяє.'},
+ {q:'У моделі після Shade Smooth з’явились дивні плями.',o:['Shift+N — перерахувати нормалі','Ctrl+R','I'],a:0,r:'Плями майже завжди означають вивернуті нормалі.'}];
+let tlI=0,tlOk=0;
+function tlDraw(){if(!document.querySelector('#tl-opts'))return;const t=tlT[tlI];
+  $('#tl-task').innerHTML=t.q+'<span class="chip">'+tlOk+' з 4</span>';
+  const box=$('#tl-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){tlOk++;if(tlOk>=4)mark('tools');say('#tl-v','Так. '+t.r,true);}
+      else say('#tl-v','Ні. '+t.r,false);};box.appendChild(b);});
+  hide('#tl-v');}
+function tlNext(){tlI=(tlI+1)%tlT.length;tlDraw();}
+
+/* --- 7. Subdivision і петлі --- */
+T('subdiv',{g:1,ic:'🫧',t:'Subdivision і петлі',s:'Чому кути «пливуть»',html:`
+<div class="panel">
+  <div class="task">Підвищуй рівень згладжування. Потім увімкни підтримувальні петлі — і порівняй.</div>
+  <svg viewBox="0 0 300 190" height="185" id="sd-svg"></svg>
+  <div style="font-size:14px;color:var(--ink-2)">рівень Subdivision: <b id="sd-lL">0</b></div>
+  <input type="range" min="0" max="3" value="0" id="sd-l" oninput="sdDraw()">
+  <div class="row center"><button class="btn'+'" id="sd-btn" onclick="sdLoops()">Додати петлі (Ctrl+R)</button></div>
+  <div class="hintline" id="sd-state"></div>
+  <div class="verdict" id="sd-v"></div>
+  <div class="legend">Модифікатор Subdivision округлює все підряд. Щоб кут лишився гострим, поруч ставлять додаткові петлі ребер — support loops.</div>
+</div>`,init(){sdLoop=false;sdDraw();}});
+let sdLoop=false;
+function sdDraw(){const l=+$('#sd-l').value;$('#sd-lL').textContent=l;
+  const r=sdLoop?6+l*2:6+l*22;
+  let s='<rect width="300" height="190" fill="#3B3B3B" rx="10"/>';
+  s+='<rect x="70" y="35" width="160" height="120" rx="'+Math.min(60,r)+'" fill="#BEBEBE" stroke="#EA7600" stroke-width="2"/>';
+  if(sdLoop){[80,220].forEach(x=>s+='<line x1="'+x+'" y1="35" x2="'+x+'" y2="155" stroke="#FFB86B" stroke-width="1.5" stroke-dasharray="4 3"/>');
+    [45,145].forEach(y=>s+='<line x1="70" y1="'+y+'" x2="230" y2="'+y+'" stroke="#FFB86B" stroke-width="1.5" stroke-dasharray="4 3"/>');}
+  s+='<text x="14" y="22" fill="#C8C8C8" font-size="12">'+(sdLoop?'з підтримувальними петлями':'без петель')+'</text>';
+  $('#sd-svg').innerHTML=s;
+  $('#sd-state').textContent=l===0?'Модифікатор вимкнено — куб як куб.'
+    :sdLoop?'Петлі тримають форму: кути лишились гострими навіть на рівні '+l+'.'
+    :'На рівні '+l+' куб дедалі більше схожий на кулю — кути «попливли».';
+  if(sdLoop&&l>=2){mark('subdiv');
+    say('#sd-v','Ось головний прийом hard-surface моделювання: що ближче петля до ребра, то гостріший кут лишається після згладжування.',true);}}
+function sdLoops(){sdLoop=!sdLoop;$('#sd-btn').className='btn'+(sdLoop?'':' ghost');sdDraw();}
+
+/* --- 8. Стек модифікаторів --- */
+T('stack',{g:1,ic:'🧱',t:'Порядок модифікаторів',s:'Що спершу: Mirror чи Subdivision',html:`
+<div class="panel">
+  <div class="task" id="st-task"></div>
+  <div class="stack" id="st-list"></div>
+  <div class="row center"><button class="btn" onclick="stCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="stLoad()">Перемішати</button></div>
+  <div class="verdict" id="st-v"></div>
+  <div class="legend">Модифікатори виконуються згори вниз. Тому Mirror має стояти над Subdivision — інакше по центру моделі лишиться помітний шов.</div>
+</div>`,init(){stI=0;stOk=0;stLoad();}});
+const stT=[{n:'Персонаж: дзеркалимо, згладжуємо, потім гнемо кістками',
+  s:[['Mirror','дзеркалить половину'],['Subdivision','згладжує форму'],['Armature','деформує кістками']]},
+ {n:'Труба з паркану: масив копій, потім товщина, потім згладжування',
+  s:[['Array','робить ряд копій'],['Solidify','додає товщину'],['Subdivision','згладжує']]}];
+let stI=0,stOk=0,stOrder=[],stSel=null;
+function stLoad(){const t=stT[stI];stOrder=t.s.map((_,i)=>i).sort(()=>Math.random()-.5);stSel=null;hide('#st-v');stDraw();}
+function stDraw(){if(!document.querySelector('#st-list'))return;const t=stT[stI];
+  $('#st-task').innerHTML=t.n+'<span class="chip">'+stOk+' з 2</span>';
+  const box=$('#st-list');box.innerHTML='';
+  stOrder.forEach((idx,pos)=>{const b=document.createElement('button');b.className='mod'+(stSel===pos?' sel':'');
+    b.innerHTML='<b>'+(pos+1)+'.</b> '+t.s[idx][0]+' <i>— '+t.s[idx][1]+'</i>';
+    (function(k){b.onclick=()=>{if(stSel===null)stSel=k;else{const x=stOrder[stSel];stOrder[stSel]=stOrder[k];stOrder[k]=x;stSel=null;}stDraw();};})(pos);
+    box.appendChild(b);});}
+function stCheck(){if(stOrder.every((v,i)=>v===i)){stOk++;if(stOk>=2)mark('stack');
+    say('#st-v','Правильно. Стек рахується згори вниз: кожен наступний модифікатор працює вже з результатом попереднього.',true);
+    stI=(stI+1)%stT.length;setTimeout(stLoad,1800);}
+  else say('#st-v','Ще ні. Подумай, що має існувати першим, щоб наступний модифікатор мав із чим працювати.',false);}
+
+/* --- 9. Principled BSDF --- */
+T('mat',{g:2,ic:'🔮',t:'Матеріал',s:'Metallic і Roughness',html:`
+<div class="panel">
+  <div class="task" id="mt-task"></div>
+  <div class="sphere" id="mt-ball"></div>
+  <div style="font-size:14px;color:var(--ink-2)">Base Color</div>
+  <input type="range" min="0" max="360" value="30" id="mt-h" oninput="mtDraw()">
+  <div style="font-size:14px;color:var(--ink-2);margin-top:6px">Metallic: <b id="mt-mL">0</b></div>
+  <input type="range" min="0" max="100" value="0" id="mt-m" oninput="mtDraw()">
+  <div style="font-size:14px;color:var(--ink-2);margin-top:6px">Roughness: <b id="mt-rL">0.5</b></div>
+  <input type="range" min="0" max="100" value="50" id="mt-r" oninput="mtDraw()">
+  <div class="hintline" id="mt-state"></div>
+  <div class="row center"><button class="btn" onclick="mtCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="mtNext()">Інший матеріал</button></div>
+  <div class="verdict" id="mt-v"></div>
+  <div class="legend">Metallic — це перемикач: або 0, або 1, проміжних значень у природі майже не буває. Roughness вирішує, чи буде відблиск різким, чи розмитим.</div>
+</div>`,init(){mtI=0;mtOk=0;mtDraw();}});
+const mtT=[{n:'полірований метал',m:[80,100],r:[0,25]},{n:'матовий пластик',m:[0,20],r:[55,100]},
+ {n:'глянцевий пластик',m:[0,20],r:[0,25]},{n:'подряпаний метал',m:[80,100],r:[45,80]}];
+let mtI=0,mtOk=0;
+function mtDraw(){if(!document.querySelector('#mt-ball'))return;
+  const h=+$('#mt-h').value,m=+$('#mt-m').value,r=+$('#mt-r').value;
+  $('#mt-mL').textContent=(m/100).toFixed(2);$('#mt-rL').textContent=(r/100).toFixed(2);
+  const base='hsl('+h+','+(m>50?30:70)+'%,'+(m>50?45:55)+'%)';
+  const spec=100-r;
+  const el=$('#mt-ball');
+  el.style.background='radial-gradient(circle at 34% 28%, rgba(255,255,255,'+(0.15+spec/120)+') 0%, rgba(255,255,255,0) '+(6+r*0.5)+'%), '+
+    'radial-gradient(circle at 70% 78%, rgba(255,255,255,'+(m/300)+') 0%, rgba(0,0,0,0) 40%), '+
+    'radial-gradient(circle at 40% 35%, '+base+' 0%, hsl('+h+','+(m>50?25:60)+'%,'+(m>50?18:25)+'%) 100%)';
+  el.style.boxShadow='0 12px 26px rgba(0,0,0,.25)';
+  $('#mt-state').textContent=m>50?(r<30?'Дзеркальний метал: чіткий відблиск і темні краї.':'Метал із подряпинами: відблиск розмитий.')
+    :(r<30?'Гладкий діелектрик — глянець, як у пластику чи фарби.':'Матова поверхня: світло розсіюється рівномірно.');
+  $('#mt-task').innerHTML='Налаштуй <b>'+mtT[mtI].n+'</b>.<span class="chip">'+mtOk+' з 3</span>';}
+function mtCheck(){const m=+$('#mt-m').value,r=+$('#mt-r').value,t=mtT[mtI];
+  if(m>=t.m[0]&&m<=t.m[1]&&r>=t.r[0]&&r<=t.r[1]){mtOk++;if(mtOk>=3)mark('mat');
+    say('#mt-v','Так. '+(t.m[0]>50?'Метал: Metallic майже 1.':'Не метал: Metallic 0.')+' Roughness відповідає '+(t.r[0]<30?'гладкій':'шорсткій')+' поверхні.',true);
+    mtI=(mtI+1)%mtT.length;setTimeout(mtDraw,1400);}
+  else say('#mt-v','Ще ні. Згадай: Metallic — це «так або ні», а Roughness — наскільки поверхня шорстка.',false);}
+function mtNext(){mtI=(mtI+1)%mtT.length;mtDraw();}
+
+/* --- 10. Триточкове світло --- */
+T('light',{g:2,ic:'💡',t:'Триточкове світло',s:'Key, fill, back',html:`
+<div class="panel">
+  <div class="task" id="li-task">Вмикай джерела по черзі й дивись, що змінюється.</div>
+  <svg viewBox="0 0 300 210" height="205" id="li-svg"></svg>
+  <div class="row center" id="li-btns"></div>
+  <div class="hintline" id="li-state"></div>
+  <div class="verdict" id="li-v"></div>
+  <div class="legend">Key — головне, дає форму й тінь. Fill — підсвічує тінь, щоб вона не була чорною. Back (rim) — відділяє об’єкт від фону.</div>
+</div>`,init(){liOn=[false,false,false];liDraw();}});
+let liOn=[false,false,false];
+const LI=['Key · головне','Fill · заповнювальне','Back · контрове'];
+function liDraw(){if(!document.querySelector('#li-svg'))return;
+  const [k,f,b]=liOn;
+  const amb=0.12+(k?0.5:0)+(f?0.2:0);
+  let s='<rect width="300" height="210" fill="#2A2A2A" rx="10"/>';
+  s+='<ellipse cx="150" cy="196" rx="70" ry="10" fill="rgba(0,0,0,.5)"/>';
+  if(b)s+='<circle cx="150" cy="120" r="62" fill="none" stroke="rgba(255,225,180,.85)" stroke-width="6"/>';
+  s+='<defs><radialGradient id="lg" cx="'+(k?'32%':'50%')+'" cy="'+(k?'28%':'40%')+'">'+
+    '<stop offset="0%" stop-color="rgba(255,255,255,'+Math.min(1,amb+0.25)+')"/>'+
+    '<stop offset="100%" stop-color="rgba(60,60,60,'+Math.min(1,amb+0.1)+')"/></radialGradient></defs>';
+  s+='<circle cx="150" cy="120" r="58" fill="url(#lg)"/>';
+  if(k)s+='<circle cx="52" cy="46" r="11" fill="#FFD84D"/><text x="52" y="76" text-anchor="middle" font-size="10" fill="#C8C8C8">key</text>';
+  if(f)s+='<circle cx="252" cy="96" r="9" fill="#BBD8FF"/><text x="252" y="122" text-anchor="middle" font-size="10" fill="#C8C8C8">fill</text>';
+  if(b)s+='<circle cx="150" cy="24" r="9" fill="#FFE1B4"/><text x="150" y="46" text-anchor="middle" font-size="10" fill="#C8C8C8">back</text>';
+  $('#li-svg').innerHTML=s;
+  $('#li-btns').innerHTML=LI.map((n,i)=>'<button class="btn'+(liOn[i]?'':' ghost')+' small" onclick="liTog('+i+')">'+n+'</button>').join('');
+  $('#li-state').textContent=!k?'Без key-світла об’єкт майже не видно.'
+    :!f?'Є форма, але тінь глуха й чорна.':!b?'Уже добре, але об’єкт зливається з фоном.':'Повна схема: форма, м’яка тінь і світлий контур.';
+  if(k&&f&&b){mark('light');
+    say('#li-v','Це та сама схема, якою знімають кіно й портрети. Спробуй тепер вимкнути back — і побач, як об’єкт «злипається» з фоном.',true);}}
+function liTog(i){liOn[i]=!liOn[i];liDraw();}
+
+/* --- 11. Фокусна відстань --- */
+T('lens',{g:3,ic:'📷',t:'Фокусна відстань',s:'Чому портрет спотворюється',html:`
+<div class="panel">
+  <div class="task">Змінюй фокусну відстань. Щоб голова лишалась того самого розміру, камера сама відсувається.</div>
+  <svg viewBox="0 0 300 190" height="185" id="ln-svg"></svg>
+  <div style="font-size:14px;color:var(--ink-2)">Focal Length: <b id="ln-fL">50</b> мм</div>
+  <input type="range" min="15" max="135" value="50" id="ln-f" oninput="lnDraw()">
+  <div class="hintline" id="ln-state"></div>
+  <div class="verdict" id="ln-v"></div>
+  <div class="legend">Ширококутник (15–24 мм) збільшує ніс і зменшує вуха. Для портрета беруть 50–85 мм. Стандарт Blender — 50 мм.</div>
+</div>`,init(){lnSeen={};lnDraw();}});
+let lnSeen={};
+function lnDraw(){if(!document.querySelector('#ln-svg'))return;
+  const f=+$('#ln-f').value;$('#ln-fL').textContent=f;
+  const k=Math.max(0,(50-f)/35);
+  let s='<rect width="300" height="190" fill="#3B3B3B" rx="10"/>';
+  s+='<ellipse cx="150" cy="100" rx="'+(58-k*10)+'" ry="70" fill="#D9C0A5"/>';
+  s+='<ellipse cx="150" cy="112" rx="'+(12+k*14)+'" ry="'+(16+k*16)+'" fill="#C9A98A"/>';
+  s+='<circle cx="'+(124+k*6)+'" cy="86" r="'+(7-k*1.5)+'" fill="#2A2A2A"/><circle cx="'+(176-k*6)+'" cy="86" r="'+(7-k*1.5)+'" fill="#2A2A2A"/>';
+  s+='<ellipse cx="'+(92+k*8)+'" cy="104" rx="7" ry="'+(13-k*5)+'" fill="#C9A98A"/>';
+  s+='<ellipse cx="'+(208-k*8)+'" cy="104" rx="7" ry="'+(13-k*5)+'" fill="#C9A98A"/>';
+  s+='<text x="14" y="22" fill="#C8C8C8" font-size="12">'+f+' мм · камера '+(f<30?'близько':f>85?'далеко':'нормально')+'</text>';
+  $('#ln-svg').innerHTML=s;
+  lnSeen[f<30?'wide':f>85?'tele':'norm']=1;
+  $('#ln-state').textContent=f<30?'Ширококутник: ніс наближається до камери й здається більшим, вуха «тікають» назад.'
+    :f>85?'Телеоб’єктив: обличчя виглядає пласкішим, риси природніші для портрета.'
+    :'50 мм — близько до того, як бачить людське око.';
+  if(Object.keys(lnSeen).length>=3){mark('lens');
+    say('#ln-v','Фокусна відстань — це не «наближення», а характер кадру. Ту саму сцену можна зняти широко зблизька або вузько здалеку — і настрій буде різний.',true);}}
+
+/* --- 12. Eevee чи Cycles --- */
+T('render',{g:3,ic:'🖥',t:'Eevee чи Cycles',s:'Швидко чи реалістично',html:`
+<div class="panel">
+  <div class="task" id="rd-task"></div>
+  <div class="row center"><button class="btn" id="rd-e" onclick="rdSet(0)">Eevee</button>
+    <button class="btn ghost" id="rd-c" onclick="rdSet(1)">Cycles</button></div>
+  <div style="font-size:14px;color:var(--ink-2);margin-top:8px">Samples: <b id="rd-sL">32</b></div>
+  <input type="range" min="4" max="512" step="4" value="32" id="rd-s" oninput="rdDraw()">
+  <svg viewBox="0 0 300 170" height="165" id="rd-svg"></svg>
+  <div class="big" id="rd-time" style="font-size:18px"></div>
+  <div class="hintline" id="rd-state"></div>
+  <div class="verdict" id="rd-v"></div>
+  <div class="legend">Eevee малює кадр майже миттєво, але відбиття й тіні в нього приблизні. Cycles рахує кожен промінь — звідси шум, який зникає з ростом Samples.</div>
+</div>`,init(){rdE=0;rdDraw();}});
+let rdE=0;
+function rdSet(e){rdE=e;$('#rd-e').className='btn'+(e?' ghost':'');$('#rd-c').className='btn'+(e?'':' ghost');rdDraw();}
+function rdDraw(){if(!document.querySelector('#rd-svg'))return;
+  const sm=+$('#rd-s').value;$('#rd-sL').textContent=sm;
+  const noise=rdE?Math.max(0,1-sm/300):0.02;
+  let s='<rect width="300" height="170" fill="#2A2A2A" rx="10"/>';
+  s+='<ellipse cx="150" cy="150" rx="80" ry="12" fill="rgba(0,0,0,.45)"/>';
+  s+='<circle cx="150" cy="92" r="52" fill="#C9C9C9"/><circle cx="128" cy="72" r="16" fill="rgba(255,255,255,.5)"/>';
+  if(rdE)s+='<ellipse cx="150" cy="146" rx="46" ry="8" fill="rgba(0,0,0,.35)"/>';
+  const N=Math.round(noise*420);
+  for(let i=0;i<N;i++){const x=Math.random()*300,y=Math.random()*170;
+    s+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="2" height="2" fill="rgba('+(Math.random()>.5?'255,255,255':'0,0,0')+',.5)"/>';}
+  $('#rd-svg').innerHTML=s;
+  const t=rdE?(sm*0.12).toFixed(1)+' с на кадр':'0,3 с на кадр';
+  $('#rd-time').textContent=t;
+  $('#rd-state').textContent=rdE?(sm<64?'Шум добре помітний — семплів замало.':'Шум майже зник, але кадр рахується довше.')
+    :'Eevee рахує швидко, тіні й відбиття спрощені.';
+  if(rdE&&sm>=256){mark('render');
+    say('#rd-v','Порахуй: 300 кадрів анімації по '+(sm*0.12).toFixed(1)+' с — це '+Math.round(sm*0.12*300/60)+' хвилин. Тому анімацію часто рендерять в Eevee, а фінальні картинки — у Cycles.',true);}}
+
+/* --- 13. Гарячі клавіші --- */
+T('keysq',{g:3,ic:'⌨️',t:'Гарячі клавіші',s:'Швидкий тренажер',html:`
+<div class="panel">
+  <div class="task" id="hk-task"></div>
+  <div class="keyrow" id="hk-opts"></div>
+  <div class="verdict" id="hk-v"></div>
+  <div class="row center" style="margin-top:8px"><button class="btn ghost small" onclick="hkNext()">Далі</button></div>
+  <div class="legend">Blender задуманий під дві руки: одна на миші, друга на клавіатурі. Саме тому в ньому так багато скорочень.</div>
+</div>`,init(){hkI=0;hkOk=0;hkDraw();}});
+const HK=[{q:'Перемкнути Object ↔ Edit Mode',o:['Tab','Ctrl+Tab','Shift+A'],a:0},
+ {q:'Додати новий об’єкт',o:['Shift+A','Ctrl+A','Alt+A'],a:0},
+ {q:'Застосувати трансформації (масштаб, поворот)',o:['Ctrl+A','Shift+A','Ctrl+J'],a:0},
+ {q:'Продублювати виділене',o:['Shift+D','Alt+D','Ctrl+D'],a:0},
+ {q:'Наблизити вид до виділеного',o:['NumPad .','NumPad 0','Home'],a:0},
+ {q:'Зробити рендер поточного кадру',o:['F12','F9','F5'],a:0},
+ {q:'Показати вид з камери',o:['NumPad 0','NumPad 5','NumPad 1'],a:0},
+ {q:'Скасувати останню дію',o:['Ctrl+Z','Ctrl+Y','Alt+Z'],a:0}];
+let hkI=0,hkOk=0;
+function hkDraw(){if(!document.querySelector('#hk-opts'))return;const t=HK[hkI];
+  $('#hk-task').innerHTML=t.q+'<span class="chip">'+hkOk+' з 6</span>';
+  const idx=[0,1,2].sort(()=>Math.random()-.5);
+  $('#hk-opts').innerHTML=idx.map(i=>'<button class="kbd" onclick="hkPick('+i+')">'+t.o[i]+'</button>').join('');
+  hide('#hk-v');}
+function hkPick(i){const t=HK[hkI];
+  if(i===t.a){hkOk++;if(hkOk>=6)mark('keysq');say('#hk-v','Так: <b>'+t.o[t.a]+'</b>.',true);
+    hkI=(hkI+1)%HK.length;setTimeout(hkDraw,1000);}
+  else say('#hk-v','Ні, правильно — '+t.o[t.a]+'.',false);}
+function hkNext(){hkI=(hkI+1)%HK.length;hkDraw();}
+
+/* --- 14. Пайплайн --- */
+T('pipe',{g:3,ic:'🧭',t:'Порядок роботи',s:'Від ідеї до рендера',html:`
+<div class="panel">
+  <div class="task" id="pp-task"></div>
+  <div class="stack" id="pp-list"></div>
+  <div class="row center"><button class="btn" onclick="ppCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="ppLoad()">Перемішати</button></div>
+  <div class="verdict" id="pp-v"></div>
+  <div class="legend">Найчастіша помилка новачка — почати з дрібних деталей. Спершу великі об’єми, деталі — в кінці.</div>
+</div>`,init(){ppLoad();}});
+const PPS=[['Референси й ідея','знайти, як це має виглядати'],['Блокінг','грубі об’єми з примітивів'],
+ ['Моделювання деталей','форма, петлі, фаски'],['UV-розгортка','розкласти меш на площині'],
+ ['Матеріали й текстури','колір, метал, шорсткість'],['Освітлення','key, fill, back'],
+ ['Камера й композиція','вибрати кадр'],['Рендер','F12 і збереження']];
+let ppOrder=[],ppSel=null;
+function ppLoad(){ppOrder=PPS.map((_,i)=>i).sort(()=>Math.random()-.5);ppSel=null;hide('#pp-v');ppDraw();}
+function ppDraw(){if(!document.querySelector('#pp-list'))return;
+  $('#pp-task').innerHTML='Постав етапи роботи над сценою в правильному порядку.';
+  const box=$('#pp-list');box.innerHTML='';
+  ppOrder.forEach((idx,pos)=>{const b=document.createElement('button');b.className='mod'+(ppSel===pos?' sel':'');
+    b.innerHTML='<b>'+(pos+1)+'.</b> '+PPS[idx][0]+' <i>— '+PPS[idx][1]+'</i>';
+    (function(k){b.onclick=()=>{if(ppSel===null)ppSel=k;else{const x=ppOrder[ppSel];ppOrder[ppSel]=ppOrder[k];ppOrder[k]=x;ppSel=null;}ppDraw();};})(pos);
+    box.appendChild(b);});}
+function ppCheck(){if(ppOrder.every((v,i)=>v===i)){mark('pipe');
+    say('#pp-v','Саме так працюють студії. Найдовше триває моделювання, найкоротше — натиснути F12.',true);}
+  else say('#pp-v','Ще не той порядок. Підказка: матеріали накладають на готову форму, а світло ставлять перед тим, як обирати кадр.',false);}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
