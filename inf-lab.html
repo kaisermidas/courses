@@ -193,7 +193,7 @@ T('bits',{g:0,ic:'💡',t:'Двійкові лампочки',s:'Як комп�
 const btT=[42,100,7,255,13];
 let btB=[0,0,0,0,0,0,0,0],btI=0,btOk=0;
 function btVal(){return btB.reduce((a,v,i)=>a+v*Math.pow(2,7-i),0);}
-function btDraw(){const box=$('#bt-row');box.innerHTML='';
+function btDraw(){if(!document.querySelector('#bt-row'))return;const box=$('#bt-row');box.innerHTML='';
   btB.forEach((v,i)=>{const w=document.createElement('div');w.className='bit';
     const p=Math.pow(2,7-i);
     w.innerHTML='<button class="'+(v?'on':'')+'">'+v+'</button><span>'+p+'</span>';
@@ -337,7 +337,7 @@ function rbLoad(i){rbI=i;stopAll();const L=rbL[i];RB={x:L.start[0],y:L.start[1],
   $('#rb-lv').innerHTML=rbL.map((l,k)=>'<button class="btn small'+(k===i?'':' ghost')+'" onclick="rbLoad('+k+')">рівень '+(k+1)+'</button>').join('');
   $('#rb-task').innerHTML=L.hint+'<span class="chip">'+rbOk+' з 3</span>';
   rbDraw();}
-function rbDraw(step){const L=rbL[rbI],g=$('#rb-grid');
+function rbDraw(step){if(!document.querySelector('#rb-grid'))return;const L=rbL[rbI],g=$('#rb-grid');
   g.style.gridTemplateColumns='repeat('+L.w+',1fr)';g.innerHTML='';
   const arrows=['↑','→','↓','←'];
   for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++){const d=document.createElement('div');
@@ -450,7 +450,7 @@ T('sort',{g:1,ic:'📊',t:'Сортування бульбашкою',s:'Як к
 let SR={a:[],i:0,j:0,cmp:0,swap:0,done:false};
 function srNew(){stopAll();SR={a:Array.from({length:8},()=>2+Math.floor(Math.random()*10)),i:0,j:0,cmp:0,swap:0,done:false};
   hide('#sr-v');srDraw();}
-function srDraw(){const box=$('#sr-bars');box.innerHTML='';
+function srDraw(){if(!document.querySelector('#sr-bars'))return;const box=$('#sr-bars');box.innerHTML='';
   const mx=Math.max.apply(null,SR.a);
   SR.a.forEach((v,i)=>{const d=document.createElement('div');
     d.style.height=(v/mx*120)+'px';
@@ -483,7 +483,7 @@ T('search',{g:1,ic:'🎯',t:'Вгадати за 7 питань',s:'Двійко
 </div>`,init(){seNew();}});
 let SE={lo:1,hi:100,n:0};
 function seNew(){SE={lo:1,hi:100,n:0};hide('#se-v');seDraw();}
-function seDraw(){const mid=Math.floor((SE.lo+SE.hi)/2);
+function seDraw(){if(!document.querySelector('#se-guess'))return;const mid=Math.floor((SE.lo+SE.hi)/2);
   $('#se-guess').textContent='Це '+mid+'?';
   $('#se-range').textContent='Питання: '+SE.n+' · лишилось варіантів: '+(SE.hi-SE.lo+1)+' (від '+SE.lo+' до '+SE.hi+')';}
 function seAns(d){const mid=Math.floor((SE.lo+SE.hi)/2);SE.n++;
@@ -512,7 +512,7 @@ const flTasks=[{f:'домашка.docx',p:'D:\\Школа\\Математика\
  {f:'море.jpg',p:'D:\\Фото\\Літо\\море.jpg'},
  {f:'схема.png',p:'D:\\Школа\\Інформатика\\схема.png'}];
 let flOpen={},flOk=0,flI=0;
-function flDraw(){const box=$('#fl-tree');box.innerHTML='';
+function flDraw(){if(!document.querySelector('#fl-tree'))return;const box=$('#fl-tree');box.innerHTML='';
   const walk=(node,depth,path)=>{
     const isFile=!node.kids;
     const el=document.createElement('div');el.style.paddingLeft=(depth*18)+'px';
