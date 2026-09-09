@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Інформатика руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#5B4BD6; --accent-soft:#EBE8FB; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  .bits{display:flex;gap:6px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+  .bit{width:44px;text-align:center}
+  .bit button{width:44px;height:52px;border-radius:10px;background:#EFEDE6;font-size:22px;font-weight:700;color:#B9B5A8}
+  .bit button.on{background:var(--accent);color:#fff}
+  .bit span{display:block;font-size:11px;color:var(--ink-2);margin-top:3px}
+  .pix{display:grid;width:min(100%,270px);margin:0 auto;gap:1px;background:#D8D3C4;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .pix button{aspect-ratio:1;border:0;background:#fff}
+  .pix button.on{background:#1E2A3A}
+  .rgrid{display:grid;width:min(100%,300px);margin:0 auto;gap:2px}
+  .rgrid div{aspect-ratio:1;border-radius:4px;background:#F4F2EC;display:grid;place-items:center;font-size:15px}
+  .rgrid div.rob{background:var(--accent-soft)}
+  .rgrid div.goal{background:#FFF3D4}
+  .rgrid div.wall{background:#8B8578}
+  .prog{display:flex;flex-wrap:wrap;gap:6px;min-height:48px;border:2px dashed var(--line);border-radius:12px;padding:8px;margin:10px 0}
+  .cmd{background:var(--accent-soft);border:1px solid var(--accent);border-radius:9px;padding:6px 10px;font-size:14px;font-weight:600}
+  .cmd.now{background:var(--volt-soft);border-color:var(--volt)}
+  .bars{display:flex;align-items:flex-end;gap:4px;height:130px;justify-content:center}
+  .bars div{flex:1;max-width:34px;background:var(--accent);border-radius:4px 4px 0 0;position:relative;transition:height .2s}
+  .bars div.cmp{background:var(--volt)}
+  .bars div.done{background:var(--ok)}
+  .tree{font-size:15px;line-height:1.8}
+  .tree button{text-align:left}
+  .tree .fold{color:var(--accent);font-weight:600}
+  .mail{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;font-size:15px;line-height:1.7}
+  .mail mark{background:#FFF3D4;border-radius:4px;padding:1px 3px;cursor:pointer}
+  .mail mark.hit{background:var(--ok-soft);outline:2px solid var(--ok)}
+  .planet{cursor:pointer}
+  .molec{position:relative;height:150px;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#F7FAFF}
+  .mol{position:absolute;width:13px;height:13px;border-radius:50%;background:#2F6FE4}
+  .tank{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;position:relative;overflow:hidden;background:#EAF4FF}
+  .tank .surf{position:absolute;left:0;right:0;top:38%;height:2px;background:#5AA9EE}
+  .item{position:absolute;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;transition:top .5s ease}
+  .kbox{border:2px dashed var(--line);border-radius:12px;min-height:64px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .kcard{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;font-size:14px}
+  .kcard.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pyr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+  .lvl{border-radius:10px;padding:9px 14px;font-weight:600;color:#fff;text-align:center;transition:opacity .3s}
+  .lvl.dead{opacity:.25;text-decoration:line-through}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Інформатика руками</h1>
+    <p>Шістнадцять приладів. Комп'ютер перестає бути чорною скринькою, коли бачиш, з чого він зроблений.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='inf-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['Як влаштована інформація','Алгоритми','Дані, файли, мережа','Безпека й творення'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
+
+/* --- 1. Сонячна система --- */
+T('sun',{g:0,ic:'🪐',t:'Сонячна система',s:'Орбіти, розміри й порядок планет',html:`
+<div class="panel">
+  <div class="task">Тисни на планету — дізнаєшся про неї. Повзунок прискорює час.</div>
+  <svg viewBox="0 0 320 320" height="310" id="ss-svg"></svg>
+  <div class="row"><div style="flex:1">швидкість часу<input type="range" min="0" max="10" value="3" id="ss-sp"></div></div>
+  <div class="hintline" id="ss-info">Меркурій робить оберт за 88 днів, Нептун — за 165 років. Тому внутрішні планети біжать швидко, а зовнішні майже стоять.</div>
+  <div class="row center"><button class="btn" onclick="ssQuiz()">Питання</button></div>
+  <div class="verdict" id="ss-v"></div>
+  <div class="legend">Розміри й відстані тут не в масштабі: якби Земля була горошиною, Сонце було б за 25 метрів від неї.</div>
+</div>`,init(){ssStart();}});
+
+/* --- 1. Двійкові лампочки --- */
+T('bits',{g:0,ic:'💡',t:'Двійкові лампочки',s:'Як комп’ютер записує числа',html:`
+<div class="panel">
+  <div class="task" id="bt-task"></div>
+  <div class="bits" id="bt-row"></div>
+  <div class="big" id="bt-val"></div>
+  <div class="hintline" id="bt-sum"></div>
+  <div class="row center"><button class="btn" onclick="btCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="btNew()">Інше число</button>
+    <button class="btn ghost" onclick="btClear()">Погасити всі</button></div>
+  <div class="verdict" id="bt-v"></div>
+  <div class="legend">Вісім лампочок — один байт. Найбільше, що можна ними записати, — 255, а всього комбінацій 256.</div>
+</div>`,init(){btB=[0,0,0,0,0,0,0,0];btI=0;btOk=0;btDraw();}});
+const btT=[42,100,7,255,13];
+let btB=[0,0,0,0,0,0,0,0],btI=0,btOk=0;
+function btVal(){return btB.reduce((a,v,i)=>a+v*Math.pow(2,7-i),0);}
+function btDraw(){const box=$('#bt-row');box.innerHTML='';
+  btB.forEach((v,i)=>{const w=document.createElement('div');w.className='bit';
+    const p=Math.pow(2,7-i);
+    w.innerHTML='<button class="'+(v?'on':'')+'">'+v+'</button><span>'+p+'</span>';
+    w.firstChild.onclick=()=>{btB[i]=1-btB[i];btDraw();};box.appendChild(w);});
+  $('#bt-val').textContent=btVal();
+  const parts=btB.map((v,i)=>v?Math.pow(2,7-i):0).filter(x=>x);
+  $('#bt-sum').textContent=parts.length?parts.join(' + ')+' = '+btVal():'усі лампочки вимкнені';
+  $('#bt-task').innerHTML='Увімкни лампочки так, щоб вийшло <b>'+btT[btI]+'</b>.<span class="chip">'+btOk+' з 3</span>';}
+function btCheck(){if(btVal()===btT[btI]){btOk++;btI=(btI+1)%btT.length;
+    if(btOk>=3)mark('bits');btDraw();
+    say('#bt-v','Точно. Кожна лампочка вдвічі «дорожча» за сусідню праворуч. Наступне число: '+btT[btI]+'.',true);}
+  else say('#bt-v','Зараз '+btVal()+'. Починай із найбільшої лампочки, яка ще влазить у число.',false);}
+function btNew(){btI=(btI+1)%btT.length;btDraw();hide('#bt-v');}
+function btClear(){btB=[0,0,0,0,0,0,0,0];btDraw();}
+
+/* --- 2. Одиниці інформації --- */
+T('units',{g:0,ic:'💾',t:'Байти, кілобайти, гігабайти',s:'Скільки фото влізе на флешку',html:`
+<div class="panel">
+  <div class="task">Пересувай повзунок і дивись, як те саме число виглядає в різних одиницях.</div>
+  <div class="big" id="un-val"></div>
+  <input type="range" min="0" max="40" value="20" id="un-r" oninput="unDraw()">
+  <table class="tt" id="un-tt"></table>
+  <div class="hintline" id="un-cmp"></div>
+  <div class="row center" style="margin-top:10px"><input type="number" id="un-in" style="width:150px;text-align:center" placeholder="фото по 4 МБ на 16 ГБ">
+    <button class="btn small" onclick="unCheck()">Скільки фото?</button></div>
+  <div class="verdict" id="un-v"></div>
+  <div class="legend">У комп’ютері рахують не десятками, а двійками: 1 КБ = 1024 байти, бо 1024 = 2¹⁰.</div>
+</div>`,init(){unDraw();}});
+function unDraw(){const k=+$('#un-r').value,bytes=Math.pow(2,k);
+  const fmt=n=>n>=1?n.toFixed(n<10?2:0):n.toFixed(3);
+  $('#un-val').textContent=bytes>=1073741824?fmt(bytes/1073741824)+' ГБ':bytes>=1048576?fmt(bytes/1048576)+' МБ':bytes>=1024?fmt(bytes/1024)+' КБ':bytes+' Б';
+  $('#un-tt').innerHTML='<tr><th>біти</th><th>байти</th><th>КБ</th><th>МБ</th></tr><tr><td>'+
+    (bytes*8).toLocaleString('uk')+'</td><td>'+bytes.toLocaleString('uk')+'</td><td>'+fmt(bytes/1024)+'</td><td>'+fmt(bytes/1048576)+'</td></tr>';
+  const ex=bytes<1024?'одна буква — це 1–2 байти':bytes<102400?'сторінка тексту ≈ 3 КБ':
+    bytes<10485760?'фото з телефона ≈ 4 МБ':bytes<1073741824?'пісня ≈ 5 МБ, серія мультика ≈ 300 МБ':'фільм ≈ 2 ГБ';
+  $('#un-cmp').textContent='Для порівняння: '+ex;}
+function unCheck(){const v=+$('#un-in').value;
+  if(v===4096){mark('units');say('#un-v','Так: 16 ГБ = 16 × 1024 МБ = 16384 МБ, а 16384 : 4 = <b>4096</b> фото.',true);}
+  else say('#un-v','Ще ні. Спершу переведи 16 ГБ у мегабайти — множ на 1024.',false);}
+
+/* --- 3. Кодування тексту --- */
+T('text',{g:0,ic:'🔤',t:'Букви стають числами',s:'Що насправді зберігає комп’ютер',html:`
+<div class="panel">
+  <div class="task">Напиши слово — і подивись, у що воно перетворюється всередині комп’ютера.</div>
+  <input type="text" id="tx-in" value="сова" oninput="txDraw()" maxlength="12">
+  <div style="margin-top:12px;font-size:14px;color:var(--ink-2)">номери букв в алфавіті</div>
+  <div class="cipher-out" id="tx-num"></div>
+  <div style="margin-top:8px;font-size:14px;color:var(--ink-2)">ті самі номери у двійковому коді</div>
+  <div class="cipher-out" id="tx-bin" style="font-size:14px"></div>
+  <div class="hintline" id="tx-state"></div>
+  <div class="verdict" id="tx-v"></div>
+  <div class="legend">Комп’ютер не знає букв — лише числа. Таблиця, яка каже, що «а» це 1, називається кодуванням; сучасне зветься Unicode.</div>
+</div>`,init(){txDraw();}});
+const AL='абвгґдеєжзиіїйклмнопрстуфхцчшщьюя';
+function txDraw(){const w=$('#tx-in').value.toLowerCase();
+  const nums=[...w].map(c=>{const i=AL.indexOf(c);return i<0?0:i+1;});
+  $('#tx-num').textContent=nums.join(' · ');
+  $('#tx-bin').textContent=nums.map(n=>n.toString(2).padStart(6,'0')).join(' ');
+  const bits=nums.length*6;
+  $('#tx-state').textContent='Букв: '+nums.length+' · бітів у цьому записі: '+bits+' ≈ '+Math.ceil(bits/8)+' байт';
+  if(w.length>=4){mark('text');
+    say('#tx-v','Одна буква нашого алфавіту вміщається в 6 біт, бо 2⁶ = 64 > 33. У справжньому Unicode на кирилицю відводять 2 байти — щоб вистачило на всі мови світу.',true);}}
+
+/* --- 4. Піксельний малюнок --- */
+T('pixel',{g:0,ic:'🖼',t:'Малюнок із пікселів',s:'Чому фото важить мегабайти',html:`
+<div class="panel">
+  <div class="task">Намалюй щось на сітці 8×8 — і подивись, скільки місця це займе.</div>
+  <div class="pix" id="px-grid" style="grid-template-columns:repeat(8,1fr)"></div>
+  <div class="hintline" id="px-state"></div>
+  <div class="row center" style="margin-top:10px"><button class="btn ghost" onclick="pxClear()">Стерти</button>
+    <button class="btn" onclick="pxBig()">А якщо як у телефона?</button></div>
+  <div class="verdict" id="px-v"></div>
+  <div class="legend">Чорно-білий піксель — це 1 біт. Кольоровий — 3 байти: скільки червоного, зеленого й синього.</div>
+</div>`,init(){pxOn={};pxDraw();}});
+let pxOn={};
+function pxDraw(){const g=$('#px-grid');g.innerHTML='';
+  for(let i=0;i<64;i++){const b=document.createElement('button');b.className=pxOn[i]?'on':'';
+    (function(k){b.onclick=()=>{pxOn[k]=!pxOn[k];pxDraw();};})(i);g.appendChild(b);}
+  const n=Object.keys(pxOn).filter(k=>pxOn[k]).length;
+  $('#px-state').textContent='Зафарбовано '+n+' з 64 пікселів · чорно-білий малюнок = 64 біти = 8 байт';}
+function pxClear(){pxOn={};pxDraw();hide('#px-v');}
+function pxBig(){mark('pixel');
+  say('#px-v','Камера телефона — приблизно 4000 × 3000 пікселів, це 12 мільйонів. Помнож на 3 байти кольору: вийде <b>36 МБ</b> на одне фото. Тому картинки стискають — так з’явились формати JPEG і PNG.',true);}
+
+/* --- 5. Кольори RGB --- */
+T('rgb',{g:0,ic:'🎨',t:'Три лампочки кольору',s:'Звідки береться будь-який відтінок',html:`
+<div class="panel">
+  <div class="task" id="rg-task">Змішай червоне, зелене й синє світло. Отримай заданий колір.</div>
+  <div style="height:96px;border-radius:14px;border:2px solid var(--line);margin:10px 0" id="rg-box"></div>
+  <div style="font-size:14px;color:var(--ink-2)">червоний <b id="rg-rL">255</b></div>
+  <input type="range" min="0" max="255" value="255" id="rg-r" oninput="rgDraw()">
+  <div style="font-size:14px;color:var(--ink-2)">зелений <b id="rg-gL">255</b></div>
+  <input type="range" min="0" max="255" value="255" id="rg-g" oninput="rgDraw()">
+  <div style="font-size:14px;color:var(--ink-2)">синій <b id="rg-bL">255</b></div>
+  <input type="range" min="0" max="255" value="255" id="rg-b" oninput="rgDraw()">
+  <div class="big" id="rg-code"></div>
+  <div class="row center"><button class="btn" onclick="rgCheck()">Перевірити</button>
+    <button class="btn ghost" onclick="rgNext()">Інший колір</button></div>
+  <div class="verdict" id="rg-v"></div>
+  <div class="legend">Кожен канал — від 0 до 255, тобто один байт. Разом 256³ ≈ 16,7 мільйона відтінків.</div>
+</div>`,init(){rgI=0;rgOk=0;rgDraw();}});
+const rgT=[{n:'жовтий',c:[255,255,0]},{n:'білий',c:[255,255,255]},{n:'чорний',c:[0,0,0]},
+ {n:'фіолетовий',c:[128,0,255]},{n:'помаранчевий',c:[255,140,0]}];
+let rgI=0,rgOk=0;
+function rgDraw(){const r=+$('#rg-r').value,g=+$('#rg-g').value,b=+$('#rg-b').value;
+  $('#rg-rL').textContent=r;$('#rg-gL').textContent=g;$('#rg-bL').textContent=b;
+  $('#rg-box').style.background='rgb('+r+','+g+','+b+')';
+  const hex=n=>n.toString(16).padStart(2,'0');
+  $('#rg-code').textContent='rgb('+r+', '+g+', '+b+')  ·  #'+hex(r)+hex(g)+hex(b);
+  $('#rg-task').innerHTML='Отримай <b>'+rgT[rgI].n+'</b> колір.<span class="chip">'+rgOk+' з 3</span>';}
+function rgCheck(){const v=[+$('#rg-r').value,+$('#rg-g').value,+$('#rg-b').value],t=rgT[rgI].c;
+  const d=v.reduce((a,x,i)=>a+Math.abs(x-t[i]),0);
+  if(d<=90){rgOk++;if(rgOk>=3)mark('rgb');rgDraw();
+    say('#rg-v','Схоже! Жовтий — це червоне плюс зелене: у світлі кольори змішуються не так, як фарби.',true);}
+  else say('#rg-v','Ще не той відтінок. Підказка: щоб отримати білий — усі три на максимум, чорний — усі на нуль.',false);}
+function rgNext(){rgI=(rgI+1)%rgT.length;rgDraw();hide('#rg-v');}
+
+/* --- 6. Виконавець на сітці --- */
+T('robot',{g:1,ic:'🤖',t:'Виконавець',s:'Склади програму й запусти',html:`
+<div class="panel">
+  <div class="row" style="margin-bottom:10px" id="rb-lv"></div>
+  <div class="task" id="rb-task"></div>
+  <div class="rgrid" id="rb-grid"></div>
+  <div class="prog" id="rb-prog"></div>
+  <div class="row center">
+    <button class="btn ghost small" onclick="rbAdd('f')">↑ вперед</button>
+    <button class="btn ghost small" onclick="rbAdd('l')">↺ вліво</button>
+    <button class="btn ghost small" onclick="rbAdd('r')">↻ вправо</button>
+    <button class="btn ghost small" onclick="rbAdd('x')">✖ стерти</button></div>
+  <div class="row center" style="margin-top:8px"><button class="btn" onclick="rbRun()">Запустити</button>
+    <button class="btn ghost" onclick="rbLoad(rbI)">Спочатку</button></div>
+  <div class="hintline" id="rb-state"></div>
+  <div class="verdict" id="rb-v"></div>
+  <div class="legend">Виконавець робить рівно те, що написано, — не те, що ти мав на увазі. Це головна властивість алгоритму.</div>
+</div>`,init(){rbI=0;rbOk=0;rbLoad(0);}});
+const rbL=[{w:5,h:4,start:[0,3],dir:0,goal:[4,0],walls:[],hint:'Проста дорога: угору й праворуч.'},
+ {w:5,h:4,start:[0,3],dir:0,goal:[4,3],walls:[[2,3],[2,2]],hint:'Стіна на дорозі — доведеться обійти.'},
+ {w:6,h:5,start:[0,4],dir:0,goal:[5,0],walls:[[1,3],[3,3],[3,1],[4,1]],hint:'Тут без плану не пройти: спершу подумай, потім став команди.'}];
+let rbI=0,rbOk=0,RB={x:0,y:0,d:0},rbProg=[],rbTimer=null;
+function rbLoad(i){rbI=i;stopAll();const L=rbL[i];RB={x:L.start[0],y:L.start[1],d:L.dir};rbProg=[];hide('#rb-v');
+  $('#rb-lv').innerHTML=rbL.map((l,k)=>'<button class="btn small'+(k===i?'':' ghost')+'" onclick="rbLoad('+k+')">рівень '+(k+1)+'</button>').join('');
+  $('#rb-task').innerHTML=L.hint+'<span class="chip">'+rbOk+' з 3</span>';
+  rbDraw();}
+function rbDraw(step){const L=rbL[rbI],g=$('#rb-grid');
+  g.style.gridTemplateColumns='repeat('+L.w+',1fr)';g.innerHTML='';
+  const arrows=['↑','→','↓','←'];
+  for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++){const d=document.createElement('div');
+    const isW=L.walls.some(w=>w[0]===x&&w[1]===y);
+    if(isW)d.className='wall';
+    else if(RB.x===x&&RB.y===y){d.className='rob';d.textContent=arrows[RB.d];}
+    else if(L.goal[0]===x&&L.goal[1]===y){d.className='goal';d.textContent='★';}
+    g.appendChild(d);}
+  const p=$('#rb-prog');p.innerHTML='';
+  const names={f:'вперед',l:'вліво',r:'вправо'};
+  rbProg.forEach((c,i)=>{const el=document.createElement('span');
+    el.className='cmd'+(step===i?' now':'');el.textContent=(i+1)+'. '+names[c];p.appendChild(el);});
+  $('#rb-state').textContent='Команд у програмі: '+rbProg.length;}
+function rbAdd(c){if(c==='x')rbProg.pop();else rbProg.push(c);rbDraw();}
+function rbRun(){stopAll();const L=rbL[rbI];RB={x:L.start[0],y:L.start[1],d:L.dir};let i=0;
+  rbTimer=every(()=>{if(!document.querySelector('#rb-grid'))return;
+    if(i>=rbProg.length){stopAll();
+      const win=RB.x===L.goal[0]&&RB.y===L.goal[1];
+      if(win){rbOk++;if(rbOk>=3)mark('robot');
+        say('#rb-v','Зірку зібрано за '+rbProg.length+' команд. Спробуй коротшу програму — це і є оптимізація.',true);}
+      else say('#rb-v','Програма закінчилась, а зірки немає. Перевір кожну команду по черзі.',false);
+      rbDraw();return;}
+    const c=rbProg[i];
+    if(c==='l')RB.d=(RB.d+3)%4; else if(c==='r')RB.d=(RB.d+1)%4;
+    else{const dx=[0,1,0,-1][RB.d],dy=[-1,0,1,0][RB.d];
+      const nx=RB.x+dx,ny=RB.y+dy;
+      const blocked=nx<0||ny<0||nx>=L.w||ny>=L.h||L.walls.some(w=>w[0]===nx&&w[1]===ny);
+      if(blocked){stopAll();say('#rb-v','Виконавець уперся у стіну на команді '+(i+1)+'. Він не вміє обходити перешкоди сам.',false);rbDraw(i);return;}
+      RB.x=nx;RB.y=ny;}
+    rbDraw(i);i++;},420);}
+
+/* --- 7. Розгалуження --- */
+T('branch',{g:1,ic:'🔀',t:'Якщо — то — інакше',s:'Блок-схема з умовою',html:`
+<div class="panel">
+  <div class="task">Обери значення умов — і подивись, якою гілкою піде алгоритм.</div>
+  <div class="row center" style="margin:10px 0">
+    <button class="btn small" id="br-a" onclick="brT('a')">дощ: ні</button>
+    <button class="btn small ghost" id="br-b" onclick="brT('b')">холодно: ні</button></div>
+  <svg viewBox="0 0 320 250" height="245" id="br-svg"></svg>
+  <div class="big" id="br-out"></div>
+  <div class="hintline" id="br-state"></div>
+  <div class="verdict" id="br-v"></div>
+  <div class="legend">Ромб — це перевірка умови. З нього завжди виходять рівно дві стрілки: «так» і «ні».</div>
+</div>`,init(){brRain=false;brCold=false;brSeen={};brDraw();}});
+let brRain=false,brCold=false,brSeen={};
+function brT(k){if(k==='a')brRain=!brRain;else brCold=!brCold;brDraw();}
+function brDraw(){$('#br-a').className='btn small'+(brRain?'':' ghost');$('#br-a').textContent='дощ: '+(brRain?'так':'ні');
+  $('#br-b').className='btn small'+(brCold?'':' ghost');$('#br-b').textContent='холодно: '+(brCold?'так':'ні');
+  const out=brRain?'узяти парасольку':brCold?'вдягнути куртку':'іти як є';
+  brSeen[out]=1;
+  const hi=c=>c?'#5B4BD6':'#C9C6BB';
+  let s='<rect x="105" y="8" width="110" height="34" rx="17" fill="#EFEDE6" stroke="#8B8578" stroke-width="2"/><text x="160" y="30" text-anchor="middle" font-size="14">початок</text>';
+  s+='<line x1="160" y1="42" x2="160" y2="60" stroke="#8B8578" stroke-width="2"/>';
+  s+='<polygon points="160,60 235,92 160,124 85,92" fill="#EBE8FB" stroke="'+hi(true)+'" stroke-width="2"/><text x="160" y="97" text-anchor="middle" font-size="13">дощ?</text>';
+  s+='<line x1="235" y1="92" x2="285" y2="92" stroke="'+hi(brRain)+'" stroke-width="'+(brRain?3:2)+'"/><text x="248" y="84" font-size="11" fill="#5B6779">так</text>';
+  s+='<rect x="248" y="112" width="66" height="34" rx="8" fill="'+(brRain?'#EBE8FB':'#fff')+'" stroke="'+hi(brRain)+'" stroke-width="2"/><text x="281" y="134" text-anchor="middle" font-size="12">парасолька</text>';
+  s+='<line x1="160" y1="124" x2="160" y2="146" stroke="'+hi(!brRain)+'" stroke-width="'+(!brRain?3:2)+'"/><text x="166" y="140" font-size="11" fill="#5B6779">ні</text>';
+  s+='<polygon points="160,146 228,176 160,206 92,176" fill="#EBE8FB" stroke="'+hi(!brRain)+'" stroke-width="2"/><text x="160" y="181" text-anchor="middle" font-size="13">холодно?</text>';
+  s+='<rect x="6" y="158" width="62" height="34" rx="8" fill="'+((!brRain&&brCold)?'#EBE8FB':'#fff')+'" stroke="'+hi(!brRain&&brCold)+'" stroke-width="2"/><text x="37" y="180" text-anchor="middle" font-size="12">куртка</text>';
+  s+='<line x1="92" y1="176" x2="68" y2="176" stroke="'+hi(!brRain&&brCold)+'" stroke-width="'+((!brRain&&brCold)?3:2)+'"/>';
+  s+='<line x1="160" y1="206" x2="160" y2="222" stroke="'+hi(!brRain&&!brCold)+'" stroke-width="'+((!brRain&&!brCold)?3:2)+'"/>';
+  s+='<rect x="112" y="222" width="96" height="26" rx="8" fill="'+((!brRain&&!brCold)?'#EBE8FB':'#fff')+'" stroke="'+hi(!brRain&&!brCold)+'" stroke-width="2"/><text x="160" y="240" text-anchor="middle" font-size="12">іти як є</text>';
+  $('#br-svg').innerHTML=s;
+  $('#br-out').textContent=out;
+  $('#br-state').textContent='Перевірок пройдено: '+(brRain?1:2);
+  if(Object.keys(brSeen).length>=3){mark('branch');
+    say('#br-v','Ти пройшов усі три гілки. Зверни увагу: коли дощ, друга умова навіть не перевіряється — алгоритм уже пішов іншим шляхом.',true);}}
+
+/* --- 8. Цикл: черепашка --- */
+T('loop',{g:1,ic:'🐢',t:'Цикл малює фігуру',s:'Одна команда замість двадцяти',html:`
+<div class="panel">
+  <div class="task" id="lp-task"></div>
+  <div class="row center"><div style="flex:1">повторити <b id="lp-nL">4</b> рази<input type="range" min="2" max="12" value="4" id="lp-n" oninput="lpDraw()"></div></div>
+  <div class="row center"><div style="flex:1">поворот на <b id="lp-aL">90</b>°<input type="range" min="30" max="180" step="5" value="90" id="lp-a" oninput="lpDraw()"></div></div>
+  <svg viewBox="0 0 320 220" height="215" id="lp-svg"></svg>
+  <div class="hintline" id="lp-state"></div>
+  <div class="row center"><button class="btn" onclick="lpCheck()">Перевірити фігуру</button>
+    <button class="btn ghost" onclick="lpNext()">Інша фігура</button></div>
+  <div class="verdict" id="lp-v"></div>
+  <div class="legend">Щоб фігура замкнулась, кількість поворотів помножена на кут має дати 360°.</div>
+</div>`,init(){lpI=0;lpOk=0;lpDraw();}});
+const lpT=[{n:'квадрат',k:4,a:90},{n:'трикутник',k:3,a:120},{n:'шестикутник',k:6,a:60},{n:'зірку з 5 променів',k:5,a:144}];
+let lpI=0,lpOk=0;
+function lpDraw(){const n=+$('#lp-n').value,a=+$('#lp-a').value;
+  $('#lp-nL').textContent=n;$('#lp-aL').textContent=a;
+  let x=160,y=170,dir=-90,d='M '+x+' '+y;
+  for(let i=0;i<n;i++){const r=dir*Math.PI/180;x+=Math.cos(r)*60;y+=Math.sin(r)*60;d+=' L '+x.toFixed(1)+' '+y.toFixed(1);dir+=a;}
+  $('#lp-svg').innerHTML='<path d="'+d+'" fill="none" stroke="#5B4BD6" stroke-width="3" stroke-linejoin="round"/>'+
+    '<circle cx="160" cy="170" r="5" fill="#E9A800"/>';
+  $('#lp-state').textContent='повторити '+n+' [вперед 60, поворот '+a+'°] · '+n+' × '+a+'° = '+(n*a)+'°';
+  $('#lp-task').innerHTML='Налаштуй цикл так, щоб вийшов <b>'+lpT[lpI].n+'</b>.<span class="chip">'+lpOk+' з 3</span>';}
+function lpCheck(){const n=+$('#lp-n').value,a=+$('#lp-a').value,t=lpT[lpI];
+  if(n===t.k&&a===t.a){lpOk++;if(lpOk>=3)mark('loop');lpDraw();
+    say('#lp-v','Так! '+n+' × '+a+'° = '+(n*a)+'° — фігура замкнулась. Без циклу довелось би писати '+(n*2)+' команд.',true);}
+  else say('#lp-v','Ще ні. Порахуй: скільки поворотів і по скільки градусів дадуть повне коло?',false);}
+function lpNext(){lpI=(lpI+1)%lpT.length;lpDraw();hide('#lp-v');}
+
+/* --- 9. Сортування --- */
+T('sort',{g:1,ic:'📊',t:'Сортування бульбашкою',s:'Як комп’ютер наводить лад',html:`
+<div class="panel">
+  <div class="task">Натисни «крок» — алгоритм порівняє двох сусідів і за потреби поміняє їх місцями.</div>
+  <div class="bars" id="sr-bars"></div>
+  <div class="hintline" id="sr-state"></div>
+  <div class="row center"><button class="btn" onclick="srStep()">Крок</button>
+    <button class="btn ghost" onclick="srAuto()">Автоматично</button>
+    <button class="btn ghost" onclick="srNew()">Нові числа</button></div>
+  <div class="verdict" id="sr-v"></div>
+  <div class="legend">Найбільше число щоразу «спливає» вправо, як бульбашка. Для 8 стовпчиків потрібно до 28 порівнянь, для 100 — майже 5000.</div>
+</div>`,init(){srNew();}});
+let SR={a:[],i:0,j:0,cmp:0,swap:0,done:false};
+function srNew(){stopAll();SR={a:Array.from({length:8},()=>2+Math.floor(Math.random()*10)),i:0,j:0,cmp:0,swap:0,done:false};
+  hide('#sr-v');srDraw();}
+function srDraw(){const box=$('#sr-bars');box.innerHTML='';
+  const mx=Math.max.apply(null,SR.a);
+  SR.a.forEach((v,i)=>{const d=document.createElement('div');
+    d.style.height=(v/mx*120)+'px';
+    if(SR.done||i>=SR.a.length-SR.i)d.className='done';
+    else if(i===SR.j||i===SR.j+1)d.className='cmp';
+    d.textContent='';box.appendChild(d);});
+  $('#sr-state').textContent='Порівнянь: '+SR.cmp+' · обмінів: '+SR.swap+' · '+SR.a.join(', ');}
+function srStep(){if(SR.done)return;
+  if(SR.j>=SR.a.length-1-SR.i){SR.i++;SR.j=0;
+    if(SR.i>=SR.a.length-1){SR.done=true;mark('sort');
+      say('#sr-v','Відсортовано за '+SR.cmp+' порівнянь. Це «бульбашка» — простий, але повільний спосіб: комп’ютери для великих даних використовують швидші.',true);}}
+  else{SR.cmp++;
+    if(SR.a[SR.j]>SR.a[SR.j+1]){const t=SR.a[SR.j];SR.a[SR.j]=SR.a[SR.j+1];SR.a[SR.j+1]=t;SR.swap++;}
+    SR.j++;}
+  srDraw();}
+function srAuto(){stopAll();every(()=>{if(!document.querySelector('#sr-bars')||SR.done){stopAll();return;}srStep();},160);}
+
+/* --- 10. Двійковий пошук --- */
+T('search',{g:1,ic:'🎯',t:'Вгадати за 7 питань',s:'Двійковий пошук',html:`
+<div class="panel">
+  <div class="task">Я загадав число від 1 до 100. Кажи, більше воно чи менше — і рахуй питання.</div>
+  <div class="big" id="se-guess"></div>
+  <div class="hintline" id="se-range"></div>
+  <div class="row center"><button class="btn ghost" onclick="seAns(-1)">менше</button>
+    <button class="btn" onclick="seAns(0)">вгадав!</button>
+    <button class="btn ghost" onclick="seAns(1)">більше</button></div>
+  <div class="row center" style="margin-top:8px"><button class="btn ghost small" onclick="seNew()">Заново</button></div>
+  <div class="verdict" id="se-v"></div>
+  <div class="legend">Щоразу відкидається половина варіантів: 100 → 50 → 25 → 13 → 7 → 4 → 2 → 1. Тому семи питань завжди досить.</div>
+</div>`,init(){seNew();}});
+let SE={lo:1,hi:100,n:0};
+function seNew(){SE={lo:1,hi:100,n:0};hide('#se-v');seDraw();}
+function seDraw(){const mid=Math.floor((SE.lo+SE.hi)/2);
+  $('#se-guess').textContent='Це '+mid+'?';
+  $('#se-range').textContent='Питання: '+SE.n+' · лишилось варіантів: '+(SE.hi-SE.lo+1)+' (від '+SE.lo+' до '+SE.hi+')';}
+function seAns(d){const mid=Math.floor((SE.lo+SE.hi)/2);SE.n++;
+  if(d===0){mark('search');
+    return say('#se-v','Вгадано за '+SE.n+' питань! Кожне питання ділило залишок навпіл — це двійковий пошук. Так само працює пошук слова у словнику.',true);}
+  if(d<0)SE.hi=mid-1;else SE.lo=mid+1;
+  if(SE.lo>SE.hi)return say('#se-v','Десь була помилка у відповідях — числа з такими умовами не існує.',false);
+  seDraw();}
+
+/* --- 11. Файли й папки --- */
+T('files',{g:2,ic:'📁',t:'Дерево папок',s:'Що таке шлях до файлу',html:`
+<div class="panel">
+  <div class="task" id="fl-task"></div>
+  <div class="tree" id="fl-tree"></div>
+  <div class="hintline" id="fl-path"></div>
+  <div class="verdict" id="fl-v"></div>
+  <div class="legend">Шлях — це маршрут від диска до файлу. Розширення після крапки каже, якою програмою відкривати.</div>
+</div>`,init(){flOpen={'D:':1};flOk=0;flI=0;flDraw();}});
+const FS={name:'D:',kids:[
+ {name:'Школа',kids:[
+   {name:'Математика',kids:[{name:'домашка.docx'},{name:'формули.pdf'}]},
+   {name:'Інформатика',kids:[{name:'проєкт.pptx'},{name:'схема.png'}]}]},
+ {name:'Фото',kids:[{name:'Літо',kids:[{name:'море.jpg'},{name:'риболовля.jpg'}]}]},
+ {name:'Ігри',kids:[{name:'blender_модель.blend'}]}]};
+const flTasks=[{f:'домашка.docx',p:'D:\\Школа\\Математика\\домашка.docx'},
+ {f:'море.jpg',p:'D:\\Фото\\Літо\\море.jpg'},
+ {f:'схема.png',p:'D:\\Школа\\Інформатика\\схема.png'}];
+let flOpen={},flOk=0,flI=0;
+function flDraw(){const box=$('#fl-tree');box.innerHTML='';
+  const walk=(node,depth,path)=>{
+    const isFile=!node.kids;
+    const el=document.createElement('div');el.style.paddingLeft=(depth*18)+'px';
+    const b=document.createElement('button');
+    b.className=isFile?'':'fold';
+    b.textContent=(isFile?'📄 ':(flOpen[path]?'📂 ':'📁 '))+node.name;
+    (function(np,file){b.onclick=()=>{if(file)flPick(node.name,np);else{flOpen[np]=!flOpen[np];flDraw();}};})(path,isFile);
+    el.appendChild(b);box.appendChild(el);
+    if(!isFile&&flOpen[path])node.kids.forEach(k=>walk(k,depth+1,path+'\\'+k.name));};
+  walk(FS,0,'D:');
+  $('#fl-task').innerHTML='Знайди файл <b>'+flTasks[flI].f+'</b> і натисни на нього.<span class="chip">'+flOk+' з 3</span>';}
+function flPick(name,path){
+  $('#fl-path').textContent='Шлях: '+path;
+  if(name===flTasks[flI].f){flOk++;flI=(flI+1)%flTasks.length;if(flOk>=3)mark('files');flDraw();
+    say('#fl-v','Знайдено. Повний шлях: <b>'+path+'</b> — саме так комп’ютер розуміє, де лежить файл.',true);}
+  else say('#fl-v','Це інший файл. Подумай, у якій папці мала б лежати «'+flTasks[flI].f+'».',false);}
+
+/* --- 12. Як ходить інтернет --- */
+T('net',{g:2,ic:'🌐',t:'Пакети в мережі',s:'Чому інтернет важко зламати',html:`
+<div class="panel">
+  <div class="task">Надішли пакет із твого комп’ютера на сервер. Потім вимкни вузол посеред дороги.</div>
+  <svg viewBox="0 0 320 200" height="195" id="nt-svg"></svg>
+  <div class="row center"><button class="btn" onclick="ntSend()">Надіслати пакет</button>
+    <button class="btn ghost" onclick="ntReset()">Увімкнути всі вузли</button></div>
+  <div class="hintline" id="nt-state">Тисни на вузол, щоб вимкнути його.</div>
+  <div class="verdict" id="nt-v"></div>
+  <div class="legend">Мережа не має єдиної дороги: якщо вузол зник, пакет шукає інший маршрут. Саме так інтернет і задумували.</div>
+</div>`,init(){ntDead={};ntPath=[];ntReset();}});
+const NT={pos:[[24,100],[110,44],[110,156],[200,44],[200,156],[292,100]],
+  edges:[[0,1],[0,2],[1,3],[2,4],[1,4],[2,3],[3,5],[4,5]],names:['ти','A','B','C','D','сервер']};
+let ntDead={},ntPath=[],ntTimer=null,ntStep=0;
+function ntReset(){stopAll();ntDead={};ntPath=[];ntStep=0;hide('#nt-v');ntDraw();}
+function ntRoute(){const q=[[0]],seen={0:1};
+  while(q.length){const p=q.shift(),v=p[p.length-1];
+    if(v===5)return p;
+    NT.edges.forEach(e=>{const n=e[0]===v?e[1]:e[1]===v?e[0]:-1;
+      if(n<0||seen[n]||ntDead[n])return;seen[n]=1;q.push(p.concat([n]));});}
+  return null;}
+function ntDraw(){let s='';
+  NT.edges.forEach(e=>{const a=NT.pos[e[0]],b=NT.pos[e[1]];
+    const used=ntPath.some((v,i)=>i<ntPath.length-1&&((ntPath[i]===e[0]&&ntPath[i+1]===e[1])||(ntPath[i]===e[1]&&ntPath[i+1]===e[0])));
+    s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="'+(used?'#5B4BD6':'#D8D3C4')+'" stroke-width="'+(used?4:2)+'"/>';});
+  NT.pos.forEach((p,i)=>{const dead=ntDead[i];
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="20" fill="'+(dead?'#EFEDE6':i===0||i===5?'#EBE8FB':'#fff')+'" stroke="'+(dead?'#C9C6BB':'#5B4BD6')+'" stroke-width="2" style="cursor:pointer" onclick="ntKill('+i+')"/>'+
+       '<text x="'+p[0]+'" y="'+(p[1]+5)+'" text-anchor="middle" font-size="11" font-weight="600" fill="'+(dead?'#C4C0B4':'#1E2A3A')+'" pointer-events="none">'+NT.names[i]+'</text>';});
+  if(ntPath.length&&ntStep<ntPath.length){const p=NT.pos[ntPath[ntStep]];
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="7" fill="#E9A800"/>';}
+  $('#nt-svg').innerHTML=s;}
+function ntKill(i){if(i===0||i===5)return;ntDead[i]=!ntDead[i];ntPath=[];ntDraw();
+  $('#nt-state').textContent=Object.keys(ntDead).filter(k=>ntDead[k]).length?'Вимкнено вузлів: '+Object.keys(ntDead).filter(k=>ntDead[k]).length:'Усі вузли працюють.';}
+function ntSend(){stopAll();const path=ntRoute();
+  if(!path){ntPath=[];ntDraw();return say('#nt-v','Усі маршрути перекрито — пакет не дійде. У справжньому інтернеті доріг набагато більше.',false);}
+  ntPath=path;ntStep=0;ntDraw();
+  ntTimer=every(()=>{if(!document.querySelector('#nt-svg'))return;ntStep++;ntDraw();
+    if(ntStep>=ntPath.length){stopAll();mark('net');
+      say('#nt-v','Пакет дійшов маршрутом: '+path.map(i=>NT.names[i]).join(' → ')+'. Вимкни вузол на цьому шляху й надішли ще раз — пакет знайде обхід.',true);}},450);}
+
+/* --- 13. Надійність пароля --- */
+T('pass',{g:3,ic:'🔑',t:'Наскільки міцний пароль',s:'Чому «12345» ламають миттєво',html:`
+<div class="panel">
+  <div class="task">Пиши пароль — прилад покаже, скільки варіантів довелося б перебрати зловмиснику.</div>
+  <input type="text" id="pw-in" value="12345" oninput="pwDraw()">
+  <div class="big" id="pw-time"></div>
+  <div class="hintline" id="pw-state"></div>
+  <div class="row center" id="pw-tips"></div>
+  <div class="verdict" id="pw-v"></div>
+  <div class="legend">Довжина важливіша за складність: «конякапарасолька7» надійніше за «Qw!7z».</div>
+</div>`,init(){pwBest=0;pwDraw();}});
+let pwBest=0;
+function pwDraw(){const p=$('#pw-in').value;
+  let set=0;
+  if(/[a-zа-яґєії]/.test(p))set+=33;
+  if(/[A-ZА-ЯҐЄІЇ]/.test(p))set+=33;
+  if(/[0-9]/.test(p))set+=10;
+  if(/[^0-9a-zA-Zа-яА-ЯґєііїЇ]/.test(p))set+=20;
+  const combos=p.length?Math.pow(set||1,p.length):0;
+  const secs=combos/1e9;
+  const fmt=s=>s<1?'менш ніж секунда':s<60?Math.round(s)+' с':s<3600?Math.round(s/60)+' хв':
+    s<86400?Math.round(s/3600)+' год':s<31536000?Math.round(s/86400)+' днів':
+    s<31536000*1000?Math.round(s/31536000)+' років':'мільйони років';
+  const weak=['12345','123456','qwerty','password','пароль','11111','00000'];
+  const isWeak=weak.some(w=>p.toLowerCase().includes(w));
+  $('#pw-time').textContent=isWeak?'миттєво':fmt(secs);
+  $('#pw-state').textContent='Довжина '+p.length+' · різних символів у наборі '+set+' · варіантів ≈ '+(combos>1e15?combos.toExponential(1):Math.round(combos).toLocaleString('uk'));
+  $('#pw-tips').innerHTML='<span class="chip">'+(p.length>=12?'✓':'✗')+' 12+ символів</span>'+
+    '<span class="chip">'+(/[0-9]/.test(p)?'✓':'✗')+' цифри</span>'+
+    '<span class="chip">'+(/[A-ZА-Я]/.test(p)?'✓':'✗')+' великі букви</span>'+
+    '<span class="chip">'+(isWeak?'✗ є у словниках':'✓ не зі списку популярних')+'</span>';
+  if(isWeak)say('#pw-v','Такий пароль є в перших рядках будь-якого словника зламу — його підберуть за частку секунди, скільки б варіантів не було в теорії.',false);
+  else if(secs>31536000*100){mark('pass');
+    say('#pw-v','Ось це вже надійно. Але головне правило лишається: для кожного сайту — свій пароль.',true);}
+  else hide('#pw-v');}
+
+/* --- 14. Знайди підозріле --- */
+T('phish',{g:3,ic:'🎣',t:'Лист від шахрая',s:'Чотири ознаки фішингу',html:`
+<div class="panel">
+  <div class="task" id="ph-task"></div>
+  <div class="mail" id="ph-mail"></div>
+  <div class="verdict" id="ph-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="phInit()">Заново</button></div>
+  <div class="legend">Справжня служба ніколи не просить пароль листом і не змушує «діяти протягом години».</div>
+</div>`,init(){phInit();}});
+const PH=[{t:'support@bank-ua.xyz',w:'Дивна адреса: справжній банк не пише з домену .xyz'},
+ {t:'протягом 24 годин',w:'Штучна терміновість — щоб ти не встиг подумати'},
+ {t:'введіть пароль і код із СМС',w:'Пароль і код із СМС не питає жодна справжня служба'},
+ {t:'bank-ua-secure.com/login',w:'Підроблене посилання: схоже на справжнє, але домен інший'}];
+let phFound={};
+function phInit(){phFound={};hide('#ph-v');
+  $('#ph-mail').innerHTML='Від: <mark data-i="0">support@bank-ua.xyz</mark><br><br>'+
+    'Шановний клієнте!<br>Ваш рахунок буде заблоковано <mark data-i="1">протягом 24 годин</mark>. '+
+    'Щоб зберегти доступ, перейдіть за посиланням і <mark data-i="2">введіть пароль і код із СМС</mark>.<br><br>'+
+    '<mark data-i="3">bank-ua-secure.com/login</mark><br><br>З повагою, служба підтримки.';
+  $$('#ph-mail mark').forEach(m=>{m.onclick=()=>phTap(+m.dataset.i,m);});
+  phDraw();}
+function phDraw(){$('#ph-task').innerHTML='Знайди в листі ознаки шахрайства — тисни на підозрілі місця.<span class="chip">'+Object.keys(phFound).length+' з 4</span>';}
+function phTap(i,el){if(phFound[i])return;phFound[i]=1;el.classList.add('hit');phDraw();
+  say('#ph-v',PH[i].w,true);
+  if(Object.keys(phFound).length>=4){mark('phish');
+    say('#ph-v','Усі чотири ознаки знайдено. Якщо хоч одна з них є — не переходь за посиланням, а зайди на сайт банку самостійно.',true);}}
+
+/* --- 15. Растр і вектор --- */
+T('vector',{g:3,ic:'🔍',t:'Растр проти вектора',s:'Чому одні картинки не пікселяться',html:`
+<div class="panel">
+  <div class="task">Збільшуй зображення. Ліворуч — з пікселів, праворуч — з формул.</div>
+  <div class="row"><div style="flex:1;text-align:center"><div style="font-size:14px;color:var(--ink-2)">растр (фото)</div>
+      <svg viewBox="0 0 100 100" height="130" id="vc-a"></svg></div>
+    <div style="flex:1;text-align:center"><div style="font-size:14px;color:var(--ink-2)">вектор (схема)</div>
+      <svg viewBox="0 0 100 100" height="130" id="vc-b"></svg></div></div>
+  <div style="font-size:14px;color:var(--ink-2);margin-top:8px">збільшення <b id="vc-zL">1</b>×</div>
+  <input type="range" min="1" max="12" value="1" id="vc-z" oninput="vcDraw()">
+  <div class="verdict" id="vc-v"></div>
+  <div class="legend">Логотипи й креслення роблять векторними — їх можна збільшити на білборд. Фото завжди растрове.</div>
+</div>`,init(){vcDraw();}});
+function vcDraw(){const z=+$('#vc-z').value;$('#vc-zL').textContent=z;
+  const n=Math.max(2,Math.round(24/z));const s=100/n;
+  let a='';
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    const cx=(x+0.5)/n,cy=(y+0.5)/n;
+    const d=Math.hypot(cx-0.5,cy-0.55);
+    const col=d<0.3?'#5B4BD6':d<0.42?'#B7AEEA':'#F4F2EC';
+    a+='<rect x="'+(x*s)+'" y="'+(y*s)+'" width="'+(s+0.5)+'" height="'+(s+0.5)+'" fill="'+col+'"/>';}
+  $('#vc-a').innerHTML=a;
+  $('#vc-b').innerHTML='<rect width="100" height="100" fill="#F4F2EC"/><circle cx="50" cy="55" r="30" fill="#5B4BD6"/>';
+  if(z>=8){mark('vector');
+    say('#vc-v','Растр розсипався на квадратики — пікселів більше не стало, вони просто збільшились. Вектор лишився чітким: він зберігає не крапки, а формулу «коло радіусом 30».',true);}
+  else hide('#vc-v');}
+
+/* --- 16. Таблиця й формула --- */
+T('sheet',{g:3,ic:'🧮',t:'Формула в таблиці',s:'Чому електронна таблиця розумніша за зошит',html:`
+<div class="panel">
+  <div class="task">Зміни будь-яке число — і подивись, що станеться з підсумками. Нічого не треба переписувати.</div>
+  <table class="tt" id="sh-t"></table>
+  <div class="hintline" id="sh-state"></div>
+  <div class="row center" style="margin-top:10px"><button class="btn" onclick="shAsk()">Що робить формула?</button></div>
+  <div class="verdict" id="sh-v"></div>
+  <div class="legend">Формула завжди починається зі знака =. Вона зберігає не результат, а спосіб його обчислити.</div>
+</div>`,init(){shData=[[120,3],[45,10],[230,2],[80,5]];shDraw();}});
+let shData=[[120,3],[45,10],[230,2],[80,5]];
+const shNames=['Олівці','Зошити','Ручки','Гумки'];
+function shDraw(){let h='<tr><th>товар</th><th>ціна</th><th>кількість</th><th>сума = ціна × к-сть</th></tr>';
+  shData.forEach((r,i)=>{h+='<tr><td>'+shNames[i]+'</td>'+
+    '<td><input type="number" value="'+r[0]+'" style="width:70px;padding:4px;text-align:center" oninput="shSet('+i+',0,this.value)"></td>'+
+    '<td><input type="number" value="'+r[1]+'" style="width:60px;padding:4px;text-align:center" oninput="shSet('+i+',1,this.value)"></td>'+
+    '<td><b>'+(r[0]*r[1])+'</b></td></tr>';});
+  const tot=shData.reduce((a,r)=>a+r[0]*r[1],0);
+  h+='<tr><th colspan="3">Разом =СУМА(D2:D5)</th><th>'+tot+'</th></tr>';
+  $('#sh-t').innerHTML=h;
+  $('#sh-state').textContent='Загальна сума перерахувалась сама: '+tot+' грн';}
+function shSet(i,j,v){shData[i][j]=+v||0;shDraw();mark('sheet');}
+function shAsk(){say('#sh-v','У стовпці «сума» стоїть не число, а формула <b>=B2*C2</b>. Тому щойно ти міняєш ціну, сума й підсумок оновлюються самі. У зошиті довелося б перераховувати все вручну.',true);}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
