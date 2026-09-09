@@ -229,7 +229,7 @@ function sdSounds(w){
     if(c==="'"||c==='’')continue;
     out.push(c);}
   return out;}
-function sdDraw(){const w=$('#sd-in').value.trim();
+function sdDraw(){if(!document.querySelector('#sd-in'))return;const w=$('#sd-in').value.trim();
   const s=sdSounds(w);
   $('#sd-tr').textContent=w?'['+s.join('')+']':'';
   const letters=[...w].filter(c=>c!=="'"&&c!=='’').length;
@@ -259,7 +259,7 @@ const ssT=[{w:['о','ди','на','дцять'],a:2,n:'одинадцять'},{w
  {w:['за','вжди'],a:1,n:'завжди'},{w:['по','ми','лка'],a:2,n:'помилка'},
  {w:['ви','мо','ва'],a:1,n:'вимова'},{w:['чо','ти','рна','дцять'],a:2,n:'чотирнадцять'}];
 let ssI=0,ssOk=0;
-function ssDraw(){const t=ssT[ssI];$('#ss-task').innerHTML='Познач наголошений склад у слові <b>'+t.n+'</b>.<span class="chip">'+ssOk+' з 5</span>';
+function ssDraw(){if(!document.querySelector('#ss-row'))return;const t=ssT[ssI];$('#ss-task').innerHTML='Познач наголошений склад у слові <b>'+t.n+'</b>.<span class="chip">'+ssOk+' з 5</span>';
   const box=$('#ss-row');box.innerHTML='';
   t.w.forEach((sy,i)=>{const b=document.createElement('button');b.textContent=sy;
     (function(k){b.onclick=()=>ssPick(k);})(i);box.appendChild(b);});
@@ -292,7 +292,7 @@ const apT=[{w:'м..ята',a:0,r:'Після губного м перед я —
  {w:'бур..ян',a:0,r:'Після р перед я — апостроф: бур’ян.'},
  {w:'т..мяний',a:2,r:'Перед м стоїть т — апострофа немає: тьмяний (тут ь).'}];
 let apI=0,apOk=0;
-function apDraw(){const t=apT[apI];$('#ap-word').textContent=t.w;
+function apDraw(){if(!document.querySelector('#ap-word'))return;const t=apT[apI];$('#ap-word').textContent=t.w;
   $('#ap-task').innerHTML='Що поставити замість крапок?<span class="chip">'+apOk+' з 5</span>';hide('#ap-v');}
 function apPick(i){const t=apT[apI];
   if(i===t.a){apOk++;if(apOk>=5)mark('apos');apDraw();say('#ap-v','Так. '+t.r,true);}
@@ -344,7 +344,7 @@ const mpT=[
  {w:'розповідач',parts:[['роз','префікс'],['повід','корінь'],['ач','суфікс'],['','нульове закінчення']],
   o:['розп-овід-ач','роз-повід-ач','розпо-від-ач'],a:1}];
 let mpI=0,mpOk=0,mpShow=false;
-function mpDraw(){const t=mpT[mpI];
+function mpDraw(){if(!document.querySelector('#mp-opts'))return;const t=mpT[mpI];
   $('#mp-task').innerHTML='Обери правильний розбір слова <b>'+t.w+'</b>.<span class="chip">'+mpOk+' з 3</span>';
   const cols=['#DCE9FF','#FDEBDC','#E3F6EC','#F4E7FF'];
   const row=$('#mp-row');row.innerHTML='';
@@ -384,7 +384,7 @@ const pfT=[{w:'пр..красний',o:['пре','при','прі'],a:0,r:'Оз�
  {w:'..хотіти',o:['з','с'],a:1,r:'Перед х пишемо с-: схотіти.'},
  {w:'..шити',o:['з','с'],a:0,r:'Перед ш — з-: зшити (хоч чуємо [шш]).'}];
 let pfI=0,pfOk=0;
-function pfDraw(){const t=pfT[pfI];$('#pf-word').textContent=t.w;
+function pfDraw(){if(!document.querySelector('#pf-word'))return;const t=pfT[pfI];$('#pf-word').textContent=t.w;
   $('#pf-task').innerHTML='Яку букву чи префікс поставити?<span class="chip">'+pfOk+' з 5</span>';
   $('#pf-btns').innerHTML=t.o.map((o,i)=>'<button class="btn" onclick="pfPick('+i+')">'+o+'-</button>').join('');
   hide('#pf-v');}
@@ -411,7 +411,7 @@ const smT=[{q:'Утвори прикметник від слова <b>якіст
  {q:'Постав у місцевому відмінку: на <b>рука</b> → на …',a:['руці'],r:'к → ц: на руці.'},
  {q:'Постав у місцевому відмінку: на <b>муха</b> → на …',a:['мусі'],r:'х → с: на мусі.'}];
 let smI=0,smOk=0;
-function smDraw(){$('#sm-task').innerHTML=smT[smI].q+'<span class="chip">'+smOk+' з 5</span>';
+function smDraw(){if(!document.querySelector('#sm-in'))return;$('#sm-task').innerHTML=smT[smI].q+'<span class="chip">'+smOk+' з 5</span>';
   $('#sm-in').value='';hide('#sm-v');}
 function smCheck(){const v=$('#sm-in').value.trim().toLowerCase(),t=smT[smI];
   if(t.a.indexOf(v)>=0){smOk++;if(smOk>=5)mark('simpl');
@@ -556,7 +556,7 @@ const gbT=[{w:['Над','лісом','піднялося','сонце'],s:[3],p:
 let gbI=0,gbOk=0,gbM=0,gbSel={};
 function gbLoad(){gbSel={};hide('#gb-v');gbDraw();}
 function gbMode(m){gbM=m;$('#gb-m0').className='btn'+(m?' ghost':'');$('#gb-m1').className='btn'+(m?'':' ghost');}
-function gbDraw(){const t=gbT[gbI],box=$('#gb-sent');box.innerHTML='';
+function gbDraw(){if(!document.querySelector('#gb-sent'))return;const t=gbT[gbI],box=$('#gb-sent');box.innerHTML='';
   t.w.forEach((w,i)=>{const s=document.createElement('span');
     s.className='w'+(gbSel[i]===1?' subj':gbSel[i]===2?' pred':'');s.textContent=w+' ';
     (function(k){s.onclick=()=>{const v=gbM===0?1:2;gbSel[k]=gbSel[k]===v?0:v;gbDraw();};})(i);
@@ -590,7 +590,7 @@ const cmT=[{w:['Мамо','я','вже','прийшов'],c:[0],r:'«Мамо» 
  {w:['Дорогий','брате','на','жаль','я','не','зможу','прийти'],c:[1,3],r:'Після звертання «дорогий брате» і навколо вставного «на жаль».'}];
 let cmI=0,cmOk=0,cmSel={};
 function cmLoad(){cmSel={};hide('#cm-v');cmDraw();}
-function cmDraw(){const t=cmT[cmI],box=$('#cm-sent');box.innerHTML='';
+function cmDraw(){if(!document.querySelector('#cm-sent'))return;const t=cmT[cmI],box=$('#cm-sent');box.innerHTML='';
   t.w.forEach((w,i)=>{const s=document.createElement('span');s.textContent=w;box.appendChild(s);
     if(i<t.w.length-1){const g=document.createElement('span');
       g.className='g'+(cmSel[i]?' on':'');g.textContent=cmSel[i]?',':'·';
@@ -621,7 +621,7 @@ const hmT=[{w:['У','саду','росли','яблуні','груші','сли�
  {w:['Дощ','ущух','і','виглянуло','сонце'],c:[1],r:'Тут кома перед «і» потрібна: це складне речення з двома основами.'}];
 let hmI=0,hmOk=0,hmSel={};
 function hmLoad(){hmSel={};hide('#hm-v');hmDraw();}
-function hmDraw(){const t=hmT[hmI],box=$('#hm-sent');box.innerHTML='';
+function hmDraw(){if(!document.querySelector('#hm-sent'))return;const t=hmT[hmI],box=$('#hm-sent');box.innerHTML='';
   t.w.forEach((w,i)=>{const s=document.createElement('span');s.textContent=w;box.appendChild(s);
     if(i<t.w.length-1){const g=document.createElement('span');
       g.className='g'+(hmSel[i]?' on':'');g.textContent=hmSel[i]?',':'·';
