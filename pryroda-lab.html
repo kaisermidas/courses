@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Довкілля руками</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --blue:#2F6FE4; --blue-soft:#E6EEFF; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+  header.hero{margin:6px 0 20px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .tool .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .tool .tx{flex:1;min-width:0}
+  .tool b{display:block;font-size:16px}
+  .tool span{color:var(--ink-2);font-size:13px}
+  .tool .tick{color:var(--ok);font-weight:700;font-size:18px;opacity:0}
+  .tool.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.4em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  .big{font-size:26px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+  svg{display:block;max-width:100%;touch-action:none}
+  input[type=text],input[type=number]{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2);margin-left:6px}
+  .opts{display:grid;gap:8px;margin-top:10px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:15px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sieve{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:10px 0}
+  .sieve button{aspect-ratio:1;border-radius:7px;background:#F4F2EC;font-size:12px;font-weight:600;color:var(--ink)}
+  .sieve button.out{background:#EFEDE6;color:#C4C0B4;text-decoration:line-through}
+  .sieve button.prime{background:var(--accent-soft);color:#14603E}
+  .sieve button.one{background:#fff;color:#C4C0B4;border:1px dashed var(--line)}
+  .strip{display:grid;grid-template-columns:repeat(20,1fr);gap:2px;margin:10px 0}
+  .strip div{aspect-ratio:1;border-radius:4px;background:#EFEDE6}
+  .strip div.on{background:var(--accent)}
+  .strip div.cut{background:var(--bad-soft)}
+  .fracbar{height:44px;display:flex;gap:2px;margin:6px 0 2px}
+  .fracbar i{flex:1;border-radius:5px;background:#EFEDE6}
+  .fracbar i.on{background:var(--blue)}
+  .fracbar.b i.on{background:var(--volt)}
+  .grid8{display:grid;width:min(100%,320px);margin:0 auto;border:2px solid #C9C6BB;border-radius:6px;overflow:hidden}
+  .grid8 button{aspect-ratio:1;border:0;background:#F6F3E9}
+  .grid8 button.on{background:var(--accent);border:1px solid rgba(255,255,255,.35)}
+  .pans{display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:10px 0}
+  .pan{flex:1;min-height:96px;border:2px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#FCFBF7}
+  .xbox{width:38px;height:38px;border-radius:9px;background:var(--blue-soft);border:2px solid var(--blue);
+    display:grid;place-items:center;font-weight:700;color:var(--blue)}
+  .wt{width:26px;height:26px;border-radius:50%;background:#F4EBD0;border:2px solid var(--volt)}
+  .hanoi{display:flex;justify-content:space-around;align-items:flex-end;height:150px;margin:10px 0}
+  .peg{position:relative;width:31%;height:100%;display:flex;flex-direction:column-reverse;align-items:center;gap:3px;
+    border-bottom:5px solid #8B8578;padding-bottom:0}
+  .peg:before{content:'';position:absolute;bottom:0;width:6px;height:100%;background:#D8D3C4;border-radius:3px}
+  .disk{height:20px;border-radius:6px;position:relative;z-index:1;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700}
+  .peg.sel{background:rgba(31,122,90,.07);border-radius:10px}
+  table.tt{border-collapse:collapse;width:100%;margin-top:10px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:6px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  .planet{cursor:pointer}
+  .molec{position:relative;height:150px;border:2px solid var(--line);border-radius:12px;overflow:hidden;background:#F7FAFF}
+  .mol{position:absolute;width:13px;height:13px;border-radius:50%;background:#2F6FE4}
+  .tank{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;position:relative;overflow:hidden;background:#EAF4FF}
+  .tank .surf{position:absolute;left:0;right:0;top:38%;height:2px;background:#5AA9EE}
+  .item{position:absolute;width:44px;height:44px;border-radius:10px;display:grid;place-items:center;font-size:22px;transition:top .5s ease}
+  .kbox{border:2px dashed var(--line);border-radius:12px;min-height:64px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .kcard{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;font-size:14px}
+  .kcard.sel{border-color:var(--accent);background:var(--accent-soft)}
+  .pyr{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px 0}
+  .lvl{border-radius:10px;padding:9px 14px;font-weight:600;color:#fff;text-align:center;transition:opacity .3s}
+  .lvl.dead{opacity:.25;text-decoration:line-through}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Довкілля руками</h1>
+    <p>Шістнадцять приладів. Крути, тягни, вимикай — і дивись, що станеться зі світом.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+<section id="s-tool" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2 id="t-title"></h2><span style="width:64px"></span></div>
+  <div id="t-body"></div>
+</section>
+</div>
+<script>
+const $ = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+let PR = {};
+const KEY='nature-lab-v1';
+try { PR = JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
+function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
+const gcd=(a,b)=>b?gcd(b,a%b):a;
+const GROUPS=['Всесвіт і Земля','Речовини та енергія','Життя','Наша планета'];
+const TOOLS={};
+function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
+
+/* --- 1. Сонячна система --- */
+T('sun',{g:0,ic:'🪐',t:'Сонячна система',s:'Орбіти, розміри й порядок планет',html:`
+<div class="panel">
+  <div class="task">Тисни на планету — дізнаєшся про неї. Повзунок прискорює час.</div>
+  <svg viewBox="0 0 320 320" height="310" id="ss-svg"></svg>
+  <div class="row"><div style="flex:1">швидкість часу<input type="range" min="0" max="10" value="3" id="ss-sp"></div></div>
+  <div class="hintline" id="ss-info">Меркурій робить оберт за 88 днів, Нептун — за 165 років. Тому внутрішні планети біжать швидко, а зовнішні майже стоять.</div>
+  <div class="row center"><button class="btn" onclick="ssQuiz()">Питання</button></div>
+  <div class="verdict" id="ss-v"></div>
+  <div class="legend">Розміри й відстані тут не в масштабі: якби Земля була горошиною, Сонце було б за 25 метрів від неї.</div>
+</div>`,init(){ssStart();}});
+const PL=[{n:'Меркурій',r:26,s:4,c:'#B9AFA2',f:'Найближча до Сонця. Вдень +430 °C, вночі −180 °C — атмосфери майже немає.'},
+ {n:'Венера',r:40,s:6,c:'#E3B778',f:'Найгарячіша планета: +470 °C. Щільна атмосфера створює парниковий ефект.'},
+ {n:'Земля',r:54,s:6.5,c:'#2F6FE4',f:'Єдина відома планета з життям. 71% поверхні вкрито водою.'},
+ {n:'Марс',r:68,s:5,c:'#C86B4A',f:'Червона через оксид заліза. Тут найвищий вулкан Сонячної системи — Олімп, 22 км.'},
+ {n:'Юпітер',r:92,s:14,c:'#D9A76C',f:'Найбільша планета: у ній помістилося б 1300 Земель. Велика Червона Пляма — буря завбільшки з Землю.'},
+ {n:'Сатурн',r:114,s:12,c:'#E0CFA0',f:'Кільця з льоду й каміння, завтовшки лише кілька десятків метрів.'},
+ {n:'Уран',r:132,s:9,c:'#9FD8E0',f:'Обертається «лежачи на боці» — вісь нахилена майже на 98°.'},
+ {n:'Нептун',r:148,s:9,c:'#4B6BD1',f:'Найвітряніша планета: вітри до 2000 км/год.'}];
+let ssT=0,ssTimer=null,ssSel=-1;
+function ssStart(){stopAll();ssTimer=every(()=>{ssT+=(+$('#ss-sp').value)/60;ssDraw();},50);ssDraw();}
+function ssDraw(){if(!document.querySelector('#ss-svg'))return;let s='<circle cx="160" cy="160" r="17" fill="#FFC93C"/><circle cx="160" cy="160" r="24" fill="#FFC93C" opacity=".25"/>';
+  PL.forEach((p,i)=>{s+='<circle cx="160" cy="160" r="'+p.r+'" fill="none" stroke="#E3E1D9" stroke-width="1"/>';});
+  PL.forEach((p,i)=>{const a=ssT/Math.pow(p.r/26,1.5)+i;
+    const x=160+Math.cos(a)*p.r,y=160+Math.sin(a)*p.r*0.62;
+    s+='<circle class="planet" cx="'+x+'" cy="'+y+'" r="'+p.s+'" fill="'+p.c+'" stroke="'+(ssSel===i?'#1E2A3A':'none')+'" stroke-width="2" onclick="ssPick('+i+')"/>';
+    if(i===5)s+='<ellipse cx="'+x+'" cy="'+y+'" rx="'+(p.s+6)+'" ry="3" fill="none" stroke="#E0CFA0" stroke-width="2"/>';});
+  $('#ss-svg').innerHTML=s;}
+function ssPick(i){ssSel=i;const p=PL[i];
+  $('#ss-info').innerHTML='<b>'+p.n+'</b> — '+p.f;}
+function ssQuiz(){const i=Math.floor(Math.random()*8);
+  const ans=prompt('Яка планета за номером '+(i+1)+' від Сонця?');
+  if(ans&&ans.trim().toLowerCase().startsWith(PL[i].n.slice(0,4).toLowerCase())){mark('sun');
+    say('#ss-v','Так, '+PL[i].n+'. Порядок: Меркурій, Венера, Земля, Марс, Юпітер, Сатурн, Уран, Нептун.',true);}
+  else say('#ss-v','Ні, це '+PL[i].n+'. Порядок від Сонця: Меркурій, Венера, Земля, Марс, Юпітер, Сатурн, Уран, Нептун.',false);}
+
+/* --- 2. Фази Місяця --- */
+T('moon',{g:0,ic:'🌙',t:'Фази Місяця',s:'Чому Місяць «росте» і «старіє»',html:`
+<div class="panel">
+  <div class="task">Тягни Місяць по орбіті. Ліворуч — вигляд згори, праворуч — що бачить людина із Землі.</div>
+  <svg viewBox="0 0 320 200" height="195" id="mn-svg"></svg>
+  <div class="big" id="mn-name"></div>
+  <div class="hintline" id="mn-state"></div>
+  <div class="row center"><button class="btn ghost small" onclick="mnGo(0)">Новий</button>
+    <button class="btn ghost small" onclick="mnGo(90)">Перша чверть</button>
+    <button class="btn ghost small" onclick="mnGo(180)">Повний</button>
+    <button class="btn ghost small" onclick="mnGo(270)">Остання чверть</button></div>
+  <div class="verdict" id="mn-v"></div>
+  <div class="legend">Місяць не змінює форми й не «ховається в тінь Землі». Він завжди наполовину освітлений — просто ми бачимо цю половину під різним кутом.</div>
+</div>`,init(){mnA=45;mnSeen={};mnDraw();}});
+let mnA=45,mnSeen={};
+function mnPhase(a){a=((a%360)+360)%360;
+  if(a<22||a>=338)return 'Новий місяць';
+  if(a<68)return 'Молодий серп';
+  if(a<112)return 'Перша чверть';
+  if(a<158)return 'Прибуває';
+  if(a<202)return 'Повний місяць';
+  if(a<248)return 'Спадає';
+  if(a<292)return 'Остання чверть';
+  return 'Старий серп';}
+function mnDraw(){const r=Math.PI*mnA/180,mx=85+Math.cos(r)*58,my=100+Math.sin(r)*58;
+  let s='<rect x="0" y="0" width="170" height="200" fill="#F7FAFF" rx="10"/>';
+  s+='<text x="10" y="18" font-size="12" fill="#5B6779">згори</text>';
+  s+='<circle cx="85" cy="100" r="58" fill="none" stroke="#E3E1D9" stroke-width="1" stroke-dasharray="3 3"/>';
+  s+='<rect x="0" y="0" width="26" height="200" fill="#FFF3D4"/><text x="4" y="105" font-size="11" fill="#B37F00">Сонце →</text>';
+  s+='<circle cx="85" cy="100" r="15" fill="#2F6FE4"/><text x="85" y="104" text-anchor="middle" font-size="10" fill="#fff">Земля</text>';
+  s+='<circle cx="'+mx+'" cy="'+my+'" r="10" fill="#8B8578"/>';
+  s+='<path d="M '+mx+' '+(my-10)+' A 10 10 0 0 0 '+mx+' '+(my+10)+' Z" fill="#F4EBD0" transform="rotate(90 '+mx+' '+my+')"/>';
+  s+='<circle cx="'+mx+'" cy="'+my+'" r="10" fill="none" stroke="#1E2A3A" stroke-width="1.5" style="cursor:grab"/>';
+  s+='<rect x="176" y="0" width="144" height="200" fill="#0E1726" rx="10"/>';
+  s+='<text x="186" y="18" font-size="12" fill="#8FA2BE">із Землі</text>';
+  const k=Math.cos(r);
+  s+='<circle cx="248" cy="108" r="46" fill="#1A2333"/>';
+  const lit=Math.abs(k)*46;
+  const dir=Math.sin(r)>=0?1:-1;
+  s+='<path d="M 248 62 A 46 46 0 0 '+(dir>0?1:0)+' 248 154 A '+lit+' 46 0 0 '+((k*dir)>0?0:1)+' 248 62 Z" fill="#F2EFE2"/>';
+  if(mnPhase(mnA)==='Повний місяць')s='<'+s.slice(1);
+  $('#mn-svg').innerHTML=s;
+  const ph=mnPhase(mnA);mnSeen[ph]=1;
+  $('#mn-name').textContent=ph;
+  $('#mn-state').textContent='Кут між Сонцем, Землею й Місяцем: '+Math.round(mnA)+'° · освітлено видимої частини ≈ '+Math.round((1-Math.cos(r))/2*100)+'%';
+  if(Object.keys(mnSeen).length>=6){mark('moon');
+    say('#mn-v','Ти пройшов повний цикл — 29,5 доби. Форма Місяця не змінюється: змінюється лише кут, під яким ми дивимось на освітлену половину.',true);}
+  mnBind();}
+function mnGo(a){mnA=a;mnDraw();}
+function mnBind(){const svg=$('#mn-svg');if(!svg||svg.dataset.b)return;svg.dataset.b=1;let on=false;
+  const upd=e=>{const b=svg.getBoundingClientRect();
+    const x=(e.clientX-b.left)/b.width*320-85,y=(e.clientY-b.top)/b.height*200-100;
+    if(x>90)return;mnA=(Math.atan2(y,x)*180/Math.PI+360)%360;mnDraw();};
+  svg.addEventListener('pointerdown',e=>{on=true;svg.setPointerCapture(e.pointerId);upd(e);});
+  svg.addEventListener('pointermove',e=>{if(on){e.preventDefault();upd(e);}});
+  svg.addEventListener('pointerup',()=>on=false);}
+
+/* --- 3. Пори року --- */
+T('seasons',{g:0,ic:'🍂',t:'Чому є пори року',s:'Річ не у відстані до Сонця',html:`
+<div class="panel">
+  <div class="task">Пересувай Землю по орбіті. Стеж, під яким кутом промені падають на нашу півкулю.</div>
+  <svg viewBox="0 0 320 220" height="215" id="se-svg"></svg>
+  <input type="range" min="0" max="359" value="0" id="se-r" oninput="seDraw()">
+  <div class="big" id="se-name"></div>
+  <div class="hintline" id="se-state"></div>
+  <div class="verdict" id="se-v"></div>
+  <div class="legend">Земля влітку навіть трохи далі від Сонця, ніж узимку. Усе вирішує нахил осі на 23,5°: промені падають або прямо, або скісно.</div>
+</div>`,init(){seSeen={};seDraw();}});
+let seSeen={};
+function seDraw(){const a=+$('#se-r').value,r=Math.PI*a/180;
+  const x=160+Math.cos(r)*118,y=110+Math.sin(r)*72;
+  let s='<ellipse cx="160" cy="110" rx="118" ry="72" fill="none" stroke="#E3E1D9" stroke-width="1" stroke-dasharray="4 4"/>';
+  s+='<circle cx="160" cy="110" r="22" fill="#FFC93C"/><circle cx="160" cy="110" r="30" fill="#FFC93C" opacity=".2"/>';
+  s+='<g transform="translate('+x+','+y+') rotate(-23.5)">'+
+     '<circle r="22" fill="#2F6FE4"/><path d="M -22 0 A 22 22 0 0 1 22 0 Z" fill="#5AA9EE"/>'+
+     '<line x1="0" y1="-30" x2="0" y2="30" stroke="#1E2A3A" stroke-width="2" stroke-dasharray="3 3"/>'+
+     '<text x="0" y="-34" text-anchor="middle" font-size="10" fill="#1E2A3A">Пн</text></g>';
+  $('#se-svg').innerHTML=s;
+  const north=Math.cos(r);
+  const name=a<45||a>315?'Літо в нас':a<135?'Осінь':a<225?'Зима в нас':'Весна';
+  seSeen[name]=1;
+  $('#se-name').textContent=name;
+  $('#se-state').textContent=north>0.3?'Північна півкуля нахилена до Сонця: промені прямі, день довгий.'
+    :north<-0.3?'Північна півкуля відхилена: промені скісні, день короткий.'
+    :'Проміжне положення: день майже дорівнює ночі — рівнодення.';
+  if(Object.keys(seSeen).length>=4){mark('seasons');
+    say('#se-v','Пройдено повне коло — рік. Коли в нас зима, у Австралії літо: півкуля нахилена в інший бік.',true);}}
+
+/* --- 4. Сузір’я й Полярна --- */
+T('stars',{g:0,ic:'⭐️',t:'Ківш і Полярна зоря',s:'Як знайти північ уночі',html:`
+<div class="panel">
+  <div class="task" id="st-task">З’єднай сім зір Великого Воза по порядку — тисни на них.</div>
+  <svg viewBox="0 0 320 240" height="235" id="st-svg" style="background:#0E1726;border-radius:12px"></svg>
+  <div class="row center" style="margin-top:10px"><button class="btn ghost" onclick="stReset()">Заново</button>
+    <button class="btn" onclick="stHint()">Де Полярна?</button></div>
+  <div class="verdict" id="st-v"></div>
+  <div class="legend">Дві крайні зорі ковша — «вказівники». Продовж лінію між ними приблизно вп’ятеро — там Полярна зоря, а під нею завжди північ.</div>
+</div>`,init(){stOrder=[];stShow=false;stDraw();}});
+const BIG=[[70,190],[110,175],[150,168],[188,160],[196,120],[160,105],[120,118]];
+const POLAR=[268,52];
+let stOrder=[],stShow=false;
+function stDraw(){let s='';
+  for(let i=0;i<40;i++){const x=Math.random()*320,y=Math.random()*240;
+    s+='<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="1" fill="#5B6779"/>';}
+  for(let i=1;i<stOrder.length;i++){const a=BIG[stOrder[i-1]],b=BIG[stOrder[i]];
+    s+='<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+b[0]+'" y2="'+b[1]+'" stroke="#5AA9EE" stroke-width="2"/>';}
+  if(stShow){s+='<line x1="'+BIG[4][0]+'" y1="'+BIG[4][1]+'" x2="'+POLAR[0]+'" y2="'+POLAR[1]+'" stroke="#E9A800" stroke-width="1.5" stroke-dasharray="5 4"/>'+
+    '<circle cx="'+POLAR[0]+'" cy="'+POLAR[1]+'" r="6" fill="#FFD84D"/>'+
+    '<text x="'+(POLAR[0]-8)+'" y="'+(POLAR[1]-14)+'" font-size="12" fill="#FFD84D" text-anchor="middle">Полярна</text>';}
+  BIG.forEach((p,i)=>{const on=stOrder.indexOf(i)>=0;
+    s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(on?7:5)+'" fill="'+(on?'#FFFFFF':'#8FA2BE')+'" style="cursor:pointer" onclick="stTap('+i+')"/>';
+    if(on)s+='<text x="'+(p[0]+10)+'" y="'+(p[1]+4)+'" font-size="11" fill="#8FA2BE">'+(stOrder.indexOf(i)+1)+'</text>';});
+  $('#st-svg').innerHTML=s;}
+function stTap(i){if(stOrder.indexOf(i)>=0)return;stOrder.push(i);stDraw();
+  if(stOrder.length===7){const ok=stOrder.every((v,k)=>v===k)||stOrder.every((v,k)=>v===6-k);
+    if(ok){mark('stars');say('#st-v','Ківш зібрано. Чотири зорі — «чаша», три — «ручка». Це частина сузір’я Великої Ведмедиці.',true);}
+    else say('#st-v','Лінія вийшла заплутана. Спробуй по порядку: від кінця ручки до чаші.',false);}}
+function stReset(){stOrder=[];stShow=false;hide('#st-v');stDraw();}
+function stHint(){stShow=true;stDraw();mark('stars');
+  say('#st-v','Полярна зоря — остання в ручці Малого Воза. Вона майже не рухається по небу, бо стоїть над Північним полюсом.',true);}
+
+/* --- 5. Компас --- */
+T('compass',{g:0,ic:'🧭',t:'Компас і магніт',s:'Чому стрілка вказує на північ',html:`
+<div class="panel">
+  <div class="task">Крути магніт навколо компаса — стрілка слухається. Земля — теж великий магніт.</div>
+  <svg viewBox="0 0 320 240" height="235" id="cp-svg"></svg>
+  <div class="hintline" id="cp-state"></div>
+  <div class="row center"><button class="btn ghost" onclick="cpFlip()">Перевернути магніт</button>
+    <button class="btn ghost" onclick="cpAway()">Прибрати магніт</button></div>
+  <div class="verdict" id="cp-v"></div>
+  <div class="legend">Однойменні полюси відштовхуються, різнойменні притягуються. Магніт не можна розділити на «лише північний» — розріж навпіл і отримаєш два магніти.</div>
+</div>`,init(){cpA=40;cpFar=true;cpPol=1;cpDraw();}});
+let cpA=40,cpFar=true,cpPol=1;
+function cpDraw(){const r=Math.PI*cpA/180,mx=160+Math.cos(r)*95,my=120+Math.sin(r)*95;
+  let s='<circle cx="160" cy="120" r="62" fill="#fff" stroke="#C9C6BB" stroke-width="3"/>';
+  ['Пн','Сх','Пд','Зх'].forEach((n,i)=>{const a=-Math.PI/2+i*Math.PI/2;
+    s+='<text x="'+(160+Math.cos(a)*48)+'" y="'+(120+Math.sin(a)*48+5)+'" text-anchor="middle" font-size="13" fill="#5B6779">'+n+'</text>';});
+  const dir=cpFar?-Math.PI/2:(cpPol>0?r:r+Math.PI);
+  s+='<line x1="'+(160-Math.cos(dir)*34)+'" y1="'+(120-Math.sin(dir)*34)+'" x2="'+(160+Math.cos(dir)*34)+'" y2="'+(120+Math.sin(dir)*34)+'" stroke="#8B8578" stroke-width="4"/>';
+  s+='<path d="M '+(160+Math.cos(dir)*34)+' '+(120+Math.sin(dir)*34)+' l -8 -8 l 0 16 z" fill="#D8433B" transform="rotate('+(dir*180/Math.PI)+' '+(160+Math.cos(dir)*34)+' '+(120+Math.sin(dir)*34)+')"/>';
+  s+='<circle cx="160" cy="120" r="6" fill="#1E2A3A"/>';
+  if(!cpFar){s+='<g transform="translate('+mx+','+my+') rotate('+(cpA+90)+')" style="cursor:grab">'+
+    '<rect x="-13" y="-30" width="26" height="30" rx="4" fill="'+(cpPol>0?'#D8433B':'#2F6FE4')+'"/>'+
+    '<rect x="-13" y="0" width="26" height="30" rx="4" fill="'+(cpPol>0?'#2F6FE4':'#D8433B')+'"/>'+
+    '<text x="0" y="-12" text-anchor="middle" font-size="12" fill="#fff">'+(cpPol>0?'S':'N')+'</text>'+
+    '<text x="0" y="20" text-anchor="middle" font-size="12" fill="#fff">'+(cpPol>0?'N':'S')+'</text></g>';}
+  $('#cp-svg').innerHTML=s;
+  $('#cp-state').textContent=cpFar?'Магніта поруч немає — стрілка показує на магнітну північ Землі.'
+    :'Магніт поруч: стрілка розвертається до його протилежного полюса.';
+  cpBind();}
+function cpFlip(){cpPol*=-1;cpFar=false;mark('compass');cpDraw();
+  say('#cp-v','Перевернув магніт — і стрілка теж перевернулась. Саме так учені зрозуміли, що Земля має магнітні полюси.',true);}
+function cpAway(){cpFar=true;cpDraw();}
+function cpBind(){const svg=$('#cp-svg');if(!svg||svg.dataset.b)return;svg.dataset.b=1;let on=false;
+  const upd=e=>{const b=svg.getBoundingClientRect();
+    const x=(e.clientX-b.left)/b.width*320-160,y=(e.clientY-b.top)/b.height*240-120;
+    if(Math.hypot(x,y)<70)return;cpFar=false;cpA=Math.atan2(y,x)*180/Math.PI;cpDraw();};
+  svg.addEventListener('pointerdown',e=>{on=true;svg.setPointerCapture(e.pointerId);upd(e);});
+  svg.addEventListener('pointermove',e=>{if(on){e.preventDefault();upd(e);}});
+  svg.addEventListener('pointerup',()=>on=false);}
+
+/* --- 6. Три стани речовини --- */
+T('states',{g:1,ic:'🌡',t:'Лід, вода, пара',s:'Що робить температура з молекулами',html:`
+<div class="panel">
+  <div class="task">Веди повзунок температури й дивись на молекули. Вода — та сама, змінюється лише рух.</div>
+  <div class="big" id="stt-t">20 °C</div>
+  <input type="range" min="-30" max="130" value="20" id="stt-r" oninput="sttDraw()">
+  <div class="molec" id="stt-box"></div>
+  <div class="big" id="stt-name" style="font-size:20px"></div>
+  <div class="hintline" id="stt-state"></div>
+  <div class="verdict" id="stt-v"></div>
+  <div class="legend">Вода — рідкісний виняток: твердий лід легший за рідку воду, тому плаває. Якби не це, водойми промерзали б до дна.</div>
+</div>`,init(){sttSeen={};sttDraw();}});
+let sttSeen={},sttAnim=null;
+function sttDraw(){const t=+$('#stt-r').value;$('#stt-t').textContent=t+' °C';
+  const st=t<0?'лід':t<100?'вода':'пара';sttSeen[st]=1;
+  const box=$('#stt-box');box.innerHTML='';
+  const n=st==='лід'?28:st==='вода'?26:16;
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='mol';
+    let x,y;
+    if(st==='лід'){x=18+(i%7)*40;y=20+Math.floor(i/7)*32;}
+    else if(st==='вода'){x=12+Math.random()*280;y=55+Math.random()*80;}
+    else{x=8+Math.random()*295;y=6+Math.random()*135;}
+    d.style.left=x+'px';d.style.top=y+'px';
+    d.style.background=st==='лід'?'#9CCBF5':st==='вода'?'#2F6FE4':'#B9C7DA';
+    box.appendChild(d);}
+  $('#stt-name').textContent=st==='лід'?'Твердий стан — лід':st==='вода'?'Рідкий стан — вода':'Газоподібний стан — пара';
+  $('#stt-state').textContent=st==='лід'?'Молекули стоять у ґратці й лише коливаються. Форма й об’єм сталі.'
+    :st==='вода'?'Молекули перекочуються одна повз одну: об’єм сталий, форма — за посудиною.'
+    :'Молекули розлітаються: ні форми, ні власного об’єму.';
+  if(Object.keys(sttSeen).length>=3){mark('states');
+    say('#stt-v','Ти пройшов усі три стани. Речовина не змінилася — змінилась швидкість руху молекул. 0 °C і 100 °C — це точки переходу для води.',true);}}
+
+/* --- 7. Дифузія --- */
+T('diff',{g:1,ic:'🫗',t:'Дифузія',s:'Чому запах доходить швидше в теплі',html:`
+<div class="panel">
+  <div class="task">Крапни чорнило у дві склянки з різною температурою й порівняй.</div>
+  <div class="row">
+    <div style="flex:1;text-align:center"><div style="font-size:14px;color:var(--ink-2)">холодна · 5 °C</div>
+      <div class="molec" id="df-a" style="height:130px"></div></div>
+    <div style="flex:1;text-align:center"><div style="font-size:14px;color:var(--ink-2)">гаряча · 80 °C</div>
+      <div class="molec" id="df-b" style="height:130px"></div></div></div>
+  <div class="row center" style="margin-top:10px"><button class="btn" onclick="dfRun()">Крапнути чорнило</button></div>
+  <div class="hintline" id="df-state"></div>
+  <div class="verdict" id="df-v"></div>
+  <div class="legend">Дифузія — це перемішування речовин через рух молекул. Що тепліше, то швидший рух — і то швидше розходиться запах або барвник.</div>
+</div>`,init(){dfInit();}});
+let dfP=[[],[]],dfTimer=null,dfStep=0;
+function dfInit(){stopAll();dfStep=0;dfP=[[],[]];
+  [0,1].forEach(k=>{const box=$(k?'#df-b':'#df-a');box.innerHTML='';});
+  $('#df-state').textContent='';hide('#df-v');}
+function dfRun(){dfInit();
+  [0,1].forEach(k=>{const box=$(k?'#df-b':'#df-a');
+    for(let i=0;i<22;i++){const d=document.createElement('div');d.className='mol';
+      d.style.background=k?'#D8433B':'#8B5CF6';
+      const st={x:60+Math.random()*20,y:12+Math.random()*14,el:d};
+      d.style.left=st.x+'px';d.style.top=st.y+'px';box.appendChild(d);dfP[k].push(st);}});
+  dfTimer=every(()=>{if(!document.querySelector('#df-a'))return;dfStep++;
+    [0,1].forEach(k=>{const sp=k?3.2:1;
+      dfP[k].forEach(p=>{p.x+=(Math.random()-0.5)*sp*2.4;p.y+=(Math.random()-0.35)*sp*2.2;
+        p.x=Math.max(2,Math.min(130,p.x));p.y=Math.max(2,Math.min(112,p.y));
+        p.el.style.left=p.x+'px';p.el.style.top=p.y+'px';});});
+    const spread=k=>{const ys=dfP[k].map(p=>p.y);return Math.round(Math.max.apply(null,ys)-Math.min.apply(null,ys));};
+    $('#df-state').textContent='Крок '+dfStep+' · розкид у холодній: '+spread(0)+', у гарячій: '+spread(1);
+    if(dfStep>=60){stopAll();mark('diff');
+      say('#df-v','У гарячій воді чорнило розійшлося помітно швидше: молекули там рухаються швидше. Це і є дифузія.',true);}},60);}
+
+/* --- 8. Тоне чи плаває --- */
+T('dens',{g:1,ic:'🛟',t:'Тоне чи плаває',s:'Густина, а не вага',html:`
+<div class="panel">
+  <div class="task">Кидай предмети у воду. Здогадайся заздалегідь — потім перевір.</div>
+  <div class="tank" id="dn-tank"><div class="surf"></div></div>
+  <div class="row center" id="dn-btns"></div>
+  <div class="hintline" id="dn-state"></div>
+  <div class="verdict" id="dn-v"></div>
+  <div class="legend">Плаває не те, що легке, а те, у чого густина менша за густину води (1 г/см³). Величезний корабель плаває, бо всередині повітря.</div>
+</div>`,init(){dnInit();}});
+const DN=[{n:'цвях',e:'🔩',d:7.8},{n:'корок',e:'🪵',d:0.24},{n:'яблуко',e:'🍎',d:0.8},
+ {n:'камінь',e:'🪨',d:2.6},{n:'лід',e:'🧊',d:0.92},{n:'олія',e:'🫒',d:0.92},{n:'монета',e:'🪙',d:8.9}];
+let dnDone={};
+function dnInit(){dnDone={};$('#dn-tank').innerHTML='<div class="surf"></div>';
+  $('#dn-btns').innerHTML=DN.map((o,i)=>'<button class="btn ghost small" onclick="dnDrop('+i+')">'+o.e+' '+o.n+'</button>').join('');
+  $('#dn-state').textContent='';hide('#dn-v');}
+function dnDrop(i){const o=DN[i];const t=$('#dn-tank');
+  const el=document.createElement('div');el.className='item';el.textContent=o.e;
+  el.style.left=(12+Object.keys(dnDone).length*40)+'px';el.style.top='0px';t.appendChild(el);
+  setTimeout(()=>{el.style.top=(o.d>1?'120px':'22px');},50);
+  dnDone[o.n]=1;
+  $('#dn-state').textContent=o.n+': густина '+o.d+' г/см³ — '+(o.d>1?'тоне':'плаває')+' (вода — 1 г/см³)';
+  if(Object.keys(dnDone).length>=5){mark('dens');
+    say('#dn-v','Помітив? Лід плаває, хоч він твердий і холодний: його густина 0,92 — менша за воду. Тому айсберги не тонуть.',true);}}
+
+/* --- 9. Гроза: світло і звук --- */
+T('sound',{g:1,ic:'⛈',t:'Далеко чи близько гроза',s:'Світло швидше за звук',html:`
+<div class="panel">
+  <div class="task">Натисни «блискавка» і чекай грому — прилад покаже, як рахувати відстань.</div>
+  <svg viewBox="0 0 320 160" height="155" id="sn-svg"></svg>
+  <div class="big" id="sn-t">0,0 с</div>
+  <div class="row center"><button class="btn" onclick="snFlash()">Блискавка</button></div>
+  <div class="hintline" id="sn-state"></div>
+  <div class="verdict" id="sn-v"></div>
+  <div class="legend">Світло долітає майже миттєво, звук — 340 м за секунду. Тому: полічи секунди до грому й помнож на 340 — приблизно так далеко гроза.</div>
+</div>`,init(){snDraw(0);}});
+let snTimer=null,snT=0,snDist=0;
+function snDraw(t){if(!document.querySelector('#sn-svg'))return;let s='<rect x="0" y="0" width="320" height="160" fill="#EAF0F7" rx="10"/>';
+  s+='<ellipse cx="'+(60+snDist*0.06)+'" cy="42" rx="46" ry="22" fill="#8B95A5"/>';
+  if(t<0.35&&t>0)s+='<path d="M '+(60+snDist*0.06)+' 60 l -10 26 l 12 0 l -8 24 l 26 -34 l -12 0 l 10 -16 z" fill="#FFD84D" stroke="#E9A800" stroke-width="1"/>';
+  s+='<rect x="0" y="128" width="320" height="32" fill="#7BC47F" rx="6"/>';
+  s+='<circle cx="270" cy="120" r="9" fill="#2F6FE4"/><text x="270" y="150" text-anchor="middle" font-size="11" fill="#5B6779">ти</text>';
+  const wave=t*40;
+  if(t>0&&wave<260)s+='<circle cx="'+(60+snDist*0.06)+'" cy="70" r="'+wave+'" fill="none" stroke="#5B6779" stroke-width="2" opacity="'+(1-wave/260)+'"/>';
+  $('#sn-svg').innerHTML=s;}
+function snFlash(){stopAll();snT=0;snDist=Math.round((2+Math.random()*6)*340);
+  const wait=snDist/340;
+  snTimer=every(()=>{snT+=0.1;$('#sn-t').textContent=snT.toFixed(1)+' с';snDraw(snT);
+    if(snT>=wait){stopAll();mark('sound');
+      $('#sn-state').textContent='Грім! Пройшло '+wait.toFixed(1)+' с.';
+      say('#sn-v','Відстань = '+wait.toFixed(1)+' с × 340 м/с ≈ <b>'+Math.round(snDist/100)/10+' км</b>. Якщо між спалахом і громом менше ніж 10 секунд — гроза зовсім поруч, треба в укриття.',true);}},100);}
+
+/* --- 10. Клітина --- */
+T('cell',{g:2,ic:'🔬',t:'Клітина під мікроскопом',s:'Чим рослинна відрізняється від тваринної',html:`
+<div class="panel">
+  <div class="row" style="margin-bottom:10px">
+    <button class="btn small" id="cl-0" onclick="clMode(0)">Рослинна</button>
+    <button class="btn small ghost" id="cl-1" onclick="clMode(1)">Тваринна</button></div>
+  <div class="task">Тисни на частину клітини — дізнаєшся, за що вона відповідає.</div>
+  <svg viewBox="0 0 320 210" height="205" id="cl-svg"></svg>
+  <div class="hintline" id="cl-info">Обери частину клітини.</div>
+  <div class="row center"><button class="btn" onclick="clAsk()">Три відмінності</button></div>
+  <div class="verdict" id="cl-v"></div>
+</div>`,init(){clM=0;clSeen={};clMode(0);}});
+const CELL=[
+ {n:'Клітинна стінка',p:'тверда оболонка з целюлози — тримає форму й захищає',only:0,x:160,y:12},
+ {n:'Мембрана',p:'пропускає всередину потрібне й не пускає зайве',only:-1,x:160,y:30},
+ {n:'Ядро',p:'керує клітиною й зберігає спадкову інформацію',only:-1,x:120,y:105},
+ {n:'Цитоплазма',p:'напіврідке середовище, у якому плавають усі частини',only:-1,x:230,y:150},
+ {n:'Хлоропласти',p:'зелені тільця, у яких відбувається фотосинтез',only:0,x:210,y:70},
+ {n:'Вакуоля',p:'великий міхур із клітинним соком — запас води',only:0,x:100,y:160},
+ {n:'Мітохондрії',p:'«електростанції»: дають клітині енергію',only:-1,x:230,y:110}];
+let clM=0,clSeen={};
+function clMode(m){clM=m;$('#cl-0').className='btn small'+(m?' ghost':'');$('#cl-1').className='btn small'+(m?'':' ghost');clDraw();}
+function clDraw(){let s='';
+  if(clM===0){s+='<rect x="14" y="6" width="292" height="196" rx="10" fill="#DCEBD8" stroke="#5E8C4F" stroke-width="6"/>';
+    s+='<rect x="24" y="16" width="272" height="176" rx="8" fill="#EAF6E6" stroke="#8FBF7F" stroke-width="3"/>';
+    s+='<ellipse cx="100" cy="160" rx="62" ry="34" fill="#CFE6F5" stroke="#7FB6D9" stroke-width="2"/>';}
+  else{s+='<ellipse cx="160" cy="104" rx="140" ry="88" fill="#FBE6EC" stroke="#D98BA5" stroke-width="5"/>';}
+  s+='<circle cx="120" cy="105" r="30" fill="#B79CE0" stroke="#7D5BA6" stroke-width="3"/>'+
+     '<circle cx="120" cy="105" r="11" fill="#7D5BA6"/>';
+  if(clM===0)[[210,70],[248,92],[196,120]].forEach(p=>{
+    s+='<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="16" ry="10" fill="#5E8C4F"/>';});
+  [[230,110],[250,150],[178,168]].forEach(p=>{
+    s+='<ellipse cx="'+p[0]+'" cy="'+p[1]+'" rx="15" ry="8" fill="#E38B6B" transform="rotate(20 '+p[0]+' '+p[1]+')"/>';});
+  CELL.forEach((c,i)=>{if(c.only===0&&clM===1)return;
+    s+='<circle cx="'+c.x+'" cy="'+c.y+'" r="11" fill="rgba(255,255,255,.75)" stroke="#1E2A3A" stroke-width="1.5" style="cursor:pointer" onclick="clPick('+i+')"/>'+
+       '<text x="'+c.x+'" y="'+(c.y+4)+'" text-anchor="middle" font-size="11" font-weight="700" pointer-events="none">'+(i+1)+'</text>';});
+  $('#cl-svg').innerHTML=s;}
+function clPick(i){const c=CELL[i];clSeen[i]=1;
+  $('#cl-info').innerHTML='<b>'+c.n+'</b> — '+c.p+(c.only===0?' <i>(лише в рослин)</i>':'');
+  if(Object.keys(clSeen).length>=5)mark('cell');}
+function clAsk(){say('#cl-v','У рослинної клітини є те, чого немає у тваринної: <b>клітинна стінка</b>, <b>хлоропласти</b> й велика <b>вакуоля</b>. Спільні для обох — мембрана, ядро, цитоплазма й мітохондрії.',true);mark('cell');}
+
+/* --- 11. Царства живого --- */
+T('kingdom',{g:2,ic:'🍄',t:'Царства живого',s:'Куди віднести гриб і бактерію',html:`
+<div class="panel">
+  <div class="task" id="kg-task">Обери організм, потім — його царство.</div>
+  <div class="kbox" id="kg-pool"></div>
+  <div class="row center" style="margin-top:12px" id="kg-btns"></div>
+  <div class="hintline" id="kg-state"></div>
+  <div class="verdict" id="kg-v"></div>
+  <div class="legend">Гриби виділили в окреме царство: вони не фотосинтезують, як рослини, і не рухаються по їжу, як тварини.</div>
+</div>`,init(){kgInit();}});
+const KG=[{n:'дуб',k:0},{n:'мухомор',k:1},{n:'ведмідь',k:2},{n:'кишкова паличка',k:3},
+ {n:'папороть',k:0},{n:'дріжджі',k:1},{n:'дощовий черв’як',k:2},{n:'цвіль',k:1},
+ {n:'водорість',k:0},{n:'амеба',k:3},{n:'бджола',k:2},{n:'підберезник',k:1}];
+const KN=['Рослини','Гриби','Тварини','Бактерії й найпростіші'];
+let kgSel=-1,kgOk=0,kgLeft=[];
+function kgInit(){kgSel=-1;kgOk=0;kgLeft=KG.map((_,i)=>i);hide('#kg-v');
+  $('#kg-btns').innerHTML=KN.map((n,i)=>'<button class="btn ghost small" onclick="kgPut('+i+')">'+n+'</button>').join('');
+  kgDraw();}
+function kgDraw(){const box=$('#kg-pool');box.innerHTML='';
+  kgLeft.forEach(i=>{const b=document.createElement('button');b.className='kcard'+(kgSel===i?' sel':'');
+    b.textContent=KG[i].n;(function(k){b.onclick=()=>{kgSel=k;kgDraw();};})(i);box.appendChild(b);});
+  $('#kg-state').textContent='Правильно розподілено: '+kgOk+' з '+KG.length;}
+function kgPut(k){if(kgSel<0)return say('#kg-v','Спершу обери організм.',false);
+  const o=KG[kgSel];
+  if(o.k===k){kgOk++;kgLeft=kgLeft.filter(i=>i!==kgSel);kgSel=-1;hide('#kg-v');kgDraw();
+    if(!kgLeft.length){mark('kingdom');say('#kg-v','Усе розподілено. Найважче з грибами: дріжджі й цвіль теж гриби, хоч зовсім не схожі на мухомор.',true);}}
+  else{say('#kg-v','«'+o.n+'» — не '+KN[k].toLowerCase()+'. Подумай, як цей організм живиться.',false);}}
+
+/* --- 12. Ланцюг живлення --- */
+T('food',{g:2,ic:'🦉',t:'Ланцюг живлення',s:'Прибери ланку — побачиш наслідки',html:`
+<div class="panel">
+  <div class="task">Натисни на будь-яку ланку, щоб вона зникла. Що станеться з рештою?</div>
+  <div class="pyr" id="fd-pyr"></div>
+  <div class="hintline" id="fd-state"></div>
+  <div class="row center"><button class="btn ghost" onclick="fdInit()">Повернути всіх</button></div>
+  <div class="verdict" id="fd-v"></div>
+  <div class="legend">Стрілка в ланцюзі показує, куди йде енергія: від того, кого з’їли, до того, хто з’їв. Зникає одна ланка — хитається весь ланцюг.</div>
+</div>`,init(){fdInit();}});
+const FD=[{n:'Сонце',c:'#E9A800',r:'дає енергію всім'},
+ {n:'Трава й дерева',c:'#5E8C4F',r:'продуценти: створюють органіку зі світла'},
+ {n:'Комахи й гризуни',c:'#7BC47F',r:'консументи I: їдять рослини'},
+ {n:'Птахи й лисиці',c:'#E38B6B',r:'консументи II: їдять рослиноїдних'},
+ {n:'Гриби й бактерії',c:'#8B8578',r:'редуценти: розкладають рештки, повертають речовини в ґрунт'}];
+let fdDead={};
+function fdInit(){fdDead={};hide('#fd-v');fdDraw();}
+function fdDraw(){const box=$('#fd-pyr');box.innerHTML='';
+  FD.forEach((f,i)=>{const d=document.createElement('div');d.className='lvl'+(fdDead[i]?' dead':'');
+    d.style.background=f.c;d.style.width=(96-i*4)+'%';d.textContent=f.n;
+    (function(k){d.onclick=()=>{fdDead[k]=!fdDead[k];fdDraw();};})(i);box.appendChild(d);
+    if(i<FD.length-1){const a=document.createElement('div');a.style.cssText='color:var(--ink-2)';a.textContent='↓';box.appendChild(a);}});
+  const dead=Object.keys(fdDead).filter(k=>fdDead[k]).map(Number);
+  $('#fd-state').textContent=dead.length?'Зникло ланок: '+dead.length:'Ланцюг цілий.';
+  if(!dead.length)return hide('#fd-v');
+  mark('food');
+  let msg='';
+  if(dead.includes(0))msg='Без Сонця зникає все: рослини не можуть створювати органіку, і ланцюг обривається на самому початку.';
+  else if(dead.includes(1))msg='Без рослин нема чого їсти рослиноїдним — за ними зникнуть і хижаки. Рослини тримають увесь ланцюг.';
+  else if(dead.includes(2))msg='Без комах і гризунів хижаки лишаються без їжі, а рослини почнуть надмірно розростатись.';
+  else if(dead.includes(3))msg='Без хижаків рослиноїдні розмножаться й з’їдять усю рослинність — це вже траплялось у справжніх лісах.';
+  else msg='Без грибів і бактерій рештки не розкладаються: ґрунт біднішає, і рослинам бракує поживних речовин.';
+  say('#fd-v',msg,true);}
+
+/* --- 13. Пристосування --- */
+T('adapt',{g:2,ic:'🐫',t:'Хто де виживе',s:'Пристосування до середовища',html:`
+<div class="panel">
+  <div class="task" id="ad-task"></div>
+  <div class="opts" id="ad-opts"></div>
+  <div class="verdict" id="ad-v"></div>
+  <div class="row" style="margin-top:10px"><button class="btn ghost" onclick="adNext()">Далі</button></div>
+  <div class="legend">Пристосування — не «бажання» тварини, а ознака, що допомогла її предкам вижити саме тут.</div>
+</div>`,init(){adI=0;adOk=0;adDraw();}});
+const AD=[
+ {q:'Пустеля: спека вдень, холод уночі, майже немає води. Яка ознака допоможе найбільше?',
+  o:['Запас жиру в горбах і вміння довго не пити','Густа біла шерсть','Широкі перетинчасті лапи'],a:0,
+  w:'Верблюд запасає жир, а не воду: жир при розщепленні дає і енергію, і воду.'},
+ {q:'Арктика: мороз, сніг, крига. Що потрібно?',o:['Товстий шар підшкірного жиру й біле хутро','Довгі вуха для охолодження','Тонка шкіра без шерсті'],a:0,
+  w:'Жир тримає тепло, біле хутро ховає серед снігу. А великі вуха, навпаки, віддають тепло — вони потрібні в пустелі.'},
+ {q:'Життя під землею — кріт. Що зайве для нього?',o:['Гострий зір','Лопатоподібні лапи','Витягнуте тіло'],a:0,
+  w:'Під землею темно, тому очі кроту майже не потрібні — вони крихітні.'},
+ {q:'Рослина в пустелі. Що допоможе?',o:['Товсте стебло-накопичувач і колючки замість листя','Широке ніжне листя','Поверхневе коріння без запасів'],a:0,
+  w:'Колючки майже не випаровують воду, а стебло її запасає — це кактус.'},
+ {q:'Риба в річці з швидкою течією. Найважливіше:',o:['Обтічна форма тіла','Пухнасте хутро','Легені замість зябер'],a:0,
+  w:'Обтічність зменшує опір води.'}];
+let adI=0,adOk=0;
+function adDraw(){const t=AD[adI];$('#ad-task').innerHTML=t.q+'<span class="chip">'+adOk+' з 4</span>';
+  const box=$('#ad-opts');box.innerHTML='';
+  t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
+      if(i===t.a){adOk++;say('#ad-v','Так. '+t.w,true);if(adOk>=4)mark('adapt');}
+      else say('#ad-v','Ні. '+t.w,false);};box.appendChild(b);});
+  hide('#ad-v');}
+function adNext(){adI=(adI+1)%AD.length;adDraw();}
+
+/* --- 14. Кругообіг води --- */
+T('water',{g:3,ic:'💧',t:'Кругообіг води',s:'Одна крапля по колу',html:`
+<div class="panel">
+  <div class="task">Веди краплю по колу: тисни на наступний етап. Вода нікуди не зникає — вона мандрує.</div>
+  <svg viewBox="0 0 320 210" height="205" id="wt-svg"></svg>
+  <div class="hintline" id="wt-info"></div>
+  <div class="verdict" id="wt-v"></div>
+  <div class="legend">Уся вода на Землі — та сама вже мільярди років. Ти п’єш ті самі молекули, що колись були в морі динозаврів.</div>
+</div>`,init(){wtI=0;wtRound=0;wtDraw();}});
+const WT=[{n:'Випаровування',x:60,y:170,p:'Сонце нагріває воду в морі, річці, ґрунті — вона переходить у пару й піднімається.'},
+ {n:'Конденсація',x:120,y:60,p:'Угорі холодніше: пара знову стає крихітними краплинками. Так утворюються хмари.'},
+ {n:'Перенесення',x:200,y:44,p:'Вітер несе хмари над сушею — інколи за сотні кілометрів.'},
+ {n:'Опади',x:250,y:110,p:'Краплі зливаються, важчають і випадають дощем, снігом або градом.'},
+ {n:'Стік і вбирання',x:210,y:180,p:'Частина води біжить у річки, частина вбирається в ґрунт і живить рослини та підземні води.'}];
+let wtI=0,wtRound=0;
+function wtDraw(){let s='<rect x="0" y="0" width="320" height="210" fill="#EAF4FF" rx="10"/>';
+  s+='<rect x="0" y="176" width="150" height="34" fill="#5AA9EE"/>';
+  s+='<rect x="150" y="176" width="170" height="34" fill="#7BC47F"/>';
+  s+='<circle cx="42" cy="34" r="18" fill="#FFC93C"/>';
+  s+='<ellipse cx="150" cy="52" rx="46" ry="20" fill="#fff"/><ellipse cx="215" cy="46" rx="38" ry="17" fill="#fff"/>';
+  WT.forEach((w,i)=>{const on=i===wtI;
+    s+='<circle cx="'+w.x+'" cy="'+w.y+'" r="'+(on?15:11)+'" fill="'+(on?'#2F6FE4':'#B9C7DA')+'" style="cursor:pointer" onclick="wtGo('+i+')"/>'+
+       '<text x="'+w.x+'" y="'+(w.y+5)+'" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" pointer-events="none">'+(i+1)+'</text>';});
+  for(let i=0;i<WT.length;i++){const a=WT[i],b=WT[(i+1)%WT.length];
+    s+='<line x1="'+a.x+'" y1="'+a.y+'" x2="'+b.x+'" y2="'+b.y+'" stroke="#9CB3CC" stroke-width="2" stroke-dasharray="4 4"/>';}
+  $('#wt-svg').innerHTML=s;
+  const w=WT[wtI];$('#wt-info').innerHTML='<b>'+(wtI+1)+'. '+w.n+'</b> — '+w.p;}
+function wtGo(i){if(i===(wtI+1)%WT.length){wtI=i;if(i===0)wtRound++;
+    if(wtRound>=1){mark('water');say('#wt-v','Коло замкнулося. Вода на планеті не витрачається й не з’являється — вона просто змінює стан і місце.',true);}}
+  else{wtI=i;}
+  wtDraw();}
+
+/* --- 15. Ґрунт і ерозія --- */
+T('soil',{g:3,ic:'🌱',t:'Ґрунт і дощ',s:'Навіщо схилам дерева',html:`
+<div class="panel">
+  <div class="task">Увімкни дощ на двох схилах: голому й засадженому. Порівняй, скільки ґрунту змиє.</div>
+  <svg viewBox="0 0 320 190" height="185" id="so-svg"></svg>
+  <div class="row center"><button class="btn" onclick="soRun()">Пустити дощ</button>
+    <button class="btn ghost" onclick="soInit()">Спочатку</button></div>
+  <div class="hintline" id="so-state"></div>
+  <div class="verdict" id="so-v"></div>
+  <div class="legend">Сантиметр ґрунту утворюється сотні років, а змити його дощем можна за один сезон. Тому на схилах саджають лісосмуги.</div>
+</div>`,init(){soInit();}});
+let soA=40,soB=40,soTimer=null;
+function soInit(){stopAll();soA=40;soB=40;hide('#so-v');soDraw();}
+function soDraw(){if(!document.querySelector('#so-svg'))return;let s='<rect x="0" y="0" width="320" height="190" fill="#EAF4FF" rx="10"/>';
+  s+='<text x="12" y="16" font-size="12" fill="#5B6779">голий схил</text><text x="180" y="16" font-size="12" fill="#5B6779">із деревами</text>';
+  s+='<path d="M 10 60 L 150 60 L 150 '+(60+soA*2)+' L 10 '+(60+soA*1.2)+' Z" fill="#8B6B4A"/>';
+  s+='<path d="M 170 60 L 310 60 L 310 '+(60+soB*2)+' L 170 '+(60+soB*1.2)+' Z" fill="#6B5237"/>';
+  [190,225,260,295].forEach(x=>{s+='<rect x="'+(x-2)+'" y="34" width="4" height="26" fill="#7A5C3E"/>'+
+    '<circle cx="'+x+'" cy="30" r="12" fill="#5E8C4F"/>';});
+  s+='<rect x="0" y="'+(60+Math.max(soA,soB)*2)+'" width="320" height="'+(190-(60+Math.max(soA,soB)*2))+'" fill="#C9C6BB"/>';
+  $('#so-svg').innerHTML=s;
+  $('#so-state').textContent='Товщина ґрунту: голий схил '+Math.round(soA)+' см · із деревами '+Math.round(soB)+' см';}
+function soRun(){stopAll();let t=0;
+  soTimer=every(()=>{t++;soA=Math.max(4,soA-1.4);soB=Math.max(4,soB-0.22);soDraw();
+    if(t>=25){stopAll();mark('soil');
+      say('#so-v','На голому схилі лишилось '+Math.round(soA)+' см, під деревами — '+Math.round(soB)+' см. Коріння тримає ґрунт, а крони гасять удар крапель.',true);}},90);}
+
+/* --- 16. Склад повітря --- */
+T('air',{g:3,ic:'🌬',t:'Чим ми дихаємо',s:'Склад повітря в цифрах',html:`
+<div class="panel">
+  <div class="task">Сто квадратиків — це все повітря навколо. Тисни на газ, щоб побачити його частку.</div>
+  <div class="strip" id="ar-strip" style="grid-template-columns:repeat(10,1fr)"></div>
+  <div class="row center" id="ar-btns"></div>
+  <div class="hintline" id="ar-info"></div>
+  <div class="verdict" id="ar-v"></div>
+  <div class="legend">Вуглекислого газу лише 0,04% — але саме він утримує тепло. Невелика домішка вирішує, яким буде клімат.</div>
+</div>`,init(){arDraw(-1);}});
+const AIR=[{n:'Азот',v:78,c:'#8FA2BE',f:'Найбільше саме його. Рослини не можуть брати азот прямо з повітря — їм допомагають бактерії.'},
+ {n:'Кисень',v:21,c:'#2F6FE4',f:'Ним дихають усі живі істоти. Його виробили рослини й водорості за мільярди років.'},
+ {n:'Аргон',v:1,c:'#B79CE0',f:'Інертний газ: ні з чим не реагує. Ним наповнюють лампочки.'},
+ {n:'Вуглекислий газ',v:0.04,c:'#D8433B',f:'Його менше за одну клітинку зі ста, але саме він потрібен рослинам для фотосинтезу й саме він створює парниковий ефект.'}];
+function arDraw(sel){const box=$('#ar-strip');box.innerHTML='';
+  let idx=0;const cells=[];
+  AIR.forEach((g,i)=>{const n=Math.round(g.v);for(let k=0;k<n;k++)cells.push(i);});
+  while(cells.length<100)cells.push(3);
+  cells.slice(0,100).forEach(i=>{const d=document.createElement('div');
+    d.style.background=(sel<0||sel===i)?AIR[i].c:'#EFEDE6';d.style.borderRadius='3px';box.appendChild(d);});
+  $('#ar-btns').innerHTML=AIR.map((g,i)=>'<button class="btn ghost small" onclick="arDraw('+i+')">'+g.n+'</button>').join('')
+    +'<button class="btn small" onclick="arDraw(-1)">усе разом</button>';
+  if(sel>=0){const g=AIR[sel];mark('air');
+    $('#ar-info').innerHTML='<b>'+g.n+'</b> — '+g.v+'% · '+g.f;}
+  else $('#ar-info').textContent='Азот 78%, кисень 21%, аргон ≈1%, вуглекислий газ 0,04%.';}
+
+/* ================= головна ================= */
+function homeDraw(){
+  const list=$('#home-list');if(!list)return;list.innerHTML='';
+  GROUPS.forEach((g,gi)=>{
+    const keys=Object.keys(TOOLS).filter(k=>TOOLS[k].g===gi);
+    if(!keys.length)return;
+    const done=keys.filter(k=>PR[k]).length;
+    const h=document.createElement('div');h.className='grp';
+    h.textContent=g+(done?'  ·  освоєно '+done+' з '+keys.length:'');list.appendChild(h);
+    keys.forEach(k=>{const t=TOOLS[k],b=document.createElement('button');
+      b.className='tool'+(PR[k]?' done':'');
+      b.innerHTML='<div class="ic">'+t.ic+'</div><div class="tx"><b>'+t.t+'</b><span>'+t.s+'</span></div><div class="tick">✓</div>';
+      b.onclick=()=>openTool(k);list.appendChild(b);});
+  });
+}
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+  go('s-tool');try{t.init();}catch(e){console.error(e);}}
+homeDraw();
+</script>
+</body>
+</html>
