@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Логіка · лабораторія</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9;
+    --grid:#E8E5DA; --accent:#2F6FE4; --accent-soft:#E6EEFF;
+    --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7;
+    --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;
+    font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;min-height:32px}
+  .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:17px;flex:1;text-align:center}
+
+  header.hero{margin:6px 0 22px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+
+  .tool{display:flex;gap:14px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;margin-bottom:10px}
+  .tool .ic{width:44px;height:44px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--accent-soft)}
+  .tool b{display:block;font-size:17px}
+  .tool span{color:var(--ink-2);font-size:14px}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:15px}
+  .hintline{color:var(--ink-2);font-size:14px;margin-top:10px;min-height:1.5em}
+  .verdict{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:11px 16px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.4}
+
+  svg{display:block;max-width:100%;touch-action:none}
+
+  /* вимикачі */
+  .wire{stroke:#C9C6BB;stroke-width:5;fill:none}
+  .wire.hot{stroke:var(--volt)}
+  .sw{cursor:pointer}
+  table.tt{border-collapse:collapse;width:100%;margin-top:14px;font-variant-numeric:tabular-nums}
+  table.tt th,table.tt td{border:1px solid var(--line);padding:7px;text-align:center;font-size:15px}
+  table.tt th{background:#F4F2EC;font-weight:600}
+  table.tt tr.now td{background:var(--volt-soft)}
+  table.tt td.q{color:#B9B5A8}
+
+  /* глечики */
+  .jugs{display:flex;gap:28px;justify-content:center;align-items:flex-end;margin:6px 0 16px}
+  .jug{width:96px;text-align:center}
+  .glass{height:170px;border:3px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;
+    display:flex;flex-direction:column-reverse;overflow:hidden;background:#fff}
+  .water{background:linear-gradient(#9CCBF5,#5AA9EE);transition:height .35s ease}
+  .jug b{display:block;margin-top:8px;font-size:20px}
+  .jug span{color:var(--ink-2);font-size:13px}
+
+  /* монети */
+  .coins{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+  .coin{width:44px;height:44px;border-radius:50%;border:2px solid var(--line);background:#F7F3E4;
+    font-weight:600;display:grid;place-items:center}
+  .coin.l{border-color:var(--accent);background:var(--accent-soft)}
+  .coin.r{border-color:var(--volt);background:var(--volt-soft)}
+  .pans{display:flex;justify-content:space-between;color:var(--ink-2);font-size:14px;margin-top:6px}
+
+  /* шахівниця */
+  .board{display:grid;grid-template-columns:repeat(8,1fr);width:min(100%,340px);margin:0 auto;
+    border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+  .cell{aspect-ratio:1;display:grid;place-items:center;font-size:11px}
+  .cell.dark{background:#D8D3C4}.cell.light{background:#F6F3E9}
+  .cell.gone{background:repeating-linear-gradient(45deg,#EFEDE6,#EFEDE6 4px,#E3E1D9 4px,#E3E1D9 8px)}
+  .cell.sel{outline:3px solid var(--accent);outline-offset:-3px}
+  .cell.dom{background:#5AA9EE}
+  .counts{display:flex;gap:16px;justify-content:center;margin-top:12px;font-size:15px}
+
+  /* магічний квадрат */
+  .msq{display:grid;grid-template-columns:repeat(4,60px);gap:6px;justify-content:center;margin:8px auto}
+  .msq input{width:60px;height:60px;text-align:center;font:600 22px/1 inherit;border:2px solid var(--line);
+    border-radius:12px;background:#fff;color:var(--ink)}
+  .msq .sum{width:60px;height:60px;display:grid;place-items:center;font-weight:600;color:var(--ink-2);
+    border:2px dashed var(--line);border-radius:12px;font-size:18px}
+  .msq .sum.ok{color:#14603E;border-color:var(--ok);background:var(--ok-soft)}
+  .msq .sum.bad{color:#8F2018;border-color:var(--bad)}
+
+  /* шкарпетки */
+  .socks{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;min-height:52px}
+  .sock{width:34px;height:46px;border-radius:8px 8px 14px 14px;border:2px solid rgba(0,0,0,.12)}
+
+  /* шифр */
+  .cipher-out{background:#F4F2EC;border-radius:12px;padding:12px 14px;margin-top:10px;
+    font-size:17px;letter-spacing:.05em;min-height:3em;word-break:break-word}
+  input[type=text]{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);
+    border-radius:12px;background:#fff;color:var(--ink)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+
+  /* машина */
+  .mach{display:flex;flex-direction:column;gap:8px;align-items:center;margin:10px 0}
+  .op{background:#F4F2EC;border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-weight:600}
+  .op.now{background:var(--volt-soft);border-color:var(--volt)}
+  .val{font-size:26px;font-weight:700}
+  .arrow{color:var(--ink-2)}
+
+  .legend{color:var(--ink-2);font-size:14px;margin-top:10px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ГОЛОВНА -->
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Логіка руками</h1>
+    <p>Десять приладів. Кожен показує один закон логіки так, щоб його було видно, а не вивчено напам'ять.</p>
+  </header>
+
+  <div class="panel" style="padding:14px 16px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <svg viewBox="0 0 150 70" width="150" height="70" id="teaser-svg" aria-hidden="true">
+        <path class="wire" d="M8 35 H40"/>
+        <path class="wire" id="tw1" d="M40 35 H78"/>
+        <path class="wire" id="tw2" d="M78 35 H108"/>
+        <circle id="tlamp" cx="126" cy="35" r="15" fill="#EFEDE6" stroke="#C9C6BB" stroke-width="3"/>
+        <g id="tsw" class="sw"><circle cx="59" cy="35" r="13" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
+          <line id="tline" x1="52" y1="41" x2="66" y2="29" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/></g>
+      </svg>
+      <div style="font-size:15px;color:var(--ink-2)">Натисни вимикач.<br>Це і є «істина» й «хиба».</div>
+    </div>
+  </div>
+
+  <div class="grp">Тижні 1–8 · Логіка як наука</div>
+  <button class="tool" onclick="go('s-euler')"><div class="ic">⭕️</div><div><b>Кола понять</b><span>Тижд. 1 · обсяг, рід і вид, перетин</span></div></button>
+  <button class="tool" onclick="go('s-quant')"><div class="ic">🚦</div><div><b>Усі, деякі, жоден</b><span>Тижд. 2 · істинність і заперечення</span></div></button>
+  <button class="tool" onclick="go('s-circuit')"><div class="ic">💡</div><div><b>Схема «і / або / не»</b><span>Тижд. 5–6 · таблиця істинності</span></div></button>
+
+  <div class="grp">Тижні 9–16 · Числа й нестандартні задачі</div>
+  <button class="tool" onclick="go('s-parity')"><div class="ic">🁣</div><div><b>Доміно на шахівниці</b><span>Тижд. 10 · парність і розфарбування</span></div></button>
+  <button class="tool" onclick="go('s-magic')"><div class="ic">🔢</div><div><b>Магічний квадрат</b><span>Тижд. 11 · суми, що завжди 15</span></div></button>
+  <button class="tool" onclick="go('s-caesar')"><div class="ic">🔐</div><div><b>Шифрувальне колесо</b><span>Тижд. 11 · шифр Цезаря</span></div></button>
+  <button class="tool" onclick="go('s-jugs')"><div class="ic">🧪</div><div><b>Переливання</b><span>Тижд. 12 · відміряти 4 літри</span></div></button>
+  <button class="tool" onclick="go('s-scale')"><div class="ic">⚖️</div><div><b>Терези й монети</b><span>Тижд. 12 · знайти легшу за 2 зважування</span></div></button>
+  <button class="tool" onclick="go('s-back')"><div class="ic">↩️</div><div><b>Машина навпаки</b><span>Тижд. 15 · метод оберненого ходу</span></div></button>
+
+  <div class="grp">Тижні 22 та 35 · Геометрія й підсумок</div>
+  <button class="tool" onclick="go('s-euler-path')"><div class="ic">✏️</div><div><b>Одним розчерком</b><span>Тижд. 22 · мости й непарні вершини</span></div></button>
+  <button class="tool" onclick="go('s-socks')"><div class="ic">🧦</div><div><b>Шухляда зі шкарпетками</b><span>Тижд. 35 · принцип Діріхле</span></div></button>
+</section>
+
+<!-- 1. КОЛА ПОНЯТЬ -->
+<section id="s-euler" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Кола понять</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task" id="eu-task"></div>
+    <svg viewBox="0 0 340 240" height="240" id="eu-svg">
+      <circle id="eu-a" cx="130" cy="120" r="72" fill="rgba(47,111,228,.18)" stroke="var(--accent)" stroke-width="2.5"/>
+      <circle id="eu-b" cx="215" cy="120" r="46" fill="rgba(233,168,0,.20)" stroke="var(--volt)" stroke-width="2.5"/>
+      <text id="eu-la" x="130" y="126" text-anchor="middle" font-size="15" font-weight="600" fill="#1E2A3A"></text>
+      <text id="eu-lb" x="215" y="126" text-anchor="middle" font-size="14" font-weight="600" fill="#1E2A3A"></text>
+    </svg>
+    <div class="hintline" id="eu-state"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" onclick="euCheck()">Перевірити</button>
+      <button class="btn ghost" onclick="euNext()">Інша пара</button>
+    </div>
+    <div class="verdict" id="eu-v"></div>
+    <div class="legend">Тягни менше коло. Коли воно всередині — це рід і вид. Коли краї заходять один за одний — перетин. Коли кола нарізно — поняття несумісні.</div>
+  </div>
+</section>
+
+<!-- 2. УСІ / ДЕЯКІ / ЖОДЕН -->
+<section id="s-quant" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Усі, деякі, жоден</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">Натискай на фігури — вони змінюють колір. Стеж, коли твердження стає хибним.</div>
+    <div class="row" id="q-figs" style="justify-content:center;gap:10px;margin:6px 0 14px"></div>
+    <div style="display:grid;gap:8px">
+      <div class="op" id="q-s1"></div>
+      <div class="op" id="q-s2"></div>
+      <div class="op" id="q-s3"></div>
+    </div>
+    <div class="verdict good on" id="q-note" style="margin-top:14px">Щоб спростувати «усі», досить <b>однієї</b> фігури іншого кольору. Це і є контрприклад.</div>
+  </div>
+</section>
+
+<!-- 3. СХЕМА -->
+<section id="s-circuit" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Схема «і / або / не»</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn small" id="m-and" onclick="setMode('and')">A і B</button>
+      <button class="btn small ghost" id="m-or" onclick="setMode('or')">A або B</button>
+      <button class="btn small ghost" id="m-not" onclick="setMode('not')">не A</button>
+    </div>
+    <svg viewBox="0 0 340 150" height="150" id="c-svg"></svg>
+    <div class="hintline" id="c-state"></div>
+    <table class="tt" id="c-tt"></table>
+    <div class="legend" id="c-legend"></div>
+  </div>
+</section>
+
+<!-- 4. ДОМІНО -->
+<section id="s-parity" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Доміно на шахівниці</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">З дошки вирізали два кутики. Спробуй накрити решту доміношками 1×2: тисни на дві сусідні клітинки.</div>
+    <div class="board" id="p-board"></div>
+    <div class="counts"><span id="p-w"></span><span id="p-b"></span><span id="p-d"></span></div>
+    <div class="row" style="margin-top:12px;justify-content:center">
+      <button class="btn ghost small" onclick="parityInit(true)">Вирізати інші кути</button>
+      <button class="btn ghost small" onclick="parityInit(false)">Почати заново</button>
+    </div>
+    <div class="verdict" id="p-v"></div>
+  </div>
+</section>
+
+<!-- 5. МАГІЧНИЙ КВАДРАТ -->
+<section id="s-magic" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Магічний квадрат</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">Розстав числа від 1 до 9 так, щоб кожен рядок, стовпець і діагональ давали 15. Суми рахуються самі.</div>
+    <div class="msq" id="ms"></div>
+    <div class="hintline" id="ms-used"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" onclick="msClear()">Очистити</button>
+      <button class="btn ghost small" onclick="msHint()">Підказка</button>
+    </div>
+    <div class="verdict" id="ms-v"></div>
+  </div>
+</section>
+
+<!-- 6. ШИФР -->
+<section id="s-caesar" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Шифрувальне колесо</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <input type="text" id="cz-in" value="привіт совеня" oninput="czRun()" aria-label="Текст">
+    <div style="margin:14px 0 6px;color:var(--ink-2);font-size:14px">Зсув: <b id="cz-k">3</b> букви</div>
+    <input type="range" min="1" max="32" value="3" id="cz-shift" oninput="czRun()">
+    <div class="cipher-out" id="cz-out"></div>
+    <svg viewBox="0 0 300 60" height="60" id="cz-wheel" style="margin-top:10px"></svg>
+    <div class="row" style="margin-top:10px">
+      <button class="btn ghost small" onclick="czSwap()">Розшифрувати назад</button>
+    </div>
+    <div class="legend">Зсув 32 повертає текст таким, як був: в українському алфавіті 33 букви.</div>
+  </div>
+</section>
+
+<!-- 7. ПЕРЕЛИВАННЯ -->
+<section id="s-jugs" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Переливання</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">Відміряй рівно <b>4 літри</b>. Мірок на глечиках немає — тільки 5 л і 3 л.</div>
+    <div class="jugs">
+      <div class="jug"><div class="glass"><div class="water" id="j5" style="height:0"></div></div><b id="j5v">0 л</b><span>глечик 5 л</span></div>
+      <div class="jug"><div class="glass" style="height:110px"><div class="water" id="j3" style="height:0"></div></div><b id="j3v">0 л</b><span>глечик 3 л</span></div>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn ghost small" onclick="jug('f5')">Наповнити 5</button>
+      <button class="btn ghost small" onclick="jug('f3')">Наповнити 3</button>
+      <button class="btn ghost small" onclick="jug('e5')">Вилити 5</button>
+      <button class="btn ghost small" onclick="jug('e3')">Вилити 3</button>
+      <button class="btn small" onclick="jug('53')">5 → 3</button>
+      <button class="btn small" onclick="jug('35')">3 → 5</button>
+    </div>
+    <div class="hintline" id="j-moves">Кроків: 0</div>
+    <div class="verdict" id="j-v"></div>
+    <div class="row"><button class="btn ghost small" onclick="jugReset()">Спочатку</button></div>
+  </div>
+</section>
+
+<!-- 8. ТЕРЕЗИ -->
+<section id="s-scale" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Терези й монети</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">Дев'ять монет, одна легша. Знайди її за <b>два</b> зважування. Тисни на монету: перший раз — ліва шалька, другий — права, третій — прибрати.</div>
+    <svg viewBox="0 0 300 120" height="120" id="sc-svg"></svg>
+    <div class="pans"><span>◀ ліва</span><span>права ▶</span></div>
+    <div class="coins" id="sc-coins"></div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" onclick="scWeigh()">Зважити</button>
+      <button class="btn ghost" onclick="scReset()">Нові монети</button>
+    </div>
+    <div class="hintline" id="sc-state">Зважувань: 0</div>
+    <div class="row" style="justify-content:center;margin-top:8px">
+      <span style="align-self:center;font-size:15px;color:var(--ink-2)">Фальшива — №</span>
+      <input type="text" id="sc-guess" style="width:70px;text-align:center" inputmode="numeric">
+      <button class="btn small" onclick="scGuess()">Готово</button>
+    </div>
+    <div class="verdict" id="sc-v"></div>
+  </div>
+</section>
+
+<!-- 9. МАШИНА НАВПАКИ -->
+<section id="s-back" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Машина навпаки</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task" id="bk-task"></div>
+    <div class="mach" id="bk-mach"></div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" onclick="bkStep()">Крок назад</button>
+      <button class="btn ghost" onclick="bkNew()">Нова задача</button>
+    </div>
+    <div class="verdict" id="bk-v"></div>
+    <div class="legend">Кожен крок назад замінює дію на протилежну: множення на ділення, додавання на віднімання.</div>
+  </div>
+</section>
+
+<!-- 10. ОДНИМ РОЗЧЕРКОМ -->
+<section id="s-euler-path" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Одним розчерком</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn small" id="g-0" onclick="graphLoad(0)">Конверт</button>
+      <button class="btn small ghost" id="g-1" onclick="graphLoad(1)">Будиночок</button>
+      <button class="btn small ghost" id="g-2" onclick="graphLoad(2)">Мости Кенігсберга</button>
+    </div>
+    <svg viewBox="0 0 320 250" height="250" id="gp-svg"></svg>
+    <div class="hintline" id="gp-state"></div>
+    <div class="row"><button class="btn ghost small" onclick="graphReset()">Стерти лінію</button></div>
+    <div class="verdict" id="gp-v"></div>
+    <div class="legend">Спершу тисни на точку, потім на сусідню — лінія проведеться. Двічі одним ребром не можна.</div>
+  </div>
+</section>
+
+<!-- 11. ШКАРПЕТКИ -->
+<section id="s-socks" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Прилади</button><h2>Шухляда зі шкарпетками</h2><span style="width:64px"></span></div>
+  <div class="panel">
+    <div class="task">У темряві не видно кольору. Скільки шкарпеток витягти, щоб <b>напевно</b> була пара?</div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn small" id="k-2" onclick="sockSet(2)">2 кольори</button>
+      <button class="btn small ghost" id="k-3" onclick="sockSet(3)">3 кольори</button>
+      <button class="btn small ghost" id="k-4" onclick="sockSet(4)">4 кольори</button>
+    </div>
+    <div class="socks" id="sk-list"></div>
+    <div class="row"><button class="btn" onclick="sockPull()">Витягнути шкарпетку</button>
+      <button class="btn ghost" onclick="sockReset()">Скласти назад</button></div>
+    <div class="hintline" id="sk-state"></div>
+    <div class="verdict" id="sk-v"></div>
+    <div class="legend">Найгірший випадок: спершу трапляються всі кольори по одному разу. Наступна шкарпетка обов'язково повторить один із них — це принцип Діріхле.</div>
+  </div>
+</section>
+
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const tg = window.Telegram?.WebApp; if (tg) { tg.ready(); tg.expand(); }
+function go(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function say(el, text, good){ el.className='verdict on '+(good?'good':'warn'); el.innerHTML=text; }
+function hide(el){ el.className='verdict'; }
+
+/* ---------- тизер на головній ---------- */
+let teaser=false;
+$('#tsw').addEventListener('click',()=>{ teaser=!teaser;
+  $('#tline').setAttribute('x2', teaser?66:66); $('#tline').setAttribute('y2', teaser?35:29);
+  $('#tw1').classList.toggle('hot',teaser); $('#tw2').classList.toggle('hot',teaser);
+  $('#tlamp').setAttribute('fill', teaser?'#FFD84D':'#EFEDE6');
+  $('#tlamp').setAttribute('stroke', teaser?'#E9A800':'#C9C6BB'); });
+
+/* ---------- 1. КОЛА ПОНЯТЬ ---------- */
+const euPairs=[
+  {a:'тварини',b:'коти',want:'in',ask:'Постав так, щоб було видно: <b>кожен кіт — тварина</b>.'},
+  {a:'учні',b:'спортсмени',want:'cross',ask:'Постав так, щоб було видно: <b>деякі учні — спортсмени</b>.'},
+  {a:'парні числа',b:'непарні',want:'out',ask:'Постав так, щоб було видно: <b>жодне парне число не є непарним</b>.'},
+  {a:'меблі',b:'стільці',want:'in',ask:'Постав так, щоб було видно: <b>стілець — це меблі</b>.'},
+  {a:'птахи',b:'ті, що літають',want:'cross',ask:'Постав так, щоб було видно: <b>деякі птахи літають, але не всі</b>.'}
+];
+let euI=0;
+function euRel(){ const A=$('#eu-a'),B=$('#eu-b');
+  const dx=+B.getAttribute('cx')-+A.getAttribute('cx'), dy=+B.getAttribute('cy')-+A.getAttribute('cy');
+  const d=Math.hypot(dx,dy), ra=+A.getAttribute('r'), rb=+B.getAttribute('r');
+  if(d+rb<=ra+2) return 'in'; if(d>=ra+rb-2) return 'out'; return 'cross'; }
+const euName={in:'менше коло всередині — рід і вид',cross:'кола перетинаються — спільна частина',out:'кола нарізно — несумісні'};
+function euDraw(){ const p=euPairs[euI]; $('#eu-la').textContent=p.a; $('#eu-lb').textContent=p.b;
+  $('#eu-task').innerHTML=p.ask; $('#eu-state').textContent='Зараз: '+euName[euRel()]; }
+function euNext(){ euI=(euI+1)%euPairs.length; $('#eu-b').setAttribute('cx',215); $('#eu-b').setAttribute('cy',120);
+  hide($('#eu-v')); euDraw(); }
+function euCheck(){ const p=euPairs[euI], r=euRel();
+  if(r===p.want) say($('#eu-v'),'Так. '+euName[r][0].toUpperCase()+euName[r].slice(1)+'.',true);
+  else say($('#eu-v'),'Ще ні. Зараз '+euName[r]+', а потрібне інше розташування.',false); }
+(function euDrag(){ const svg=$('#eu-svg'), B=$('#eu-b'), L=$('#eu-lb'); let on=false;
+  const pt=e=>{ const r=svg.getBoundingClientRect(), t=e.touches?e.touches[0]:e;
+    return {x:(t.clientX-r.left)/r.width*340, y:(t.clientY-r.top)/r.height*240}; };
+  const move=e=>{ if(!on) return; e.preventDefault(); const p=pt(e);
+    const x=Math.max(46,Math.min(294,p.x)), y=Math.max(46,Math.min(194,p.y));
+    B.setAttribute('cx',x); B.setAttribute('cy',y); L.setAttribute('x',x); L.setAttribute('y',y+6);
+    $('#eu-state').textContent='Зараз: '+euName[euRel()]; };
+  B.addEventListener('pointerdown',e=>{on=true;B.setPointerCapture(e.pointerId);});
+  svg.addEventListener('pointermove',move);
+  svg.addEventListener('pointerup',()=>on=false); svg.addEventListener('pointercancel',()=>on=false);
+})();
+euDraw();
+
+/* ---------- 2. УСІ / ДЕЯКІ / ЖОДЕН ---------- */
+let figs=[1,1,1,1,1,1];
+function qDraw(){ const box=$('#q-figs'); box.innerHTML='';
+  figs.forEach((v,i)=>{ const b=document.createElement('button');
+    b.style.cssText='width:42px;height:42px;border-radius:12px;border:2px solid '+(v?'#2F6FE4':'#E9A800')+
+      ';background:'+(v?'rgba(47,111,228,.18)':'rgba(233,168,0,.22)');
+    b.setAttribute('aria-label','фігура '+(i+1)); b.onclick=()=>{figs[i]=1-figs[i];qDraw();}; box.appendChild(b); });
+  const blue=figs.filter(v=>v).length, all=figs.length;
+  const st=(t,ok)=>`<span style="color:${ok?'#14603E':'#8F2018'};font-weight:600">${ok?'істинне':'хибне'}</span> — ${t}`;
+  $('#q-s1').innerHTML='«Усі фігури сині» → '+st(`синіх ${blue} з ${all}`, blue===all);
+  $('#q-s2').innerHTML='«Деякі фігури сині» → '+st(`синіх ${blue}`, blue>0);
+  $('#q-s3').innerHTML='«Жодна фігура не синя» → '+st(`синіх ${blue}`, blue===0);
+}
+qDraw();
+
+/* ---------- 3. СХЕМА ---------- */
+let mode='and', A=false, B=false, seen=new Set();
+function lampOn(){ return mode==='and'? (A&&B) : mode==='or'? (A||B) : !A; }
+function setMode(m){ mode=m; A=B=false; seen=new Set();
+  ['and','or','not'].forEach(k=>$('#m-'+k).className='btn small'+(k===m?'':' ghost')); cDraw(); }
+function cDraw(){
+  const on=lampOn(), sw=(x,y,st,id)=>`<g class="sw" onclick="toggle('${id}')">
+      <circle cx="${x}" cy="${y}" r="15" fill="#fff" stroke="var(--ink)" stroke-width="3"/>
+      <line x1="${x-8}" y1="${y+7}" x2="${x+8}" y2="${st?y:y-8}" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+      <text x="${x}" y="${y+34}" text-anchor="middle" font-size="14" font-weight="600">${id}</text></g>`;
+  let svg='';
+  if(mode==='and'){
+    svg=`<path class="wire ${A?'hot':''}" d="M10 75 H55"/><path class="wire ${A&&B?'hot':''}" d="M85 75 H145"/>
+      <path class="wire ${on?'hot':''}" d="M175 75 H235"/>${sw(70,75,A,'A')}${sw(160,75,B,'B')}`;
+  } else if(mode==='or'){
+    svg=`<path class="wire ${A||B?'hot':''}" d="M10 75 H40"/>
+      <path class="wire ${A?'hot':''}" d="M40 75 V40 H55"/><path class="wire ${A?'hot':''}" d="M85 40 H140 V75"/>
+      <path class="wire ${B?'hot':''}" d="M40 75 V110 H55"/><path class="wire ${B?'hot':''}" d="M85 110 H140 V75"/>
+      <path class="wire ${on?'hot':''}" d="M140 75 H235"/>${sw(70,40,A,'A')}${sw(70,110,B,'B')}`;
+  } else {
+    svg=`<path class="wire ${!A?'hot':''}" d="M10 75 H55"/><path class="wire ${!A?'hot':''}" d="M85 75 H235"/>
+      ${sw(70,75,!A,'A')}<text x="70" y="30" text-anchor="middle" font-size="13" fill="var(--ink-2)">заперечення</text>`;
+  }
+  svg+=`<circle cx="258" cy="75" r="20" fill="${on?'#FFD84D':'#EFEDE6'}" stroke="${on?'#E9A800':'#C9C6BB'}" stroke-width="3"/>
+        <text x="258" y="112" text-anchor="middle" font-size="13" fill="var(--ink-2)">лампа</text>`;
+  $('#c-svg').innerHTML=svg;
+  $('#c-state').textContent = mode==='not' ? `A ${A?'істинне':'хибне'} → лампа ${on?'горить':'не горить'}`
+    : `A ${A?'істинне':'хибне'}, B ${B?'істинне':'хибне'} → лампа ${on?'горить':'не горить'}`;
+  ttDraw();
+  $('#c-legend').textContent = mode==='and' ? 'Вимикачі один за одним: струм іде, лише коли обидва ввімкнені.'
+    : mode==='or' ? 'Два шляхи поруч: досить одного ввімкненого — і лампа горить.'
+    : 'Тут навпаки: вимикач розмикає коло. Не A істинне тоді, коли A хибне.';
+}
+function toggle(id){ if(mode==='not'){A=!A;} else if(id==='A'){A=!A;} else {B=!B;}
+  seen.add(mode==='not'?String(+A):String(+A)+String(+B)); cDraw(); }
+function ttDraw(){
+  const rows = mode==='not' ? [[0],[1]] : [[0,0],[0,1],[1,0],[1,1]];
+  const cur = mode==='not' ? String(+A) : String(+A)+String(+B);
+  let h = mode==='not' ? '<tr><th>A</th><th>не A</th></tr>' : `<tr><th>A</th><th>B</th><th>A ${mode==='and'?'і':'або'} B</th></tr>`;
+  let body='';
+  rows.forEach(r=>{ const key=r.join('');
+    const res = mode==='and'? (r[0]&&r[1]) : mode==='or'? (r[0]||r[1]) : (r[0]?0:1);
+    const known = seen.has(key) || key===cur;
+    body += `<tr class="${key===cur?'now':''}">` + r.map(v=>`<td>${v?'І':'Х'}</td>`).join('') +
+      (known?`<td><b>${res?'І':'Х'}</b></td>`:`<td class="q">?</td>`) + '</tr>'; });
+  $('#c-tt').innerHTML = h + body;
+}
+setMode('and');
+
+/* ---------- 4. ДОМІНО ---------- */
+let pBoard=[], pSel=null, pCut='opp';
+function parityInit(switchCut){
+  if(switchCut) pCut = pCut==='opp' ? 'adj' : 'opp';
+  pBoard=[]; pSel=null; hide($('#p-v'));
+  const cut = pCut==='opp' ? [[0,0],[7,7]] : [[0,0],[0,7]];
+  const el=$('#p-board'); el.innerHTML='';
+  for(let r=0;r<8;r++) for(let c=0;c<8;c++){
+    const dark=(r+c)%2===1, gone=cut.some(([a,b])=>a===r&&b===c);
+    pBoard.push({r,c,dark,gone,dom:false});
+    const d=document.createElement('button');
+    d.className='cell '+(gone?'gone':dark?'dark':'light');
+    d.onclick=()=>pTap(r*8+c); el.appendChild(d);
+  }
+  pStats();
+}
+function pTap(i){
+  const cells=$('#p-board').children, cell=pBoard[i];
+  if(cell.gone||cell.dom) return;
+  if(pSel===null){ pSel=i; cells[i].classList.add('sel'); return; }
+  if(pSel===i){ cells[i].classList.remove('sel'); pSel=null; return; }
+  const a=pBoard[pSel], b=cell, near=Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1;
+  cells[pSel].classList.remove('sel');
+  if(near){ a.dom=b.dom=true; cells[pSel].classList.add('dom'); cells[i].classList.add('dom'); pSel=null; pStats(); }
+  else { pSel=i; cells[i].classList.add('sel'); }
+}
+function pStats(){
+  const free=pBoard.filter(c=>!c.gone&&!c.dom);
+  const w=free.filter(c=>!c.dark).length, b=free.filter(c=>c.dark).length;
+  const placed=pBoard.filter(c=>c.dom).length/2;
+  $('#p-w').textContent='світлих вільно: '+w; $('#p-b').textContent='темних: '+b;
+  $('#p-d').textContent='доміношок: '+placed;
+  const stuck = !pBoard.some((c,i)=>{ if(c.gone||c.dom) return false;
+    return [[0,1],[1,0]].some(([dr,dc])=>{ const r=c.r+dr,cc=c.c+dc; if(r>7||cc>7) return false;
+      const n=pBoard[r*8+cc]; return !n.gone&&!n.dom; }); });
+  if(free.length===0) say($('#p-v'),'Уся дошка накрита. Тут світлих і темних було порівну.',true);
+  else if(stuck) say($('#p-v'), pCut==='opp'
+      ? `Далі нікуди. Подивись на лічильники: світлих і темних <b>не порівну</b> (${w} і ${b}). Кожна доміношка накриває одну світлу й одну темну, тому накрити таку дошку неможливо — і жодне перекладання не допоможе.`
+      : `Тупик, але випадковий: світлих і темних порівну (${w} і ${b}). Спробуй заново — тут розв'язок існує.`, pCut!=='opp');
+  else hide($('#p-v'));
+}
+parityInit(false);
+
+/* ---------- 5. МАГІЧНИЙ КВАДРАТ ---------- */
+function msBuild(){ const g=$('#ms'); g.innerHTML='';
+  for(let r=0;r<3;r++){ for(let c=0;c<3;c++){ const i=document.createElement('input');
+      i.inputMode='numeric'; i.maxLength=1; i.id='m'+r+c; i.oninput=msCheck; g.appendChild(i); }
+    const s=document.createElement('div'); s.className='sum'; s.id='sr'+r; g.appendChild(s); }
+  for(let c=0;c<3;c++){ const s=document.createElement('div'); s.className='sum'; s.id='sc'+c; g.appendChild(s); }
+  const d=document.createElement('div'); d.className='sum'; d.id='sd'; g.appendChild(d);
+}
+const mv=(r,c)=>{ const v=parseInt($('#m'+r+c).value,10); return isNaN(v)?0:v; };
+function msSum(el,val,full){ const e=$(el); e.textContent=val||''; 
+  e.className='sum'+(full? (val===15?' ok':' bad'):''); }
+function msCheck(){
+  let vals=[]; for(let r=0;r<3;r++) for(let c=0;c<3;c++){ const v=mv(r,c); if(v) vals.push(v); }
+  for(let r=0;r<3;r++){ const f=[0,1,2].every(c=>mv(r,c)); msSum('#sr'+r, mv(r,0)+mv(r,1)+mv(r,2), f); }
+  for(let c=0;c<3;c++){ const f=[0,1,2].every(r=>mv(r,c)); msSum('#sc'+c, mv(0,c)+mv(1,c)+mv(2,c), f); }
+  const fd=mv(0,0)&&mv(1,1)&&mv(2,2); msSum('#sd', mv(0,0)+mv(1,1)+mv(2,2), fd);
+  const used=[...new Set(vals)];
+  $('#ms-used').textContent = 'Використано: '+(used.length? used.sort((a,b)=>a-b).join(', ') : '—');
+  const dup = vals.length!==used.length;
+  const all9 = vals.length===9 && used.length===9;
+  if(dup){ say($('#ms-v'),'Числа повторюються — кожне від 1 до 9 має бути рівно один раз.',false); return; }
+  if(!all9){ hide($('#ms-v')); return; }
+  const ok=[0,1,2].every(r=>mv(r,0)+mv(r,1)+mv(r,2)===15) && [0,1,2].every(c=>mv(0,c)+mv(1,c)+mv(2,c)===15)
+    && mv(0,0)+mv(1,1)+mv(2,2)===15 && mv(0,2)+mv(1,1)+mv(2,0)===15;
+  ok ? say($('#ms-v'),'Магічний квадрат зібрано. Зверни увагу: у центрі в тебе 5 — інакше не буває.',true)
+     : say($('#ms-v'),'Числа всі різні, але суми ще не по 15. Дивись на червоні клітинки збоку.',false);
+}
+function msClear(){ for(let r=0;r<3;r++) for(let c=0;c<3;c++) $('#m'+r+c).value=''; msCheck(); }
+function msHint(){ $('#m11').value=5; msCheck();
+  say($('#ms-v'),'Центр — завжди 5: через нього проходять чотири лінії, і лише 5 дає всі потрібні пари (1+9, 2+8, 3+7, 4+6).',true); }
+msBuild(); msCheck();
+
+/* ---------- 6. ШИФР ЦЕЗАРЯ ---------- */
+const AB='абвгґдеєжзиіїйклмнопрстуфхцчшщьюя';
+let czDir=1;
+function czRun(){
+  const k=+$('#cz-shift').value*czDir, src=$('#cz-in').value.toLowerCase();
+  $('#cz-k').textContent=Math.abs(k);
+  $('#cz-out').textContent=[...src].map(ch=>{ const i=AB.indexOf(ch);
+    return i<0? ch : AB[(i+k+AB.length*2)%AB.length]; }).join('');
+  const w=$('#cz-wheel'); let s='';
+  for(let i=0;i<9;i++){ const from=AB[i], to=AB[(i+k+AB.length*2)%AB.length];
+    s+=`<text x="${18+i*32}" y="22" font-size="17" text-anchor="middle">${from}</text>
+        <text x="${18+i*32}" y="52" font-size="17" text-anchor="middle" fill="#2F6FE4" font-weight="600">${to}</text>
+        <line x1="${18+i*32}" y1="28" x2="${18+i*32}" y2="38" stroke="#C9C6BB" stroke-width="2"/>`; }
+  w.innerHTML=s;
+}
+function czSwap(){ czDir*=-1; czRun(); }
+czRun();
+
+/* ---------- 7. ПЕРЕЛИВАННЯ ---------- */
+let J={a:0,b:0,n:0};
+function jugDraw(){
+  $('#j5').style.height=(J.a/5*100)+'%'; $('#j3').style.height=(J.b/3*100)+'%';
+  $('#j5v').textContent=J.a+' л'; $('#j3v').textContent=J.b+' л';
+  $('#j-moves').textContent='Кроків: '+J.n;
+  if(J.a===4||J.b===4) say($('#j-v'),`Чотири літри є, за ${J.n} кроків.`+(J.n<=6?' Це найкоротший шлях.':' Найкоротший — шість кроків, спробуй ще.'),true);
+  else hide($('#j-v'));
+}
+function jug(op){
+  if(op==='f5') J.a=5; else if(op==='f3') J.b=3;
+  else if(op==='e5') J.a=0; else if(op==='e3') J.b=0;
+  else if(op==='53'){ const t=Math.min(J.a,3-J.b); J.a-=t; J.b+=t; }
+  else if(op==='35'){ const t=Math.min(J.b,5-J.a); J.b-=t; J.a+=t; }
+  J.n++; jugDraw();
+}
+function jugReset(){ J={a:0,b:0,n:0}; jugDraw(); }
+jugDraw();
+
+/* ---------- 8. ТЕРЕЗИ ---------- */
+let SC={light:0,pan:[],w:0,done:false};
+function scReset(){ SC={light:Math.floor(Math.random()*9)+1,pan:Array(10).fill(0),w:0,done:false};
+  $('#sc-guess').value=''; hide($('#sc-v')); scDraw(); }
+function scDraw(tilt=0){
+  const c=$('#sc-coins'); c.innerHTML='';
+  for(let i=1;i<=9;i++){ const b=document.createElement('button');
+    b.className='coin'+(SC.pan[i]===1?' l':SC.pan[i]===2?' r':''); b.textContent=i;
+    b.onclick=()=>{ if(SC.done) return; SC.pan[i]=(SC.pan[i]+1)%3; scDraw(); }; c.appendChild(b); }
+  const y=tilt*10;
+  $('#sc-svg').innerHTML=`<line x1="150" y1="30" x2="150" y2="95" stroke="#8B8578" stroke-width="6"/>
+    <line x1="60" y1="${45+y}" x2="240" y2="${45-y}" stroke="#1E2A3A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M60 ${45+y} l-22 26 h44 z" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+    <path d="M240 ${45-y} l-22 26 h44 z" fill="var(--volt-soft)" stroke="var(--volt)" stroke-width="2"/>
+    <rect x="120" y="95" width="60" height="10" rx="4" fill="#8B8578"/>`;
+  const L=SC.pan.filter(v=>v===1).length, R=SC.pan.filter(v=>v===2).length;
+  $('#sc-state').textContent=`Зважувань: ${SC.w} · ліворуч ${L}, праворуч ${R}`;
+}
+function scWeigh(){
+  if(SC.done) return;
+  const L=[],R=[]; for(let i=1;i<=9;i++){ if(SC.pan[i]===1) L.push(i); if(SC.pan[i]===2) R.push(i); }
+  if(!L.length||!R.length) return say($('#sc-v'),'Поклади монети на обидві шальки.',false);
+  if(L.length!==R.length) return say($('#sc-v'),'Щоб порівняння мало сенс, монет має бути порівну.',false);
+  SC.w++;
+  const l=L.includes(SC.light), r=R.includes(SC.light);
+  const tilt = l? -1 : r? 1 : 0;
+  scDraw(tilt);
+  say($('#sc-v'), tilt===0 ? 'Рівновага: легша монета не на терезах.' :
+    tilt<0 ? 'Ліва шалька вгорі — легша монета ліворуч.' : 'Права шалька вгорі — легша монета праворуч.', true);
+}
+function scGuess(){
+  const g=+$('#sc-guess').value;
+  if(!g) return;
+  SC.done=true;
+  if(g===SC.light) say($('#sc-v'), SC.w<=2 ? `Так, монета №${g}. І ти вклався у ${SC.w} зважування — саме тому дошку ділять на три частини: у кожного зважування три можливі відповіді.`
+      : `Монета №${g} — правильно, але зважувань ${SC.w}. Двох досить: ділити треба на три групи по три.`, SC.w<=2);
+  else say($('#sc-v'),`Ні, легша була №${SC.light}. Спробуй ще: перше зважування — три проти трьох.`,false);
+}
+scReset();
+
+/* ---------- 9. МАШИНА НАВПАКИ ---------- */
+const bkTasks=[
+  {ops:[['×',3],['+',6],[':',2]],start:6},
+  {ops:[['+',5],['×',2],['−',4]],start:7},
+  {ops:[['×',4],['−',8],[':',3]],start:5},
+  {ops:[[':',2],['+',9],['×',3]],start:12}
+];
+let BK={i:0,val:0,step:0};
+function bkNew(){ BK.i=(BK.i+1)%bkTasks.length; bkLoad(); }
+function bkLoad(){ const t=bkTasks[BK.i]; let v=t.start;
+  t.ops.forEach(([o,n])=>{ v = o==='×'? v*n : o==='+'? v+n : o==='−'? v-n : v/n; });
+  BK.val=v; BK.step=t.ops.length; hide($('#bk-v'));
+  $('#bk-task').innerHTML=`Задумали число, зробили з ним три дії й отримали <b>${v}</b>. Яке число задумали? Іди назад.`;
+  bkDraw(); }
+function bkDraw(){ const t=bkTasks[BK.i], m=$('#bk-mach'); let h='';
+  h+=`<div class="val">${BK.val}</div>`;
+  for(let k=t.ops.length-1;k>=0;k--){ const [o,n]=t.ops[k];
+    const inv = o==='×'? ': '+n : o==='+'? '− '+n : o==='−'? '+ '+n : '× '+n;
+    const active = k===BK.step-1;
+    h+=`<div class="arrow">↑</div><div class="op ${active?'now':''}">${active?'зараз: ':''}${inv} <span style="color:var(--ink-2);font-weight:400">(бо було ${o} ${n})</span></div>`;
+  }
+  m.innerHTML=h;
+  if(BK.step===0){ const ok=BK.val===t.start;
+    say($('#bk-v'), ok? `Задумане число — ${BK.val}. Перевіримо вперед: ${t.start} ${t.ops.map(([o,n])=>o+n).join(' ')} = ${bkFwd()}.`
+      : 'Щось не зійшлося.', ok); }
+}
+function bkFwd(){ const t=bkTasks[BK.i]; let v=t.start;
+  t.ops.forEach(([o,n])=>{ v = o==='×'? v*n : o==='+'? v+n : o==='−'? v-n : v/n; }); return v; }
+function bkStep(){ if(BK.step===0) return; const [o,n]=bkTasks[BK.i].ops[BK.step-1];
+  BK.val = o==='×'? BK.val/n : o==='+'? BK.val-n : o==='−'? BK.val+n : BK.val*n;
+  BK.step--; bkDraw(); }
+bkLoad();
+
+/* ---------- 10. ОДНИМ РОЗЧЕРКОМ ---------- */
+const graphs=[
+  {name:'Конверт', v:[[60,190],[260,190],[260,90],[60,90],[160,30]],
+   e:[[0,1],[1,2],[2,3],[3,0],[0,2],[1,3],[3,4],[4,2]]},
+  {name:'Будиночок', v:[[60,200],[260,200],[260,110],[60,110],[160,40]],
+   e:[[0,1],[1,2],[2,3],[3,0],[3,4],[4,2],[0,2]]},
+  {name:'Мости Кенігсберга', v:[[160,40],[60,140],[260,140],[160,220]],
+   e:[[0,1],[0,1],[0,2],[0,2],[1,3],[2,3],[0,3]]}
+];
+let G={i:0,used:[],cur:null};
+function graphLoad(i){ G={i,used:[],cur:null}; hide($('#gp-v'));
+  [0,1,2].forEach(k=>$('#g-'+k).className='btn small'+(k===i?'':' ghost')); graphDraw(); }
+function graphReset(){ G.used=[]; G.cur=null; hide($('#gp-v')); graphDraw(); }
+function degOdd(){ const g=graphs[G.i], d=Array(g.v.length).fill(0);
+  g.e.forEach(([a,b])=>{d[a]++;d[b]++;}); return d.filter(x=>x%2).length; }
+function graphDraw(){
+  const g=graphs[G.i]; let s='';
+  g.e.forEach(([a,b],idx)=>{ const [x1,y1]=g.v[a],[x2,y2]=g.v[b];
+    const dup = g.e.filter(([p,q],j)=>j<idx&&p===a&&q===b).length;
+    const off = dup? 26 : 0;
+    const mx=(x1+x2)/2+off, my=(y1+y2)/2-Math.abs(off)/1.5;
+    const path = off? `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}` : `M${x1} ${y1} L${x2} ${y2}`;
+    s+=`<path d="${path}" fill="none" stroke="${G.used.includes(idx)?'#2F6FE4':'#C9C6BB'}" stroke-width="${G.used.includes(idx)?6:4}" stroke-linecap="round"/>`; });
+  const deg=Array(g.v.length).fill(0); g.e.forEach(([a,b])=>{deg[a]++;deg[b]++;});
+  g.v.forEach(([x,y],i)=>{ const odd=deg[i]%2;
+    s+=`<circle cx="${x}" cy="${y}" r="16" fill="${G.cur===i?'#2F6FE4':odd?'#FFF3D4':'#fff'}"
+        stroke="${odd?'#E9A800':'#8B8578'}" stroke-width="3" onclick="gTap(${i})" style="cursor:pointer"/>
+        <text x="${x}" y="${y+5}" text-anchor="middle" font-size="13" font-weight="600"
+        fill="${G.cur===i?'#fff':'#1E2A3A'}" pointer-events="none">${deg[i]}</text>`; });
+  $('#gp-svg').innerHTML=s;
+  const odd=degOdd();
+  $('#gp-state').innerHTML=`Проведено ${G.used.length} з ${g.e.length} ліній · непарних вершин: <b>${odd}</b>`;
+  if(G.used.length===g.e.length) say($('#gp-v'),'Готово, одним розчерком! Тут непарних вершин '+odd+'.',true);
+}
+function gTap(i){
+  const g=graphs[G.i];
+  if(G.cur===null){ G.cur=i; graphDraw(); return; }
+  const idx=g.e.findIndex(([a,b],k)=>!G.used.includes(k) && ((a===G.cur&&b===i)||(b===G.cur&&a===i)));
+  if(idx<0){ G.cur=i; graphDraw(); return; }
+  G.used.push(idx); G.cur=i; graphDraw();
+  if(G.used.length<g.e.length){
+    const has=g.e.some(([a,b],k)=>!G.used.includes(k)&&(a===G.cur||b===G.cur));
+    if(!has) say($('#gp-v'), degOdd()>2
+      ? `Застряг. Непарних вершин тут ${degOdd()} — понад дві, тому обійти всі лінії одним розчерком <b>неможливо</b>. Саме це довів Ейлер про кенігсберзькі мости.`
+      : 'Застряг, але тут розв'+"'"+'язок є: почни з непарної вершини (жовтої).', false);
+  }
+}
+graphLoad(0);
+
+/* ---------- 11. ШКАРПЕТКИ ---------- */
+const SOCK_COLORS=['#5AA9EE','#E9A800','#7BC47F','#D8433B'];
+let SK={k:2,drawn:[]};
+function sockSet(k){ SK.k=k; [2,3,4].forEach(n=>$('#k-'+n).className='btn small'+(n===k?'':' ghost')); sockReset(); }
+function sockReset(){ SK.drawn=[]; hide($('#sk-v')); sockDraw(); }
+function sockPull(){ SK.drawn.push(Math.floor(Math.random()*SK.k)); sockDraw(); }
+function sockDraw(){
+  const box=$('#sk-list'); box.innerHTML='';
+  SK.drawn.forEach(c=>{ const d=document.createElement('div'); d.className='sock';
+    d.style.background=SOCK_COLORS[c]; box.appendChild(d); });
+  const cnt={}; SK.drawn.forEach(c=>cnt[c]=(cnt[c]||0)+1);
+  const pair=Object.values(cnt).some(v=>v>=2);
+  $('#sk-state').textContent=`Витягнуто: ${SK.drawn.length} · різних кольорів: ${Object.keys(cnt).length} з ${SK.k}`;
+  if(pair) say($('#sk-v'),`Пара є — на ${SK.drawn.length}-й шкарпетці. Але гарантія настає лише на <b>${SK.k+1}</b>-й: кольорів ${SK.k}, тож більше ніж по одній не витягнеш.`,true);
+  else if(SK.drawn.length>=SK.k) say($('#sk-v'),`Усі ${SK.k} кольори вже трапились по одному. Наступна шкарпетка обов'язково повторить якийсь колір.`,true);
+  else hide($('#sk-v'));
+}
+sockSet(2);
+</script>
+</body>
+</html>
