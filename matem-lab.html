@@ -116,13 +116,16 @@ if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{P
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
 function mark(k){ if(!PR[k]){ PR[k]=1; saveP(); homeDraw(); } }
-function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function go(id){ if(id==='s-home')stopAll(); $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function say(sel,text,good){ const e=$(sel); if(!e)return; e.className='verdict on '+(good?'good':'warn'); e.innerHTML=text; }
 function hide(sel){ const e=$(sel); if(e) e.className='verdict'; }
 const gcd=(a,b)=>b?gcd(b,a%b):a;
 const GROUPS=['Числа й дії','Дроби, десяткові, відсотки','Величини й геометрія','Задачі та стратегії'];
 const TOOLS={};
 function T(key,o){ TOOLS[key]=o; }
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
 
 /* --- 1. Решето Ератосфена --- */
 T('sieve',{g:0,ic:'🔎',t:'Решето Ератосфена',s:'Де ховаються прості числа',html:`
@@ -621,7 +624,7 @@ T('move',{g:3,ic:'🚗',t:'Задача на рух',s:'Зустріч і нав
 </div>`,init(){mvM=0;mvMode(0);}});
 let mvM=0,mvT=null;
 function mvMode(m){mvM=m;$('#mv-0').className='btn small'+(m?' ghost':'');$('#mv-1').className='btn small'+(m?'':' ghost');mvDraw();}
-function mvDraw(t){const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
+function mvDraw(t){if(!document.querySelector('#mv-svg'))return;const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
   $('#mv-v1L').textContent=v1;$('#mv-v2L').textContent=v2;$('#mv-dL').textContent=d;
   const close=mvM===0?v1+v2:v1-v2;
   $('#mv-task').innerHTML=mvM===0?'Два автомобілі виїхали назустріч. Через скільки годин зустрінуться?'
@@ -640,11 +643,11 @@ function mvDraw(t){const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d
   $('#mv-svg').innerHTML=s;
   $('#mv-res').innerHTML=close>0?'зближення '+close+' км/год · час '+(Math.round(time*100)/100)+' год'
     :'перший не швидший — не наздожене ніколи';}
-function mvRun(){clearInterval(mvT);const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
+function mvRun(){stopAll();const v1=+$('#mv-v1').value,v2=+$('#mv-v2').value,d=+$('#mv-d').value;
   const close=mvM===0?v1+v2:v1-v2;if(close<=0)return say('#mv-v','Зроби першу швидкість більшою — інакше він ніколи не наздожене.',false);
   const time=mvM===0?d/close:(d/2)/close;let t=0;
-  mvT=setInterval(()=>{t+=time/40;mvDraw(t);
-    if(t>=time){clearInterval(mvT);mark('move');
+  mvT=every(()=>{t+=time/40;mvDraw(t);
+    if(t>=time){stopAll();mark('move');
       say('#mv-v',mvM===0?'Зустріч через '+(Math.round(time*100)/100)+' год. Швидкість зближення '+close+' км/год — швидкості склались.'
         :'Наздогнав через '+(Math.round(time*100)/100)+' год. Тут швидкості віднімаються: '+v1+' − '+v2+' = '+close+'.',true);}},40);}
 
@@ -727,7 +730,7 @@ function homeDraw(){
       b.onclick=()=>openTool(k);list.appendChild(b);});
   });
 }
-function openTool(k){const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
+function openTool(k){stopAll();const t=TOOLS[k];$('#t-title').textContent=t.t;$('#t-body').innerHTML=t.html;
   go('s-tool');try{t.init();}catch(e){console.error(e);}}
 homeDraw();
 </script>
