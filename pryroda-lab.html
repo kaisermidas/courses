@@ -199,7 +199,7 @@ function mnPhase(a){a=((a%360)+360)%360;
   if(a<248)return 'Спадає';
   if(a<292)return 'Остання чверть';
   return 'Старий серп';}
-function mnDraw(){const r=Math.PI*mnA/180,mx=85+Math.cos(r)*58,my=100+Math.sin(r)*58;
+function mnDraw(){if(!document.querySelector('#mn-svg'))return;const r=Math.PI*mnA/180,mx=85+Math.cos(r)*58,my=100+Math.sin(r)*58;
   let s='<rect x="0" y="0" width="170" height="200" fill="#F7FAFF" rx="10"/>';
   s+='<text x="10" y="18" font-size="12" fill="#5B6779">згори</text>';
   s+='<circle cx="85" cy="100" r="58" fill="none" stroke="#E3E1D9" stroke-width="1" stroke-dasharray="3 3"/>';
@@ -244,7 +244,7 @@ T('seasons',{g:0,ic:'🍂',t:'Чому є пори року',s:'Річ не у �
   <div class="legend">Земля влітку навіть трохи далі від Сонця, ніж узимку. Усе вирішує нахил осі на 23,5°: промені падають або прямо, або скісно.</div>
 </div>`,init(){seSeen={};seDraw();}});
 let seSeen={};
-function seDraw(){const a=+$('#se-r').value,r=Math.PI*a/180;
+function seDraw(){if(!document.querySelector('#se-r'))return;const a=+$('#se-r').value,r=Math.PI*a/180;
   const x=160+Math.cos(r)*118,y=110+Math.sin(r)*72;
   let s='<ellipse cx="160" cy="110" rx="118" ry="72" fill="none" stroke="#E3E1D9" stroke-width="1" stroke-dasharray="4 4"/>';
   s+='<circle cx="160" cy="110" r="22" fill="#FFC93C"/><circle cx="160" cy="110" r="30" fill="#FFC93C" opacity=".2"/>';
@@ -349,7 +349,7 @@ T('states',{g:1,ic:'🌡',t:'Лід, вода, пара',s:'Що робить т
   <div class="legend">Вода — рідкісний виняток: твердий лід легший за рідку воду, тому плаває. Якби не це, водойми промерзали б до дна.</div>
 </div>`,init(){sttSeen={};sttDraw();}});
 let sttSeen={},sttAnim=null;
-function sttDraw(){const t=+$('#stt-r').value;$('#stt-t').textContent=t+' °C';
+function sttDraw(){if(!document.querySelector('#stt-r'))return;const t=+$('#stt-r').value;$('#stt-t').textContent=t+' °C';
   const st=t<0?'лід':t<100?'вода':'пара';sttSeen[st]=1;
   const box=$('#stt-box');box.innerHTML='';
   const n=st==='лід'?28:st==='вода'?26:16;
