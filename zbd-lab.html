@@ -237,7 +237,7 @@ const PL=[{n:'броколі',k:0},{n:'яблуко',k:0},{n:'морква',k:0}
 const PLZ=['Овочі й фрукти — половина','Білки — чверть','Крупи й хліб — чверть','Поза тарілкою'];
 let plSel=-1,plOk=0,plLeft=[];
 function plInit(){plSel=-1;plOk=0;plLeft=PL.map((_,i)=>i);hide('#pl-v');plDraw();}
-function plDraw(){const z=$('#pl-zones');z.innerHTML='';
+function plDraw(){if(!document.querySelector('#pl-zones'))return;const z=$('#pl-zones');z.innerHTML='';
   PLZ.forEach((n,i)=>{const d=document.createElement('div');d.className='zone';
     d.innerHTML='<b>'+n+'</b>'+PL.map((p,j)=>p.k===i&&plLeft.indexOf(j)<0?'<span class="food sel">'+p.n+'</span>':'').join('');
     (function(k){d.onclick=()=>plPut(k);})(i);z.appendChild(d);});
@@ -288,7 +288,7 @@ T('day',{g:0,ic:'🕘',t:'24 години',s:'Склади свій день',ht
 const DY=[{n:'сон',c:'#4C6EF5',min:9,max:10},{n:'школа й уроки',c:'#0E7C66',min:5,max:9},
  {n:'рух і прогулянка',c:'#7BC47F',min:1,max:5},{n:'екран',c:'#E9A800',min:0,max:2},{n:'решта справ',c:'#B7A98F',min:1,max:24}];
 let dyV=[8,7,1,3,5];
-function dyDraw(){const tot=dyV.reduce((a,b)=>a+b,0);
+function dyDraw(){if(!document.querySelector('#dy-bar'))return;const tot=dyV.reduce((a,b)=>a+b,0);
   $('#dy-bar').innerHTML=dyV.map((v,i)=>'<div style="width:'+(v/Math.max(tot,24)*100)+'%;background:'+DY[i].c+'">'+(v>1?v+' год':'')+'</div>').join('');
   $('#dy-sliders').innerHTML=DY.map((d,i)=>'<div style="font-size:14px;color:var(--ink-2);margin-top:6px">'+d.n+': <b>'+dyV[i]+' год</b></div>'+
     '<input type="range" min="0" max="14" value="'+dyV[i]+'" oninput="dySet('+i+',this.value)">').join('');
@@ -413,7 +413,7 @@ const frSets=[
   wrong:'Ліфтом користуватись не можна: він може зупинитись і заповнитись димом.'}];
 let frI=0,frOk=0,frOrder=[],frSel=null;
 function frLoad(){const set=frSets[frI];frOrder=set.s.map((_,i)=>i).sort(()=>Math.random()-.5);frSel=null;hide('#fr-v');frDraw();}
-function frDraw(){const set=frSets[frI];
+function frDraw(){if(!document.querySelector('#fr-list'))return;const set=frSets[frI];
   $('#fr-task').innerHTML='<b>'+set.t+'</b> Постав дії по порядку: тисни на дві картки, щоб поміняти їх місцями.<span class="chip">'+frOk+' з 2</span>';
   const box=$('#fr-list');box.innerHTML='';
   frOrder.forEach((idx,pos)=>{const b=document.createElement('button');
@@ -481,7 +481,7 @@ const miT=[{q:'Ти побачив у траві дивний металевий
  {q:'Що означає червона табличка з написом «Обережно, міни»?',o:['Далі йти не можна взагалі','Можна, якщо обережно','Це стара табличка'],a:0,
   r:'Позначена ділянка — категорична заборона, навіть якщо стежка виглядає протоптаною.'}];
 let miI=0,miOk=0;
-function miDraw(){const t=miT[miI];$('#mi-task').innerHTML=t.q+'<span class="chip">'+miOk+' з 4</span>';
+function miDraw(){if(!document.querySelector('#mi-opts'))return;const t=miT[miI];$('#mi-task').innerHTML=t.q+'<span class="chip">'+miOk+' з 4</span>';
   const box=$('#mi-opts');box.innerHTML='';
   t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
     b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
@@ -503,7 +503,7 @@ T('call',{g:2,ic:'📞',t:'Виклик 112',s:'Що сказати диспет
 const CL=['Сказати, що саме сталося','Назвати точну адресу','Сказати, чи є потерпілі','Назвати своє ім’я й номер телефону','Не класти слухавку першим'];
 let clOrder=[],clSel=null;
 function clLoad(){clOrder=CL.map((_,i)=>i).sort(()=>Math.random()-.5);clSel=null;hide('#cl-v');clDraw();}
-function clDraw(){$('#cl-task').innerHTML='Ти телефонуєш на 112. Постав фрази в правильному порядку.';
+function clDraw(){if(!document.querySelector('#cl-list'))return;$('#cl-task').innerHTML='Ти телефонуєш на 112. Постав фрази в правильному порядку.';
   const box=$('#cl-list');box.innerHTML='';
   clOrder.forEach((idx,pos)=>{const b=document.createElement('button');
     b.className='step'+(clSel===pos?' pick':'');b.innerHTML='<span class="num">'+(pos+1)+'</span>'+CL[idx];
@@ -571,7 +571,7 @@ const adT=[{q:'Опік окропом на руці. Перша дія?',
  {q:'Забій коліна під час гри.',o:['Прикласти холод через тканину','Прикласти грілку','Розім’яти й бігати далі'],a:0,
   r:'Холод зменшує набряк. Тепло в перші години, навпаки, посилює його.'}];
 let adI=0,adOk=0;
-function adDraw(){const t=adT[adI];$('#ad-task').innerHTML=t.q+'<span class="chip">'+adOk+' з 5</span>';
+function adDraw(){if(!document.querySelector('#ad-opts'))return;const t=adT[adI];$('#ad-task').innerHTML=t.q+'<span class="chip">'+adOk+' з 5</span>';
   const box=$('#ad-opts');box.innerHTML='';
   t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
     b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
@@ -627,7 +627,7 @@ const blT=[{q:'Однокласника щодня обзивають «жарт
   o:['У сварці сторони рівні, у булінгу є сильніший, що діє систематично','Нічим','Булінг гучніший'],a:0,
   r:'Нерівність сил і повторюваність — головні ознаки.'}];
 let blI=0,blOk=0;
-function blDraw(){const t=blT[blI];$('#bl-task').innerHTML=t.q+'<span class="chip">'+blOk+' з 3</span>';
+function blDraw(){if(!document.querySelector('#bl-opts'))return;const t=blT[blI];$('#bl-task').innerHTML=t.q+'<span class="chip">'+blOk+' з 3</span>';
   const box=$('#bl-opts');box.innerHTML='';
   t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
     b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
@@ -656,7 +656,7 @@ const prT=[{q:'«Слабо перейти по тонкій кризі?» На�
  {q:'Друзі кличуть гуляти в покинуту будівлю.',o:['Відмовитись і запропонувати інше місце','Піти, але обережно','Піти, якщо всі йдуть'],a:0,
   r:'У покинутих будівлях обвалюються перекриття — це одна з найчастіших причин дитячих травм.'}];
 let prI=0,prOk=0;
-function prDraw(){const t=prT[prI];$('#pr-task').innerHTML=t.q+'<span class="chip">'+prOk+' з 3</span>';
+function prDraw(){if(!document.querySelector('#pr-opts'))return;const t=prT[prI];$('#pr-task').innerHTML=t.q+'<span class="chip">'+prOk+' з 3</span>';
   const box=$('#pr-opts');box.innerHTML='';
   t.o.forEach((o,i)=>{const b=document.createElement('button');b.className='opt';b.textContent=o;
     b.onclick=()=>{$$('.opt',box).forEach((x,j)=>x.className='opt'+(j===t.a?' good':j===i?' bad':''));
