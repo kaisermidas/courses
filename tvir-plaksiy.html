@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Цар Плаксій та Лоскотон — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#131A24; --card:#1C2532;
+  --ink:#EEF1F5; --dim:#93A3B5;
+  --tear:#6FA8D6; --joy:#F2C14E; --rose:#E0756E;
+  --line:rgba(238,241,245,.14);
+  --ok:#6FC49A; --no:#E0756E;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 22px;overflow:hidden;
+  background:linear-gradient(120deg,#1B2A3A 0%,var(--bg) 58%,#2A2418 100%)}
+.drops{position:absolute;inset:0;pointer-events:none}
+.drops i{position:absolute;width:7px;height:11px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  background:rgba(111,168,214,.28);transform:rotate(180deg)}
+.sun{position:absolute;top:20px;right:18px;width:64px;height:64px;border-radius:50%;
+  background:radial-gradient(circle at 42% 40%,rgba(242,193,78,.34),transparent 68%);filter:blur(3px)}
+.hero h1{margin:0;font-size:29px;line-height:1.1;letter-spacing:-.4px;max-width:80%}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--tear),var(--joy));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--ok)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--tear);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--joy)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--tear);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic;white-space:pre-line}
+.note{background:rgba(242,193,78,.11);border:1px solid rgba(242,193,78,.3);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+.tl{position:relative;padding-left:26px}
+.tl:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--tear),var(--joy))}
+.tl div{position:relative;margin-bottom:15px}
+.tl div:before{content:"";position:absolute;left:-23px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--joy);box-shadow:0 0 0 3px var(--bg)}
+.tl b{color:var(--joy);font-size:13px;display:block}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--tear);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--ok);font-size:13.5px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(111,168,214,.16);color:var(--tear)}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--joy)}
+
+.btn{background:var(--tear);color:#0F1720;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink);font-weight:600}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(111,196,154,.15)}
+.opt.no{border-color:var(--no);background:rgba(224,117,110,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(111,196,154,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(224,117,110,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+.rhy{font-family:Georgia,serif;font-size:15.5px;line-height:1.7;margin-bottom:8px;white-space:pre-line}
+.rhy b{color:var(--joy);font-style:italic}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--tear);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--joy);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--joy)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="sun"></div>
+    <div class="drops">
+      <i style="top:34px;left:22px"></i><i style="top:66px;left:52px"></i>
+      <i style="top:22px;left:88px"></i><i style="top:92px;left:16px"></i>
+    </div>
+    <h1>Цар Плаксій<br>та Лоскотон</h1>
+    <p class="by">Василь Симоненко · віршована казка</p>
+    <div class="meta">
+      <span class="tag">літературна казка</span>
+      <span class="tag">віршована</span>
+      <span class="tag">сатира</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#131A24')}catch(e){}}
+
+const KEY='plaksiy-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Автор</span><b>Василь Андрійович Симоненко</b></div>
+  <div><span>Роки життя</span><b>1935–1963</b></div>
+  <div><span>Назва</span><b>«Цар Плаксій та Лоскотон»</b></div>
+  <div><span>Жанр</span><b>літературна казка, віршована</b></div>
+  <div><span>Кому написано</span><b>синові письменника Лесикові</b></div>
+  <div><span>Будова</span><b>шість частин із власними назвами</b></div>
+  <div><span>Місце дії</span><b>країна Сльозолий, столиця Плаксоград</b></div>
+  <div><span>Тема</span><b>боротьба доброго дядька Лоскотона проти царя Плаксія, який заборонив у своїй країні сміх і пив дитячі сльози</b></div>
+  <div><span>Головна думка</span><b>сміх, доброта й людська згуртованість сильніші за будь-яку злу владу — а тримається вона рівно доти, доки люди бояться сміятися</b></div>
+  <div><span>Головні герої</span><b>цар Плаксій, дядько Лоскотон, капітан Макака</b></div>
+  <div><span>Головні засоби</span><b>промовисті імена, гумор і сатира, гіпербола, порівняння</b></div>
+  <div><span>Ще одна казка автора</span><b>«Подорож у Країну Навпаки»</b></div>
+</div>
+<div class="note"><b>Корисно знати наперед.</b> Підручник вводить тут два слова: <b>оптиміст</b> — людина, яка вірить у свої сили й сподівається на хороше, і <b>песиміст</b> — та, що не вірить і нічого доброго не чекає. Плаксій і Лоскотон — це вони й є.</div>
+${fin('passport')}`});
+
+/* ================= 2. АВТОР ================= */
+T('author',{g:0,ic:'👤',t:'Автор',s:'Поет, який писав казки синові',html:`
+<p class="lead">Василь Симоненко прожив лише двадцять вісім років, але в українській літературі його знають як тонкого лірика й дуже світлу людину.</p>
+
+<div class="blk"><h3>Полтавщина</h3>
+<p>Народився 1935 року в селі Біївці на Полтавщині. Дитинство і юність припали на роки війни й повоєнного лихоліття. Ріс без батька — його замінив хлопцеві дід Федір, який майстерно співав пісні про сиву давнину. Мама працювала вчителькою й, за словами самого поета, навчила його жити по совісті.</p></div>
+
+<div class="blk"><h3>Дев’ять кілометрів до школи</h3>
+<p>П’ять класів Василь провчився в рідному селі, а далі школа була аж за дев’ять кілометрів. Узимку він долав цей шлях по глибочезних снігах — і казав друзям, що дороги не боїться, бо використовує її з користю: доки дійде, або всі уроки повторить, або всі пісні переспіває. Одного дня в несусвітню завію, коли учні із сусідніх сіл не прийшли зовсім, він до школи таки дійшов.</p>
+<div class="note">Учителі згадують, що він майже не вчив уроків удома — усе ловив на льоту. Школу закінчив із золотою медаллю, а в шкільному журналі майже самі п’ятірки.</div></div>
+
+<div class="blk"><h3>Одна двійка</h3>
+<p>Серед тих п’ятірок є одна двійка. Учителька дала написати твір на тему «Моє щасливе дитинство». Робота Василя мала один рядок: «У мене щасливого дитинства не було…»</p></div>
+
+<div class="blk"><h3>Поет</h3>
+<p>Вірші почав писати ще в середніх класах і дуже багато читав. Стара вчителька хвалила його словами, що він за духом рідний синочок Тараса Шевченка. Після школи навчався на факультеті журналістики Київського університету імені Тараса Шевченка. У віршах відверто висловлював синівську любов до України.</p></div>
+
+<div class="blk"><h3>Казки для сина</h3>
+<p>Для свого єдиного сина Лесика Симоненко написав дві віршовані казки — «Цар Плаксій та Лоскотон» і «Подорож у Країну Навпаки». Тобто ця історія теж народилася вдома, для однієї конкретної дитини.</p></div>
+${fin('author')}`});
+
+/* ================= 3. ІСТОРІЯ ================= */
+T('history',{g:0,ic:'📜',t:'Як побудована казка',s:'Шість частин і віршована мова',html:`
+<p class="lead">Ця казка написана віршами, тому в ній є те, чого немає в прозі: рядки, рими, ритм і поділ на строфи.</p>
+
+<div class="blk"><h3>Шість частин</h3>
+<p>Автор сам поділив казку й дав кожній частині назву: «Цареве сімейство», «Дядько Лоскотон», «Арешт Лоскотона», «Весілля в палаці», «Звільнення Лоскотона», «Продовження весілля». За цими назвами зручно переказувати весь твір.</p></div>
+
+<div class="blk"><h3>Чим віршована мова відрізняється від прозової</h3>
+<ul>
+<li>Текст поділено на <b>віршові рядки</b>, а не на речення в суцільному тексті.</li>
+<li>Рядки об’єднані в <b>строфи</b> — групи, пов’язані змістом і римуванням.</li>
+<li>Є <b>ритм</b> — рівномірне чергування наголошених і ненаголошених складів.</li>
+<li>Є <b>рима</b> — співзвуччя закінчень рядків: Плаксій — Сльозолий, бочка — дочки, Лоскотон — трон.</li>
+</ul>
+<div class="note">Саме через риму цю казку так легко вчити напам’ять: наступне слово ніби саме підказується.</div></div>
+
+<div class="blk"><h3>Куди веде остання строфа</h3>
+<p>Наприкінці автор жартома пояснює маршрут у цю країну: спершу прямо, потім вправо, тоді поміж дубами наліво, а далі чимчикуй куди попало — як від утоми не впадеш, то й потрапиш. Це кінцівка-жарт, дуже схожа на народні казкові кінцівки.</p></div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Цареве сімейство',
+  'У країні Сльозолий царює Плаксій: голова в нього мов бочка, очі — ніби кавуни. Має трьох дочок — Нудоту, Вай-Вай і Плакоту — і трьох синів на ім’я Плаксуни. Цілими днями вони голосять, сопуть, стогнуть і ллють сльози відрами. Цар видає наказ: хай усі діти в країні плачуть день при дні, бо сміятися в його царстві не можна, а хто всміхнеться — того він негайно з’їсть. Стежить за цим його гвардія — забіяки-сльозівці, які шмагають нагайками кожного, хто засміявся. А сам цар любить дитячі сльози пити.',
+  'Експозиція. Уже тут видно головне: влада тримається на сльозах і живиться ними буквально.'],
+ ['Дядько Лоскотон',
+  'У тому ж царстві, зневажаючи закон, живе добрий дядько Лоскотон. Щовечора — чи дощ, чи сніг — він приходить до голодної малечі й приносить усім сміх. Вдачу має теплу й щиру, з лукавинкою в очах, сіру накидку на плечах, м’які лоскотливі вуса й русе волосся. Де він з’явиться, там плач одразу припиняється. Цар і Плаксуни видають заборони проти лоскоту, охоронці полюють за ним по хатах, та Лоскотон не боїться: ходить по всій країні й носить сміх у розмальованій торбині.',
+  'Зав’язка: у країні сліз є той, хто відкрито живе інакше.'],
+ ['Арешт Лоскотона',
+  'Розлючений Плаксій обіцяє: хто впіймає Лоскотона й посадить у льох, той стане чоловіком однієї з його дочок. Цар боїться, що інакше йому нічого буде пити. Сльозівці кидаються шукати по всіх дворах і борах — і дарма, бо люди всюди ховають Лоскотона. Але при царі є лютий посіпака, віроломний, як змія, капітан Макака. Йому так хотілося стати царським зятем, що він цілу зиму не лягав спати: ходив, слухав і нарешті все рознюхав. На світанку, коли Лоскотон заснув між кленових віток, Макака підкрався й зашморгнув йому на шиї аркан.',
+  'Зраджує не сила й не хитрість царя, а один чоловік, що захотів вигоди.'],
+ ['Весілля в палаці',
+  'Лоскотона садять за вузенькі грати, а в палаці грають весілля. Макака веде до вінця висохлу Нудоту — і дивитися на них зовсім неохота. Якийсь гладкий поет присвячує молодятам вірша, у якому стільки хвальби, що навіть жаби з ганьби булькнули у воду. Цар пишається, цілується із зятем і оголошує: тепер сміх недоступний для всіх, і в країні встановлять віковічне царство сліз.',
+  'Найсатиричніша частина: показна пишнота, підлабузницький вірш і порожня похвальба.'],
+ ['Звільнення Лоскотона',
+  'Поки гуляє весілля, п’яниці-вартові напиваються якогось зілля й засинають у траві. А вночі до в’язниці йдуть батраки й робітники. Вони розносять перепони, гнуть грати, мов прути, і кличуть Лоскотона до себе — у здружену сім’ю, догравати весілля Плаксієві.',
+  'Ключова думка твору: рятує героя не диво й не сам він, а прості люди, які прийшли разом.'],
+ ['Продовження весілля',
+  'У палаці всі скачуть і від щастя гірко плачуть. Раптом цар падає на трон із криком про лоскіт. Лоскотон стрибає на трон і каже: насмієшся ти хоч раз. Він лоскоче царя, той регоче, качається, тре кулаками очі — а потім лопає і помирає. Придворні одубіли, бо сміятися не вміли. Сини так реготали, що з них поспадали штани, і всі троє втекли до чужих країв, царівни розбіглися на чотири боки, сльозівці стали п’явками в річці, а Макака з переляку з’їв себе. Лоскотон живе й понині й носить дітям сміх у розмальованій торбині.',
+  'Розв’язка: тиран гине від того самого сміху, який забороняв. Покарання зроблене з тієї самої речі, що й провина.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'Шість частин казки',html:`
+<p class="lead">Автор сам поділив казку на шість частин і дав кожній назву. Натисни на будь-яку.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><p>${c[1]}</p><div class="key">▸ ${c[2]}</div></div></div>`).join('')}
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['У країні Сльозолий царює Плаксій і забороняє сміх','експозиція'],
+ ['З’являється дядько Лоскотон, який приносить дітям сміх','зав’язка'],
+ ['Полювання на Лоскотона, зрада Макаки, арешт і весілля','розвиток дії'],
+ ['Лоскотон лоскоче царя, і той помирає від сміху','кульмінація'],
+ ['Царська родина розбігається, а Лоскотон живе й понині','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: звільнення з в’язниці — ще не кульмінація. Головне стається на троні.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Дядько Лоскотон','головний позитивний герой',
+  ['добрий','щирий','сміливий','невтомний'],
+  'Живе в мандрах і митарстві, зневажаючи царський закон. Щовечора приходить до голодної малечі, хоч дощ, хоч сніг. Має теплу й щиру вдачу, лукавинку в очах, сіру накидку, м’які лоскотливі вуса й русе волосся. Носить сміх у розмальованій торбині й у лагідних пальцях. Не має ні зброї, ні війська — і саме він валить трон.',
+  'Насмієшся ти хоч раз!..'],
+ ['Цар Плаксій','правитель країни Сльозолий',
+  ['злий','жорстокий','жалюгідний','боягуз'],
+  'Голова мов бочка, очі — ніби кавуни. Заборонив у своєму царстві сміх і пообіцяв з’їсти кожного, хто всміхнеться. Найстрашніше в ньому не жорстокість, а те, чим він годується: він любить пити дитячі сльози. І він сам зізнається, чого боїться: якщо діти перестануть плакати, йому нічого буде пити.',
+  'Хто всміхнеться — я того негайно з’їм!'],
+ ['Капітан Макака','посіпака царя',
+  ['віроломний','підлий','упертий у своїй меті'],
+  'Автор називає його лютим посіпакою, віроломним, як змія. Цілу зиму не лягав спати, бо так хотів стати царським зятем: усе ходив, усе слухав і нарешті все рознюхав. Підкрався до сплячого Лоскотона змієм і зашморгнув аркан. Наприкінці з переляку з’їв сам себе.',
+  '(підкрався змієм і зашморгнув аркан)'],
+ ['Царські дочки','Нудота, Вай-Вай, Плакота',
+  ['сльозливі','нудні'],
+  'Три доньки, усі сльозливі через край. Найстарша, висохла Нудота, дістається Макаці. Наприкінці всі три навтьоки біжать у чотири боки — у цьому «в чотири боки» і є весь авторський сміх над ними.',
+  '(голосять, сопуть і ревуть)'],
+ ['Три Плаксуни','царські сини',
+  ['плаксиві','безпорадні'],
+  'Так і звуться — Плаксуни. Під кінець вони так реготали, що з них поспадали штани, і всі троє без штанів утекли до чужих країв. Ціле покоління спадкоємців зникає у смішній сцені — і це теж авторська оцінка.',
+  '(тікають без штанів)'],
+ ['Сльозівці','царська гвардія',
+  ['жорстокі','догідливі'],
+  'Забіяки, які хапають і шмагають нагайками кожного, хто засміявся. Автор називає їх кровопивцями — і наприкінці вони буквально стають п’явками в річці.',
+  '(шмагають нагайками за сміх)'],
+ ['Батраки й робітники','прості люди',
+  ['згуртовані','сміливі','вірні'],
+  'Спершу вони просто ховають Лоскотона від ловців по всій країні. А коли його ув’язнюють, ідуть уночі до в’язниці, розносять перепони, гнуть грати, мов прути, і кличуть його в здружену сім’ю. Без них казка закінчилася б інакше.',
+  'Гей, веселий Лоскотоне, це прийшли твої брати!'],
+ ['Гладкий поет','придворний віршомаз',
+  ['улесливий','продажний'],
+  'З’являється на одну строфу: присвячує молодятам вірша, у якому стільки хвальби, що навіть жаби від ганьби булькнули у воду. Крихітна деталь — а сказано нею багато про те, у що перетворюється мистецтво при такій владі.',
+  '(присвятив молодятам хвалебного вірша)']
+];
+
+T('chars',{g:1,ic:'👥',t:'Персонажі',s:'Хто вони і навіщо в казці',html:`
+<p class="lead">Майже всі імена в цій казці промовисті: вони самі розповідають про героя ще до того, як він щось зробить.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">Головне протиставлення твору: <b>Плаксій і Лоскотон</b>. Перший має трон, гвардію й закони — і живиться чужими сльозами. Другий не має нічого, крім торбини зі сміхом, — і його ховає ціла країна.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">Казка весела, але написана вона про цілком серйозні речі.</p>
+
+<div class="blk"><h3>Сміх проти страху</h3>
+<p>Плаксій заборонив сміх не з примхи: він прямо каже, що коли діти перестануть плакати, йому нічого буде пити. Влада, яка боїться сміху, боїться його не даремно — саме сміх її й убиває.</p></div>
+
+<div class="blk"><h3>Влада, що годується людьми</h3>
+<p>Це не образ, а буквальний зміст: цар п’є дитячі сльози, а його гвардійців автор називає кровопивцями. Симоненко навмисно робить це відразливо конкретним.</p></div>
+
+<div class="blk"><h3>Разом — сила</h3>
+<p>Лоскотон сам не втік би з в’язниці. Його весь час ховали люди по хатах, а звільнили вночі батраки й робітники, які прийшли гуртом і гнули грати, мов прути. У казці немає одинокого героя-рятівника.</p></div>
+
+<div class="blk"><h3>Зрада заради вигоди</h3>
+<p>Царя не врятувала гвардія — а от один Макака зробив те, чого не змогли всі сльозівці. І рушієм була не вірність, а бажання стати царським зятем. Найнебезпечніший не той, хто злий, а той, хто дуже хоче вигоди.</p></div>
+
+<div class="blk"><h3>Оптиміст і песиміст</h3>
+<p>Підручник ставить ці слова поруч саме тут. Плаксій нічого доброго не чекає й тягне за собою в сльози цілу країну. Лоскотон вірить у свої сили й носить сміх навіть тоді, коли за ним полюють. Автор радить бути оптимістом і добротворцем — тобто не просто вірити в добро, а робити його щовечора, хай дощ чи сніг.</p></div>
+
+<div class="blk"><h3>Хто не вміє сміятися</h3>
+<p>Найтонша деталь фіналу: придворні одубіли, бо сміятися не вміли. Вони гинуть не від удару, а від того, що розучилися робити просту людську річ.</p></div>
+
+<div class="blk" style="border-color:var(--joy)"><h3>Головна думка одним реченням</h3>
+<p>Сміх, доброта й людська згуртованість сильніші за будь-яку злу владу — а тримається вона рівно доти, доки люди бояться сміятися.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'🎈',t:'Образи й деталі',s:'Що ховається за ними',html:`
+<p class="lead">Шість деталей, через які в казці сказано більше, ніж прямим текстом.</p>
+${[
+['🎒','Розмальована торбина','У ній Лоскотон носить сміх. Не меч, не чари — торбина. Найсильніша річ у казці нічого не важить і нічого не коштує.'],
+['💧','Сльози, які п’є цар','Найвідразливіший образ твору. Влада тут не просто зла — вона живиться тим горем, яке сама створює.'],
+['🧥','Сіра накидка','Лоскотон одягнений найпростіше з усіх. Добро в цій казці має вигляд звичайної людини, а не героя в обладунках.'],
+['👑','Трон','На нього Лоскотон стрибає, щоб залоскотати царя. Місце влади стає місцем, де влада й закінчується.'],
+['⛓️','Гнуті грати','Робітники гнуть їх, мов прути. Найточніший образ того, що можуть люди, коли приходять разом.'],
+['🗺️','Маршрут у кінці','Прямо, вправо, поміж дубами наліво, а далі куди попало. Жартівлива кінцівка, яка нагадує: це все-таки казка.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни на прикладах із твору',html:`
+<p class="lead">Це віршована казка, тому тут з’являються терміни, яких не було в прозових творах.</p>
+${[
+['Літературна казка','Створений автором художній твір, у якому вигадана історія об’єднує елементи дійсності й фантастики. Може бути прозовою або віршованою.','Ця — віршована, і автор у неї конкретний: Василь Симоненко.'],
+['Віршована мова','Мова, поділена на віршові рядки, з ритмом і римою, на відміну від прозової, яка подібна до звичайної розмовної.','«Там, де гори і долини, / Де гуляє вітровій…»'],
+['Рима','Співзвуччя закінчень віршових рядків.','Плаксій — Сльозолий, бочка — дочки, Лоскотон — трон, сльозівці — кінці.'],
+['Ритм','Рівномірне чергування наголошених і ненаголошених складів, завдяки якому вірш «гойдається».','Саме через ритм і риму казку так легко вчити напам’ять.'],
+['Строфа','Група віршових рядків, об’єднаних змістом і римуванням.','У казці вони різні за довжиною — автор змінює їх залежно від події.'],
+['Промовисті імена','Імена, які самі розповідають про героя.','Плаксій, Нудота, Вай-Вай, Плакота, Плаксуни, сльозівці, Сльозолий, Плаксоград — і, звісно, Лоскотон.'],
+['Гумор і сатира','Гумор — добродушний сміх. Сатира — гострий сміх, який викриває вади.','Гумор — штани, що спадають із Плаксунів. Сатира — гладкий поет із хвалебним віршем.'],
+['Гіпербола','Надмірне перебільшення.','«Сльози відрами лили» — саме цей рядок найчастіше дають у завданнях.'],
+['Порівняння','Зіставлення двох предметів чи явищ зі словами «мов», «ніби», «як».','«Голова його мов бочка», «очі — ніби кавуни», «віроломний, як змія», «гнули грати, мов прути».']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">Казка віршована, тож цитати короткі й самі запам’ятовуються.</p>
+${[
+['Хто всміхнеться — в часі тім\nЯ того негайно з’їм!','цар Плаксій','наказ на початку','Найкоротший опис тиранії: заборонено не діло, а почуття.'],
+['Цар любив, як плачуть діти,\nБо любив їх сльози пити.','автор','про Плаксія','Два рядки, після яких співчувати цареві вже неможливо.'],
+['Він як прийде, залоскоче,\nТо сміється, хто й не хоче.','автор','про Лоскотона','Уся його «зброя» в одному реченні.'],
+['Що тоді ми будем пити,\nЯк не будуть плакать діти!','цар Плаксій','гнівно з трону','Він сам пояснює, чому боїться Лоскотона.'],
+['Гей, веселий Лоскотоне,\nЦе прийшли твої брати!','батраки й робітники','біля в’язниці','Мить, коли стає зрозуміло, хто справжня сила в цій країні.'],
+['Насмієшся ти хоч раз!..','Лоскотон','стрибнувши на трон','Кульмінація. І це не помста, а точна відповідь на заборону.'],
+['Потім лопнув і помер.','автор','про царя','Смерть тирана подана буденно й смішно — і це теж авторська оцінка.'],
+['З ним придворні одубіли,\nБо сміятися не вміли.','автор','фінал','Найтонший рядок казки: їх убило не покарання, а власне невміння.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Слід у культурі',s:'Казка, написана для одного хлопчика',html:`
+<div class="blk"><h3>Для сина</h3>
+<p>Обидві віршовані казки Симоненка — «Цар Плаксій та Лоскотон» і «Подорож у Країну Навпаки» — написані для його єдиного сина Лесика. Тобто читач, для якого все це складалося, був один.</p></div>
+
+<div class="blk"><h3>Прислів’я про сміх</h3>
+<p>Підручник пропонує добирати до казки народні приказки — і вони лягають напрочуд точно: «Сміх — найкращі ліки», «Краще сміятися, ніж плакати», «Тобі сміх, а мені плач», «Буває сміх і крізь сльози».</p></div>
+
+<div class="blk"><h3>Вистави й читання</h3>
+<p>Казку часто інсценізують у школах: у ній багато дійових осіб, короткі репліки й дуже виразні характери. А ще її традиційно вчать напам’ять уривками — завдяки ритму й римі це виходить швидко.</p></div>
+
+<div class="blk"><h3>Чому вона не старіє</h3>
+<p>Симоненко помер у двадцять вісім років, і в українській літературі його знають як тонкого лірика й патріота. Казка про царя, який заборонив сміх, читається сьогодні так само гостро, як і тоді, — бо влада, яка боїться сміху, з’являється в кожному поколінні.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'😄',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав або зробив?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Постав події по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай події від першої до останньої.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Добери риму</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Яким словом закінчується рядок у самій казці?</p>
+<div id="ry"></div><div class="say" id="rys"></div></div>
+
+<div class="blk"><h3>Промовисті імена</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Що розповідає про героя саме його ім’я?</p>
+<div id="nm"></div><div class="say" id="nms"></div></div>
+${fin('train')}`,
+init(){initWho();initOrder();initRy();initNm()}});
+
+const WHO=[
+ ['Хто всміхнеться — я того негайно з’їм!','цар Плаксій',['цар Плаксій','капітан Макака','сльозівці']],
+ ['Носить дітям сміх у розмальованій торбині','Лоскотон',['Лоскотон','Плаксун','гладкий поет']],
+ ['Цілу зиму не лягав спати, щоб вислідити Лоскотона','капітан Макака',['капітан Макака','цар Плаксій','вартовий']],
+ ['Гей, веселий Лоскотоне, це прийшли твої брати!','батраки й робітники',['царівни','батраки й робітники','сльозівці']],
+ ['Насмієшся ти хоч раз!..','Лоскотон',['Лоскотон','Плаксій','Макака']],
+ ['Присвятив молодятам хвалебного вірша','гладкий поет',['гладкий поет','Макака','Нудота']],
+ ['З’їв себе з переляку','капітан Макака',['капітан Макака','цар Плаксій','Плаксун']],
+ ['Стали п’явками в ріці','сльозівці',['сльозівці','царівни','вартові']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Пункт ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const ORD=[
+ 'Цар Плаксій забороняє сміх у своїй країні',
+ 'Лоскотон щовечора приносить дітям сміх',
+ 'Цар обіцяє свою дочку тому, хто впіймає Лоскотона',
+ 'Макака вистежує його і зв’язує арканом',
+ 'У палаці грають весілля Макаки й Нудоти',
+ 'Робітники вночі ламають грати й визволяють Лоскотона',
+ 'Лоскотон лоскоче царя, і той помирає від сміху',
+ 'Царська родина розбігається, а Лоскотон живе й понині'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','Це і є шість частин казки, які автор сам назвав. За ними зручно переказувати.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — це буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const RY=[
+ ['І колись в країні тій\nБув на троні цар ...','Плаксій',['Плаксій','Лоскотон','Макака'],'Рима до слова «тій». Далі поруч стоїть і назва країни — Сльозолий.'],
+ ['Голова його мов бочка,\nОчі — ніби ...','кавуни',['кавуни','дочки','ріки'],'Порівняння й рима водночас: далі йде рядок про трьох дочок.'],
+ ['А цареві три сини\nТак і звались — ...','Плаксуни',['Плаксуни','сльозівці','Плаксії'],'Промовисте ім’я, яке ще й римується з «сини».'],
+ ['Бо уже цей Лоскотон\nСкоро нам розвалить ...','трон',['трон','сон','закон'],'Цар сам вимовляє те, що з ним і станеться.'],
+ ['Дітям носить щирий сміх\nВ розмальованій ...','торбині',['торбині','країні','хатині'],'Головний предмет казки — і він повторюється двічі, на початку й у кінці.'],
+ ['Так сміялись-реготали,\nЩо штани з них ...','поспадали',['поспадали','попадали','позлітали'],'Найсмішніший рядок фіналу — і чиста рима до «реготали».']
+];
+function initRy(){
+  const b=$('#ry');if(!b)return;
+  b.innerHTML=RY.map((r,i)=>`<div style="margin-bottom:16px">
+    <div class="rhy">${r[0].replace('...','<b>...</b>')}</div>
+    <div id="ry${i}">${r[2].map(o=>`<button class="opt" style="font-size:14px;padding:9px 12px" onclick="ansRy(${i},this)">${o}</button>`).join('')}</div>
+    <div class="say" id="rye${i}"></div></div>`).join('');
+}
+function ansRy(i,el){
+  const r=RY[i],ok=(el.textContent===r[1]);
+  $$('#ry'+i+' .opt').forEach(b=>{b.disabled=true;if(b.textContent===r[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  say('#rye'+i,r[3],ok);
+  buzz(ok?'success':'error');
+  if($$('#ry .opt.ok').length>=RY.length)
+    say('#rys','Ось чому віршовану казку легко вчити напам’ять: рима сама підказує наступне слово.',true);
+}
+
+const NM=[
+ ['Плаксій','цар, який весь час плаче і любить сльози'],
+ ['Лоскотон','той, хто лоскоче й дарує сміх'],
+ ['Сльозолий','країна, де ллються сльози'],
+ ['Плаксоград','столиця плачу'],
+ ['Нудота','найстарша дочка, від якої нудно'],
+ ['сльозівці','гвардійці, що бережуть сльози в державі']
+];
+function initNm(){
+  const b=$('#nm');if(!b)return;
+  const roles=NM.map(r=>r[1]).sort(()=>Math.random()-.5);
+  b.innerHTML=NM.map((r,i)=>`<div style="margin-bottom:13px">
+    <div style="font-size:14.5px;margin-bottom:6px;color:var(--joy)">${r[0]}</div>
+    <div class="row" id="nm${i}">${roles.map(o=>
+      `<button class="chip" style="font-size:13px" onclick="ansNm(${i},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function ansNm(i,el){
+  const ok=(el.textContent===NM[i][1]);
+  $$('#nm'+i+' .chip').forEach(b=>{b.disabled=true;if(b.textContent===NM[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  buzz(ok?'success':'error');
+  if($$('#nm .chip.ok').length>=NM.length)
+    say('#nms','У цій казці ім’я — це вже характеристика. Автор нікого не описує довго: досить назвати.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто написав казку «Цар Плаксій та Лоскотон»?','choice',['Василь Симоненко','Іван Франко','Олександр Олесь','Леся Українка'],0,'Василь Андрійович Симоненко, 1935–1963.'],
+ ['Для кого написана ця казка?','choice',['Для учнів школи','Для сина письменника Лесика','Для театру','Для журналу'],1,'Друга його казка для сина — «Подорож у Країну Навпаки».'],
+ ['Як називається країна, де царює Плаксій?','choice',['Плаксоград','Сльозолий','Навпаки','Лоскотонія'],1,'А столиця зветься Плаксоград.'],
+ ['Скільки дітей у царя Плаксія?','choice',['Троє','Четверо','Шестеро','Двоє'],2,'Три дочки — Нудота, Вай-Вай, Плакота — і три сини Плаксуни.'],
+ ['Що заборонив цар у своїй країні?','choice',['Пісні','Сміх','Ігри','Хліб'],1,'І обіцяв з’їсти кожного, хто всміхнеться.'],
+ ['Навіщо цареві дитячі сльози?','choice',['Він їх рахує','Він любить їх пити','Він ними лікується','Він їх продає'],1,'Тому він і боїться, що діти перестануть плакати.'],
+ ['У чому Лоскотон носить сміх?','choice',['У кишені','У розмальованій торбині','У скрині','У торбі з горіхами'],1,'І в лагідних пальцях своїх.'],
+ ['Хто вистежив і схопив Лоскотона?','choice',['Сльозівці','Капітан Макака','Цар особисто','Вартові'],1,'Він хотів стати царським зятем.'],
+ ['Хто визволив Лоскотона з в’язниці?','choice',['Діти','Батраки й робітники','Царівна','Він утік сам'],1,'Вони гнули грати, мов прути.'],
+ ['Від чого помер цар Плаксій?','choice',['Від старості','Від сміху — Лоскотон його залоскотав','Від сліз','Від переляку'],1,'Так сміявся, що лопнув.'],
+ ['Ця казка написана віршами.','tf',null,true,'Тому в ній є рима, ритм і поділ на рядки.'],
+ ['Наприкінці Лоскотон гине.','tf',null,false,'Він живе й понині й досі носить дітям сміх.']
+];
+const Q2=[
+ ['Чому цар так боявся Лоскотона?','choice',['Той був сильніший','Бо якщо діти перестануть плакати, цареві нічого буде пити','Той хотів трон','Той знав таємницю'],1,'Цар сам це говорить із трону.'],
+ ['Чому сльозівці не могли знайти Лоскотона?','choice',['Він утік за кордон','Його всюди ховали люди','Він був невидимий','Вони погано шукали'],1,'Ціла країна була на його боці.'],
+ ['Що рухало капітаном Макакою?','choice',['Вірність цареві','Бажання стати царським зятем','Ненависть до сміху','Страх'],1,'Заради цього він цілу зиму не спав.'],
+ ['Що показує сцена з гладким поетом?','choice',['Що поети бідні','На що перетворюється мистецтво, коли служить такій владі','Що весілля було гарне','Що жаби бояться людей'],1,'Хвальби було стільки, що жаби з ганьби булькнули у воду.'],
+ ['Чому важливо, що Лоскотона визволили саме робітники?','choice',['Вони були сильні','Бо казка показує: перемагає не одинак, а люди разом','Так було швидше','Вони знали дорогу'],1,'Сам він із в’язниці не вибрався б.'],
+ ['Чому придворні «одубіли»?','choice',['Їх убив Лоскотон','Бо сміятися не вміли','Вони злякалися','Вони втекли'],1,'Найтонший рядок фіналу.'],
+ ['Що спільного між покаранням царя і його провиною?','choice',['Нічого','Він гине саме від сміху, який забороняв','Він тоне у сльозах','Його з’їдають'],1,'Покарання зроблене з тієї самої речі, що й вада.'],
+ ['Хто з героїв є оптимістом, а хто песимістом?','choice',['Обидва оптимісти','Лоскотон — оптиміст, Плаксій — песиміст','Обидва песимісти','Плаксій — оптиміст'],1,'Один вірить у свої сили й діє, другий не чекає нічого доброго.'],
+ ['Навіщо в казці промовисті імена?','choice',['Для рими','Щоб одразу показати характер героя, не описуючи його довго','Так було модно','Щоб було смішно дітям'],1,'Ім’я тут уже є характеристикою.'],
+ ['Що означає фінал зі штанами Плаксунів?','choice',['Вони бідні','Авторська насмішка: ціле покоління спадкоємців зникає смішно й безславно','Вони поспішали','Це помилка'],1,'Сатира замість покарання.'],
+ ['Лоскотон боровся з царем зброєю.','tf',null,false,'У нього не було нічого, крім торбини зі сміхом.'],
+ ['Люди в країні підтримували Лоскотона.','tf',null,true,'Ховали його від ловців і зрештою визволили з в’язниці.']
+];
+const Q3=[
+ ['Чим віршована мова відрізняється від прозової?','choice',['Нічим','Поділом на віршові рядки, наявністю ритму й рими','Довжиною','Кількістю героїв'],1,'Рядки ще й об’єднуються в строфи.'],
+ ['Що таке рима?','choice',['Наголос у слові','Співзвуччя закінчень віршових рядків','Кількість складів','Група рядків'],1,'Плаксій — Сльозолий, Лоскотон — трон.'],
+ ['Що таке строфа?','choice',['Один рядок','Група віршових рядків, об’єднаних змістом і римуванням','Назва частини','Розділовий знак'],1,'У цій казці строфи різної довжини.'],
+ ['Який художній засіб у рядку «Сльози відрами лили»?','choice',['Порівняння','Гіпербола','Епітет','Алегорія'],1,'Надмірне перебільшення.'],
+ ['Який засіб у рядку «Голова його мов бочка»?','choice',['Порівняння','Гіпербола','Метафора','Уособлення'],0,'Зіставлення зі словом «мов».'],
+ ['Чим сатира відрізняється від гумору?','choice',['Нічим','Гумор добродушний, а сатира гостро викриває вади','Сатира коротша','Гумор буває лише в прозі'],1,'Гладкий поет і царський двір — це вже сатира.'],
+ ['Що є кульмінацією казки?','choice',['Арешт Лоскотона','Звільнення з в’язниці','Лоскотання царя на троні','Весілля Макаки'],2,'Саме там усе й вирішується.'],
+ ['Яку роль відіграє останній жартівливий маршрут?','choice',['Це підказка читачеві','Це казкова кінцівка-жарт, схожа на народні','Це помилка видавця','Це опис країни'],1,'«Чимчикуй куди попало…»'],
+ ['У чому виявляється авторська позиція Симоненка?','choice',['Він співчуває цареві','Він на боці простих людей і радить бути оптимістом та добротворцем','Він не має позиції','Він засуджує сміх'],1,'Про це прямо йдеться і в підручнику.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Не можна плакати','Сміх, доброта і згуртованість сильніші за злу владу, яка тримається на страху','Царі завжди злі','Треба слухатися батьків'],1,'Обидві частини фрази однаково важливі.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--joy)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Розкажи про автора твору.',
+ 'Василь Андрійович Симоненко народився 1935 року в селі Біївці на Полтавщині й прожив лише двадцять вісім років. Дитинство його припало на роки війни, ріс він без батька, а замінив хлопцеві діда Федір, який чудово співав старовинних пісень. Мама працювала вчителькою й навчила його жити по совісті. Школа була за дев’ять кілометрів, і Василь долав цей шлях навіть у завію, кажучи, що дорогою або всі уроки повторить, або всі пісні переспіває. Закінчив школу із золотою медаллю, навчався на журналістиці в Київському університеті. У літературі відомий як тонкий лірик і патріот, а для свого сина Лесика написав дві віршовані казки.'],
+['Визнач жанр твору й доведи.',
+ 'Це літературна казка, написана віршами. Літературна вона тому, що має конкретного автора — Василя Симоненка, на відміну від народної. А казковою її роблять вигадана країна Сльозолий, фантастичні події й перемога добра над злом. Віршованою її робить сама форма: текст поділено на віршові рядки, у ньому є ритм і рима — Плаксій римується зі Сльозолий, Лоскотон із троном, сини з Плаксунами.'],
+['Прокоментуй імена героїв, назву країни й столиці.',
+ 'Майже всі імена в казці промовисті, тобто самі розповідають про героя. Цар зветься Плаксій, бо весь час плаче й живиться сльозами; його дочки — Нудота, Вай-Вай і Плакота, а сини так і звуться Плаксунами. Гвардійці називаються сльозівцями, бо їхня служба — берегти в державі сльози. Країна зветься Сльозолий, а столиця Плаксоград. І тільки одне ім’я звучить інакше — Лоскотон, той, хто лоскоче й дарує сміх. Автор нікого не описує довго: досить назвати.'],
+['За що діти й дорослі любили Лоскотона?',
+ 'Він приходив до голодної малечі кожного вечора, хоч дощ, хоч сніг, і приносив усім сміх. Мав теплу й щиру вдачу, лукавинку в очах, м’які лоскотливі вуса, а сміх носив у розмальованій торбині й у своїх лагідних пальцях. Де він з’являвся, там плач одразу припинявся. За це люди його й берегли: коли сльозівці полювали по хатах, Лоскотона всюди ховали, а коли його ув’язнили, батраки й робітники вночі прийшли до в’язниці, зігнули грати, мов прути, і визволили його.'],
+['Чому капітан Макака вирішив допомогти цареві?',
+ 'Не з вірності, а з вигоди: цар пообіцяв, що той, хто впіймає Лоскотона, стане чоловіком однієї з його дочок. Макаці так хотілося стати царським зятем, що він цілу зиму не лягав спати — усе ходив, усе слухав і нарешті все рознюхав. Автор характеризує його дуже різко: лютий посіпака, віроломний, як змія; він підкрався до сплячого змієм і зашморгнув аркан. І показово, що наприкінці він з переляку з’їв сам себе.'],
+['Чому важливо, що Лоскотона визволили саме робітники?',
+ 'Тому що казка про те, що перемагає не одинак, а люди разом. Сам Лоскотон із в’язниці не вибрався б: він сидів за вузенькими гратами, поки в палаці гуляли весілля. Але вночі до в’язниці прийшли батраки й робітники, рознесли перепони, зігнули грати й покликали його в свою здружену сім’ю. І ще раніше ціла країна ховала його від ловців, тому сльозівці й не могли його знайти. Тобто силу Лоскотонові дають люди.'],
+['Чому Симоненко вирішив написати казку про плаксу й веселуна?',
+ 'Щоб показати два способи жити. Плаксій — песиміст: він нічого доброго не чекає й тягне в сльози цілу країну, ще й забороняє іншим радіти. Лоскотон — оптиміст: він вірить у свої сили й робить добро щовечора, навіть коли за ним полюють. Автор радить бути оптимістом і добротворцем, тобто не просто вірити в хороше, а щось для нього робити. І дуже показово, як гине цар: він помирає від того самого сміху, який заборонив, а придворні одубіли, бо сміятися не вміли.'],
+['Яка головна думка твору?',
+ 'Сміх, доброта й людська згуртованість сильніші за будь-яку злу владу, і тримається така влада рівно доти, доки люди бояться сміятися. Це доводиться самою розв’язкою: у Лоскотона немає ні зброї, ні війська, тільки торбина зі сміхом, — і цього досить, щоб розвалити трон. А цар прямо зізнається, чого боїться: якщо діти перестануть плакати, йому нічого буде пити.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
