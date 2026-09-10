@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>У бур'янах — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#171A12; --card:#212518;
+  --ink:#F1EEE1; --dim:#A0A48C;
+  --wheat:#D9B65B; --sky:#8FB6C9; --clay:#C4795A;
+  --line:rgba(241,238,225,.14);
+  --ok:#8BC08A; --no:#D9796A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 30px;overflow:hidden;
+  background:radial-gradient(115% 90% at 18% 0%,#2B3020 0%,var(--bg) 68%)}
+.win{position:absolute;top:26px;right:26px;width:44px;height:52px;border-radius:4px;
+  background:linear-gradient(180deg,rgba(217,182,91,.34),rgba(217,182,91,.10));
+  box-shadow:0 0 26px rgba(217,182,91,.22)}
+.weeds{position:absolute;bottom:0;left:0;right:0;height:34px;pointer-events:none;
+  background:repeating-linear-gradient(78deg,rgba(160,164,140,.22) 0 2px,transparent 2px 11px)}
+.hero h1{margin:0;font-size:34px;line-height:1.05;letter-spacing:-.5px}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--clay),var(--wheat));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--ok)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--sky);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--wheat)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--clay);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic;white-space:pre-line}
+.note{background:rgba(217,182,91,.11);border:1px solid rgba(217,182,91,.3);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+.tl{position:relative;padding-left:26px}
+.tl:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--clay),var(--wheat))}
+.tl div{position:relative;margin-bottom:15px}
+.tl div:before{content:"";position:absolute;left:-23px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--wheat);box-shadow:0 0 0 3px var(--bg)}
+.tl b{color:var(--wheat);font-size:13px;display:block}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--clay);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--ok);font-size:13.5px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(143,182,201,.16);color:var(--sky)}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--wheat)}
+
+.btn{background:var(--clay);color:#fff;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink)}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(139,192,138,.15)}
+.opt.no{border-color:var(--no);background:rgba(217,121,106,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(139,192,138,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(217,121,106,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--sky);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--wheat);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--wheat)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="win"></div><div class="weeds"></div>
+    <h1>У бур'янах</h1>
+    <p class="by">Степан Васильченко · оповідання про дитинство Тараса Шевченка</p>
+    <div class="meta">
+      <span class="tag">оповідання</span>
+      <span class="tag">епічний твір</span>
+      <span class="tag">про Шевченка</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#171A12')}catch(e){}}
+
+const KEY='buriany-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Автор</span><b>Степан Васильченко</b></div>
+  <div><span>Назва</span><b>«У бур’янах»</b></div>
+  <div><span>Звідки взято</span><b>з повісті «Широкий шлях» — незакінченого твору про життя Тараса Шевченка</b></div>
+  <div><span>Жанр</span><b>оповідання; за родом літератури — епічний твір</b></div>
+  <div><span>Про кого</span><b>про дитинство Тараса Шевченка на Черкащині</b></div>
+  <div><span>Тема</span><b>народження й перші роки життя майбутнього поета в родині кріпака, серед бідності, праці й народних пісень</b></div>
+  <div><span>Головна думка</span><b>найбільший поет України виріс не в палаці, а в бур’янах біля вбогої хати — і саме там уже було видно, що з нього виросте незвичайна людина</b></div>
+  <div><span>Головний герой</span><b>малий Тарас</b></div>
+  <div><span>Інші герої</span><b>батько Григорій, мати, сестра Катря, брат Микита, баба-повитуха, сусід</b></div>
+  <div><span>Місце й час</span><b>село Моринці на Звенигородщині, потім Кирилівка; початок 19 століття, часи кріпацтва</b></div>
+  <div><span>Епіграф</span><b>слова з Шевченкового листа: «Та поклонися тим нашим бур’янам...»</b></div>
+  <div><span>Особливість початку</span><b>твір про реальну людину починається казковим зачином</b></div>
+</div>
+<div class="note"><b>Уточнення до назви.</b> Оповідання друкують і як «У бур’янах», і як «В бур’янах» — це той самий твір. У підручнику воно подане скорочено, трьома розділами.</div>
+${fin('passport')}`});
+
+/* ================= 2. АВТОР І ГЕРОЙ ================= */
+T('author',{g:0,ic:'👤',t:'Автор і герой',s:'Хто написав і про кого',html:`
+<p class="lead">Тут два імені, які легко переплутати на уроці: <b>Степан Васильченко</b> — автор оповідання, <b>Тарас Шевченко</b> — його герой.</p>
+
+<div class="blk"><h3>Степан Васильченко — автор</h3>
+<p>Український письменник, який задумав велику повість про життя Шевченка й назвав її «Широкий шлях». Повість лишилася незакінченою, але окремі її частини читають як самостійні твори. Одна з них — оповідання «У бур’янах» про дитинство поета.</p>
+<div class="note">Важливо: це художній твір, а не біографія. Васильченко спирався на спогади рідних Шевченка, але багато сцен домислив — на те він і письменник.</div></div>
+
+<div class="blk"><h3>Тарас Шевченко — герой</h3>
+<p>Видатний український письменник, який жив із 1814 до 1861 року. Народився кріпаком, тобто фактично рабом, — і знайшов у собі сили піднятися з колін та повести за собою цілий народ. Його поетична творчість вплинула на хід історії України.</p>
+<p>Шевченко був не тільки поетом, а й талановитим художником. У його віршах багато українських пейзажів — і це не випадково: він умів бачити й малювати.</p></div>
+
+<div class="blk"><h3>Що таке кріпацтво</h3>
+<p>Кріпак — селянин, який належав панові разом із землею. Він не міг вільно піти, одружитися чи навчатися без дозволу. Батько Тараса, Григорій Шевченко, був кріпаком пана Енгельгардта. Саме тому в оповіданні про народження хлопчика сказано так гірко: народилася нова панові кріпацька душа.</p>
+<div class="q">Нам усім — один талан: і дідові, і батькові, і дитині — довічне панське ярмо...</div></div>
+
+<div class="blk"><h3>Чому «бур’яни»</h3>
+<p>Епіграфом до твору стали слова з листа самого Шевченка: «Та поклонися тим нашим бур’янам...» Бур’яни біля вбогої хати — це місце, де малий Тарас грався, ховався, мріяв і вигадував. Для дорослого поета вони лишилися найдорожчим спогадом.</p></div>
+${fin('author')}`});
+
+/* ================= 3. ІСТОРІЯ ================= */
+T('history',{g:0,ic:'📜',t:'Час і місце',s:'Черкащина початку 19 століття',html:`
+<div class="blk"><div class="tl">
+<div><b>1814</b>У селі Моринці на Звенигородщині, у хаті кріпака Григорія Шевченка, народжується син Тарас. В оповіданні цю ніч описано так, ніби в темному вікні блиснув єдиний на все село вогник.</div>
+<div><b>дитинство</b>Родина живе в Кирилівці. Батьки цілими днями на панщині, дітей глядять старші діти. Тарас майже весь час у бур’янах за хатою.</div>
+<div><b>тодішнє село</b>Панщина, тяжка праця, вечорниці, пісні, чумацькі валки на шляху, читання житій святих у неділю, розповіді дідів про гайдамаків.</div>
+<div><b>про кого говорять дорослі</b>У ті роки на Поділлі гримів Устим Кармелюк — народний месник, що відбирав у панів і наділяв бідних. Батько жартома каже, що з Тараса вийде другий такий.</div>
+<div><b>1861</b>Тарас Шевченко помирає, лишивши по собі поезію, яка вплинула на хід історії України.</div>
+</div></div>
+<div class="note"><b>Що треба на уроці:</b> автор — Степан Васильченко, твір — оповідання «У бур’янах» із повісті «Широкий шлях», герой — малий Тарас Шевченко, місце — Моринці й Кирилівка на Черкащині, час — початок 19 століття, доба кріпацтва.</div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Розділ І. Народження',
+  'Автор починає розповідь так, як починаються казки: за широкими морями, за лісами дрімучими, у не нашій далекій стороні. А далі виявляється, що йдеться про цілком реальну ніч 1814 року, коли в Моринцях, у хаті кріпака Григорія Шевченка, народився син. Сестра Катерина, тоді ще маленька, згодом розповідала, як прокинулася вночі й побачила таємничу картину: над піччю горів каганець, а баба-повитуха розповідала матері, що вгледіла у вікні долю новонародженого — і аж обімліла. За її словами, виросте син неабияка людина й буде змагатися з панами та царями.',
+  'Ключ до всього твору: про майбутнього поета говорять іще до того, як він скаже перше слово.'],
+ ['Розділ ІІ. Хлопець із бур’янів',
+  'Тарас росте, і догляду за ним майже немає: батьки на панщині, а нянькою — старша сестра Катря, яка й сама ще дитина. Одного разу вона захопилася гульнею на шляху й згадала про малого лише тоді, коли з поля показалася череда. Мати нарікає, що світ не родив такого волоцюги: небо йому як рідна хата, а сонце як мати; заскочить у хату по кусень хліба — і знову надвір. Діти граються в дорослих: у гості, у кумів, поважно частують одне одного з порожніх черепків. А ввечері дід розповідає про гайдамаків, і вранці в хлопця вже рушниця з насоняшничини й шабля з лозини.',
+  'Дитинство тут не солодке й не бідне на враження: воно вбоге на речі й багате на світ.'],
+ ['Розділ ІІІ. Стовпи, що підпирають небо',
+  'Одного дня хлопець зникає. Його шукають цілий день: бігали й до ставка, і до греблі, усі бур’яни обшукали — як у воду впав. Катерина стоїть заплакана, батько сердито буркає «Догляділи!», мати не може вечеряти. Аж під вечір селом котиться чумацька пісня — і Катря радісно й сердито гукає: а ось і наш волоцюга! Чумаки підвезли хлопця додому й навіть дали батіг воли поганяти. А вже вклавшись спати, Тарас тихим таємничим голосом розповідає братові й сестрі, що ходив туди, де сонце заходить, і бачив залізні стовпи, які підпирають небо, і ворота, куди сонце заходить на ніч.',
+  'Розв’язка. Хлопець пішов шукати край світу — і повернувся не з нічим, а з історією.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'Три розділи оповідання',html:`
+<p class="lead">У скороченому варіанті твір має три розділи. Дібрати до кожного заголовок — окреме завдання з підручника; тут вони вже підписані.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><p>${c[1]}</p><div class="key">▸ ${c[2]}</div></div></div>`).join('')}
+
+<div class="blk"><h3>Що кажуть про Тараса дорослі</h3>
+<p style="font-size:14.5px">Майже кожен персонаж передбачає майбутнє хлопця — і всі по-різному. У цьому й побудова твору.</p>
+<ul>
+<li><b>Баба-повитуха:</b> виросте неабияка людина, буде змагатися з панами та царями.</li>
+<li><b>Мати:</b> нам усім один талан — довічне панське ярмо.</li>
+<li><b>Батько:</b> розбіяка великий вийде, другий Кармелюк.</li>
+<li><b>Сусід:</b> усі на кутку кажуть, що з вашого Тараса щось добряще вийде.</li>
+</ul>
+<div class="note">Правою виявилася баба. Але важливо, що ніхто не сказав «виросте кріпак, як усі».</div></div>
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['Казковий зачин і розповідь про вбогий кріпацький край','експозиція'],
+ ['Народження Тараса і слова баби про його долю','зав’язка'],
+ ['Дитинство в бур’янах, ігри, розповіді діда про гайдамаків','розвиток дії'],
+ ['Хлопець зникає на цілий день, і його шукає все село','кульмінація'],
+ ['Чумаки привозять Тараса, і він розповідає про стовпи, що підпирають небо','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: найнапруженіший момент — не пригода, а страх рідних, що дитина пропала.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Малий Тарас','головний герой',
+  ['допитливий','мрійливий','непосидючий','вигадливий'],
+  'Цілими днями в бур’янах, у хату забігає тільки по кусень хліба. Слухає діда про гайдамаків — і вранці вже ходить із рушницею з насоняшничини й шаблею з лозини. Іде шукати край світу й повертається з чумаками. Розповідає так, що мати сміється: старий того не придумає збрехати, як воно.',
+  'Ходив туди, де сонце заходить.'],
+ ['Мати','кріпачка, змучена працею',
+  ['стомлена','турботлива','гірка на слово'],
+  'Нарікає, що світ не родив такого волоцюги, і водночас крадькома прислухається до синових вигадок. Її слова про долю найгіркіші в усьому творі: усім їм один талан — довічне панське ярмо. Але коли хлопець зникає, вона не може навіть вечеряти.',
+  'Ото небо йому, як рідна хата, а сонце, як мати.'],
+ ['Батько Григорій','кріпак пана Енгельгардта',
+  ['суворий','мовчазний','із гумором'],
+  'Говорить мало й здебільшого сердито: «Догляділи!» Про сина каже жартома, що вийде з нього великий розбіяка, другий Кармелюк. Але коли хлопця знаходять, першим кличе вечеряти.',
+  'Розбіяка великий вийде — ось що!'],
+ ['Катря','старша сестра, нянька Тараса',
+  ['добра','сама ще дитина','винувата'],
+  'Їй доручено глядіти малого, а вона й сама хоче гуляти на шляху з іншими дітьми. Забувши про брата, згадує про нього аж увечері. Коли того шукають, стоїть заплакана, спершись на яблуню, і не бере ложки в руки. Вона ж перша й радісно гукає, побачивши його з чумаками.',
+  'А ось і наш волоцюга!'],
+ ['Баба-повитуха','жінка, яка приймала пологи',
+  ['таємнича','обережна','мудра'],
+  'Розповідає, що є прикмета: коли перед тим, як зайти в хату, заглянеш у вікно, побачиш долю новонародженого. Того разу вона аж обімліла й довго вагалася, чи казати. Її передбачення — що хлопець виросте неабиякою людиною й змагатиметься з панами та царями — виявилося правдою.',
+  'Скільки я бабую — не доводилось бачити такого.'],
+ ['Сусід','голос усього кутка',
+  ['спокійний','доброзичливий'],
+  'Заходить звичаєм погомоніти перед сном, розважає стривожену родину, а коли хлопця знаходять, підсумовує: такий лобатий не пропаде. І передає загальну думку сусідів, що з Тараса щось добряще вийде.',
+  'Такий лобатий не пропаде.'],
+ ['Чумаки','подорожні з валки',
+  ['бувалі','привітні'],
+  'Їдуть шляхом із піснею про вози, ярма й отамана, що грає в сопілочку. Підбирають заблуканого хлопця, пояснюють, що він іде не туди, садять на віз і навіть дають батіг воли поганяти. Через них у твір входить велика дорога й пісня.',
+  '(підвозять хлопця й дають батіг)'],
+ ['Дід','старий оповідач',
+  ['пам’ятливий','цікавий дітям'],
+  'Розповідає онукові про гайдамаків — про те, що було давно, не тепер. Мати заспокоює хлопця, що гайдамаків уже немає, а той наступного ранку вже рубає лозиною голови панам у бур’яні.',
+  '(розказує, що давно колись було)']
+];
+
+T('chars',{g:1,ic:'👥',t:'Персонажі',s:'Хто вони і навіщо в оповіданні',html:`
+<p class="lead">Персонажів небагато, і майже кожен потрібен для одного: щоб сказати щось про майбутнє хлопця.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">Корисно помітити: у творі майже немає описів характеру прямим текстом. Автор показує людей через <b>репліки</b> — саме тому підручник і пропонує читати цей уривок за ролями.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">Оповідання коротке, але воно відповідає на велике питання: звідки береться поет.</p>
+
+<div class="blk"><h3>Геній із бур’янів</h3>
+<p>Автор навмисно починає твір, як казку, — а розповідає про вбогу хату, кріпацтво й дитину, яку нема кому глядіти. І саме звідти, з тих бур’янів, вийшов найбільший поет України. Тому й епіграф узято з листа самого Шевченка: поклонися тим нашим бур’янам.</p></div>
+
+<div class="blk"><h3>Кріпацька доля</h3>
+<p>У ніч народження сказано страшне: народилася нова панові кріпацька душа. Мати певна, що доля в них одна на всіх — довічне панське ярмо. Твір показує світ, у якому дитина від народження вже комусь належить.</p></div>
+
+<div class="blk"><h3>Дитинство без нагляду й без нудьги</h3>
+<p>За малим Тарасом ніхто не встигає: батьки на панщині, нянька сама дитина. Але саме через це в нього ціле небо, ціле поле й цілий день на вигадки. Бідність тут не заважає уяві — вона її годує.</p></div>
+
+<div class="blk"><h3>Слово, яке дитина всотує</h3>
+<p>Пісня чумаків, балада про тополю, дідові розповіді про гайдамаків, читання житій у неділю — усе це хлопець вбирає в себе. Ще ніхто не вчив його грамоти, а він уже живе всередині народного слова.</p></div>
+
+<div class="blk"><h3>Уява сильніша за втому</h3>
+<p>Хлопець іде шукати залізні стовпи, що підпирають небо, — і хоч не знаходить, повертається з готовою історією, яку слухає вся родина. Це перший у творі опис того, як народжується поет: не з навчання, а з бажання побачити те, чого не бачив ніхто.</p></div>
+
+<div class="blk"><h3>Родина, яка сварить і любить</h3>
+<p>Хлопця називають волоцюгою й розбіякою, батько буркає, мати нарікає — а коли він зникає, ніхто не може ані вечеряти, ані розмовляти. Любов у цій родині показана не словами, а тим, як усі кидаються на кожен шелест.</p></div>
+
+<div class="blk" style="border-color:var(--wheat)"><h3>Головна думка одним реченням</h3>
+<p>Найбільший поет України виріс не в палаці, а в бур’янах біля вбогої кріпацької хати — і саме там уже було видно, що з нього виросте незвичайна людина.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'🌾',t:'Образи й деталі',s:'Що ховається за ними',html:`
+<p class="lead">Шість деталей, через які в оповіданні сказано більше, ніж прямим текстом.</p>
+${[
+['🌾','Бур’яни','Місце гри, схованки й мрій. Для дорослих — пустир біля хати, для хлопця — цілий світ. Недарма саме їм кланяється дорослий Шевченко у своєму листі.'],
+['🕯️','Каганець над піччю','Єдиний вогник на все село в ніч народження. Крихітне світло в темряві — образ того, що саме тоді почалося.'],
+['🪟','Вікно, у яке зазирнула баба','За прикметою, у вікні можна побачити долю новонародженого. Те, що вона там угледіла, задає тон усьому твору.'],
+['☀️','Небо як хата, сонце як мати','Слова матері, сказані з докором, — а насправді найточніший опис хлопця, у якого дім усюди.'],
+['🚛','Чумацька валка','Пісня, велика дорога й люди, що знають шлях. Через них до хлопця вперше приходить світ за межами села.'],
+['🛠️','Рушниця з насоняшничини','Зброя, зроблена зі стебла соняшника, і шабля з лозини. З таких дрібниць і починається уява, з якої потім виростуть вірші.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни на прикладах із твору',html:`
+<p class="lead">Саме на цьому творі підручник вводить поділ літератури на роди. Це найважливіше, що варто звідси винести.</p>
+${[
+['Епічний твір','Твір, у якому розгортаються події й розповідається про життя героїв. До епічних належать оповідання, повість, роман, казка, переказ.','«У бур’янах» — епічне оповідання: тут є сюжет, події та герої.'],
+['Ліричний твір','Твір, у якому немає сюжету: у ньому виражаються думки, почуття й переживання людини. Пишуть переважно віршованою мовою.','Вірш Шевченка «За сонцем хмаронька пливе…», який вивчають одразу після цього оповідання.'],
+['Драматичний твір','Твір, призначений для постановки на сцені: з репліками для акторів і ремарками.','Казка-п’єса Олександра Олеся «Микита Кожум’яка».'],
+['Оповідання','Невеликий прозовий твір про одну-дві події з життя героя.','Тут це три невеликі розділи про дитинство Тараса.'],
+['Казковий зачин','Початок, типовий для казки: «за широкими морями, за лісами дрімучими…».','Автор так починає розповідь про реальну людину — щоб показати, що життя поета схоже на легенду.'],
+['Портрет і деталь','Опис зовнішності або промовиста дрібниця.','«Такий лобатий не пропаде» — і характер, і зовнішність в одній фразі сусіда.'],
+['Діалог','Розмова персонажів.','Майже весь твір побудований на репліках — тому його й радять читати за ролями.'],
+['Персоніфікація','Олюднення: ознаки людини переносяться на неживе.','«Сонце, як мати»; у Шевченковому вірші — хмаронька пливе, сонце зове.'],
+['Епіграф','Короткий вислів перед твором, що задає його думку.','«Та поклонися тим нашим бур’янам...» — із листа самого Шевченка.']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">Кілька цитат, сказаних до місця, важать більше, ніж переказ усього тексту.</p>
+${[
+['Та поклонися тим нашим бур’янам...','Тарас Шевченко','епіграф із листа','Слова дорослого поета про місце свого дитинства. Заради них твір і має таку назву.'],
+['Народилась нова панові кріпацька душа, а Україні — її великий співець.','автор','про ніч народження','Одне речення, у якому вміщено все майбутнє: раб для пана і поет для народу.'],
+['Виросте твій син неабияка людина — буде змагатися з панами та царями...','баба-повитуха','матері вночі','Єдине передбачення, яке справдилося повністю.'],
+['Нам усім — один талан: і дідові, і батькові, і дитині — довічне панське ярмо...','мати','у відповідь бабі','Найгіркіші слова твору. Мати не вірить у щасливу долю, бо не бачила такої.'],
+['Розбіяка великий вийде — ось що! Ото чули про Кармелюка, а це другий буде такий.','батько','жартома сусідові','Жарт, у якому більше правди, ніж він думав.'],
+['Ото небо йому, як рідна хата, а сонце, як мати.','мати','нарікаючи на сина','Сказано з докором — а звучить як опис поета.'],
+['Такий лобатий не пропаде.','сусід','коли хлопця знайшли','Народна впевненість у дитині, висловлена трьома словами.'],
+['Ходив туди, де сонце заходить.','Тарас','увечері братові й сестрі','Перша в його житті розказана історія — і вже така, що слухає вся хата.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Навколо твору',s:'Що читати й дивитися поруч',html:`
+<div class="blk"><h3>Повість «Широкий шлях»</h3>
+<p>«У бур’янах» — частина великого задуму Васильченка: повісті про все життя Шевченка. Повість лишилася незакінченою, тож маємо тільки окремі розділи, які читають як самостійні твори.</p></div>
+
+<div class="blk"><h3>Шевченкові вірші поруч</h3>
+<p>У підручнику одразу після цього оповідання йдуть вірші Шевченка «За сонцем хмаронька пливе…» та «Садок вишневий коло хати…». Це зроблено навмисно: спершу ти бачиш хлопця в бур’янах, а потім читаєш те, що з нього виросло.</p></div>
+
+<div class="blk"><h3>Шевченко-художник</h3>
+<p>Він був не лише поетом, а й талановитим художником — тому в його віршах стільки точних українських пейзажів. В оповіданні є натяк і на це: хлопець уперше відчув, що таке творчість, коли побачив, як на мертвій дошці з-під пензля виглядають людські очі.</p></div>
+
+<div class="blk"><h3>Кармелюк</h3>
+<p>Устим Кармелюк, якого згадує батько, — реальна історична постать, народний месник, що діяв на Поділлі саме в ті роки. Про нього складали пісні. Згадка про нього показує, чим жили й про що говорили люди в селі.</p></div>
+
+<div class="blk"><h3>Чому твір досі в програмі</h3>
+<p>Бо він відповідає на просте питання: чи може вийти щось велике з дитини, у якої немає нічого. Шевченко народився кріпаком і став голосом цілого народу — і оповідання показує ту саму хату, ті самі бур’яни й того самого хлопця, який пішов шукати край світу.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'🌻',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Постав події по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай події від першої до останньої.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Епічний, ліричний чи драматичний?</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Головна вправа файлу: розподіли вивчені твори за родами літератури.</p>
+<div id="rd"></div><div class="say" id="rds"></div></div>
+
+<div class="blk"><h3>Слова з тодішнього села</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">У творі багато слів, яких сьогодні не почуєш. Що вони означають?</p>
+<div id="sl"></div><div class="say" id="sls"></div></div>
+${fin('train')}`,
+init(){initWho();initOrder();initRd();initSl()}});
+
+const WHO=[
+ ['Виросте твій син неабияка людина — буде змагатися з панами та царями.','баба-повитуха',['баба-повитуха','мати','сусід']],
+ ['Нам усім — один талан: довічне панське ярмо...','мати',['мати','баба','Катря']],
+ ['Розбіяка великий вийде — ось що!','батько',['батько','сусід','дід']],
+ ['Усі на кутку кажуть, що з вашого Тараса щось добряще вийде.','сусід',['сусід','батько','чумак']],
+ ['А ось і наш волоцюга!','Катря',['Катря','мати','Микита']],
+ ['Догляділи!','батько',['батько','мати','сусід']],
+ ['Ходив туди, де сонце заходить.','Тарас',['Тарас','дід','чумак']],
+ ['Такий лобатий не пропаде.','сусід',['сусід','баба','батько']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Репліка ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const ORD=[
+ 'Автор починає розповідь казковим зачином',
+ 'У хаті кріпака Григорія Шевченка народжується син',
+ 'Баба розповідає матері, що побачила у вікні долю дитини',
+ 'Катря, забувши про малого, згадує про нього аж під вечір',
+ 'Дід розповідає про гайдамаків, і вранці хлопець ходить із лозиною',
+ 'Тарас зникає, і його шукають усім селом',
+ 'Селом котиться чумацька пісня, і хлопця привозять додому',
+ 'Уночі Тарас розповідає про стовпи, що підпирають небо'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','Перші три події — розділ І, наступні дві — розділ ІІ, останні три — розділ ІІІ.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — це буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const RD=[
+ ['«У бур’янах» Степана Васильченка','епічний','Оповідання: є сюжет, події та герої.'],
+ ['«Микита Кожум’яка» Олександра Олеся','драматичний','Казка-п’єса для сцени: репліки дійових осіб і ремарки.'],
+ ['«За сонцем хмаронька пливе…» Тараса Шевченка','ліричний','Немає сюжету — є почуття й переживання.'],
+ ['«Фарбований Лис» Івана Франка','епічний','Літературна казка з подіями й героями.'],
+ ['«Цар Плаксій та Лоскотон» Василя Симоненка','епічний','Хоч і віршована, але з сюжетом, тому епічна.'],
+ ['«Садок вишневий коло хати…» Тараса Шевченка','ліричний','Опис вечора й настрою, а не подій.']
+];
+const RNAMES=['епічний','ліричний','драматичний'];
+function initRd(){
+  const b=$('#rd');if(!b)return;
+  b.innerHTML=RD.map((r,i)=>`<div style="margin-bottom:15px">
+    <div style="font-size:14.5px;margin-bottom:7px">${r[0]}</div>
+    <div class="row" id="rd${i}">${RNAMES.map(n=>
+      `<button class="chip" onclick="ansRd(${i},'${n}',this)">${n}</button>`).join('')}</div>
+    <div class="say" id="rde${i}"></div></div>`).join('');
+}
+function ansRd(i,n,el){
+  const ok=(RD[i][1]===n);
+  $$('#rd'+i+' .chip').forEach(b=>{b.disabled=true;if(b.textContent===RD[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  say('#rde'+i,RD[i][2],ok);
+  buzz(ok?'success':'error');
+  if($$('#rd .chip.ok').length>=RD.length)
+    say('#rds','Головне правило: є події — епічний, є почуття без подій — ліричний, написано для сцени — драматичний.',true);
+}
+
+const SL=[
+ ['кріпак','селянин, який належав панові разом із землею',['селянин, який належав панові разом із землею','багатий господар','наймит на один сезон']],
+ ['талан','доля, щастя',['доля, щастя','талант до співу','старовинна монета']],
+ ['ярмо','дерев’яна упряж на шию волам; тут — неволя',['дерев’яна упряж на шию волам; тут — неволя','воза для сіна','поле за селом']],
+ ['волоцюга','той, хто цілими днями блукає',['той, хто цілими днями блукає','злодій','сирота']],
+ ['чумаки','візники, що їздили валками по сіль і рибу',['візники, що їздили валками по сіль і рибу','пастухи','ковалі']],
+ ['каганець','маленький світильник із ґнотом',['маленький світильник із ґнотом','глиняний горщик','дитяча колиска']]
+];
+function initSl(){
+  const b=$('#sl');if(!b)return;
+  b.innerHTML=SL.map((s,i)=>`<div style="margin-bottom:15px">
+    <div style="font-size:15px;margin-bottom:7px;color:var(--wheat);font-family:Georgia,serif">${s[0]}</div>
+    <div id="sl${i}">${s[2].map(o=>`<button class="opt" style="font-size:14px;padding:9px 12px" onclick="ansSl(${i},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function ansSl(i,el){
+  const ok=(el.textContent===SL[i][1]);
+  $$('#sl'+i+' .opt').forEach(b=>{b.disabled=true;if(b.textContent===SL[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  buzz(ok?'success':'error');
+  if($$('#sl .opt.ok').length>=SL.length)
+    say('#sls','Без цих слів половина твору незрозуміла. Особливо «талан» і «ярмо» — на них тримається найгіркіша фраза матері.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто автор оповідання «У бур’янах»?','choice',['Степан Васильченко','Тарас Шевченко','Зірка Мензатюк','Іван Франко'],0,'Шевченко — герой твору, а не автор.'],
+ ['З якого твору взято це оповідання?','choice',['«Широкий шлях»','«Кобзар»','«Нечиста сила»','«Княжа Україна»'],0,'Незакінчена повість Васильченка про життя Шевченка.'],
+ ['Про чиє дитинство йдеться?','choice',['Івана Франка','Тараса Шевченка','Устима Кармелюка','Степана Васильченка'],1,'Майбутнього великого поета.'],
+ ['Де народився Тарас?','choice',['У Кирилівці','У Моринцях на Звенигородщині','У Києві','На Поділлі'],1,'У хаті кріпака Григорія Шевченка.'],
+ ['Ким був батько Тараса?','choice',['Дяком','Кріпаком пана Енгельгардта','Чумаком','Маляром'],1,'Тому й сказано: народилася нова панові кріпацька душа.'],
+ ['Хто передбачив, що хлопець змагатиметься з панами та царями?','choice',['Мати','Баба-повитуха','Сусід','Дід'],1,'Вона казала, що побачила його долю у вікні.'],
+ ['Хто мав глядіти малого Тараса?','choice',['Мати','Баба','Сестра Катря','Сусід'],2,'І забула про нього, захопившись гульнею.'],
+ ['Хто привіз заблуканого хлопця додому?','choice',['Батько','Чумаки','Сусід','Дід'],1,'Ще й дали батіг воли поганяти.'],
+ ['Що, за словами Тараса, він бачив?','choice',['Гайдамаків','Залізні стовпи, що підпирають небо','Пана Енгельгардта','Море'],1,'І ворота, куди сонце заходить на ніч.'],
+ ['Що взято за епіграф до твору?','choice',['Народна приказка','Слова з листа Шевченка про бур’яни','Рядок із «Кобзаря»','Слова автора'],1,'«Та поклонися тим нашим бур’янам...»'],
+ ['«У бур’янах» — епічний твір.','tf',null,true,'Це оповідання: у ньому є сюжет, події та герої.'],
+ ['Оповідання починається казковим зачином.','tf',null,true,'«За широкими морями, за лісами дрімучими...»']
+];
+const Q2=[
+ ['Навіщо автор починає твір як казку?','choice',['Щоб було цікавіше','Бо життя поета таке дивне, що схоже на легенду, — про це сказано прямо','Так починаються всі оповідання','Щоб приховати правду'],1,'Автор сам це пояснює в перших рядках.'],
+ ['Як ти розумієш слова «народилась нова панові кріпацька душа»?','choice',['Дитина була дуже слабка','Дитина від народження вже належала панові','Пан прийшов у гості','Дитину віддали панові'],1,'Кріпаки належали панові разом із землею.'],
+ ['Чому мати не вірить у щасливу долю сина?','choice',['Вона не любить його','Бо не бачила іншої долі: усім їм — довічне панське ярмо','Так сказала баба','Вона забобонна'],1,'Це найгіркіші слова твору.'],
+ ['Чому Тарас майже не буває вдома?','choice',['Його виганяють','Батьки на панщині, нянька сама дитина, а надворі — цілий світ','Він посварився з рідними','Йому нема де спати'],1,'Мати каже: небо йому як хата, а сонце як мати.'],
+ ['Що показує епізод із дідовими розповідями про гайдамаків?','choice',['Що дід дуже старий','Як швидко хлопець перетворює почуте на власну гру','Що гайдамаки ще існували','Що дітям не можна слухати дорослих'],1,'Уранці в нього вже рушниця з насоняшничини й шабля з лозини.'],
+ ['Чому родина не могла вечеряти?','choice',['Не було чого їсти','Бо хлопець зник і його шукали цілий день','Були в гостях','Сварилися'],1,'Кидалися на кожен шелест: чи не хлопець?'],
+ ['Що показує розповідь про залізні стовпи?','choice',['Що хлопець любить брехати','Що в ньому вже прокидається уява й уміння розповідати','Що він справді там був','Що він злякався'],1,'Мати каже: старий того не придумає збрехати, як воно.'],
+ ['Чому всі персонажі щось передбачають про Тараса?','choice',['Так було заведено','Бо на цьому побудований твір: усі відчувають, що дитина незвичайна','Вони сваряться','Вони хочуть його налякати'],1,'І ніхто не каже, що виросте звичайний кріпак.'],
+ ['Чиє передбачення справдилося?','choice',['Материне','Бабине','Батькове','Сусідове'],1,'Він і справді став тим, хто змагався з панами та царями.'],
+ ['Чому твір названо «У бур’янах»?','choice',['Там багато бур’янів','Бо там минуло дитинство поета, і сам він потім просив поклонитися тим бур’янам','Це назва села','Так назвав Шевченко свій вірш'],1,'Слова з листа стали епіграфом.'],
+ ['Батько передбачив, що з Тараса вийде поет.','tf',null,false,'Він жартома казав, що вийде розбіяка, другий Кармелюк.'],
+ ['Васильченко записав біографію Шевченка точно, без вигадки.','tf',null,false,'Це художній твір: багато сцен письменник домислив.']
+];
+const Q3=[
+ ['Що таке епічний твір?','choice',['Твір про почуття','Твір, у якому розгортаються події й розповідається про життя героїв','Твір для сцени','Твір у віршах'],1,'Оповідання, повість, роман, казка.'],
+ ['Що таке ліричний твір?','choice',['Твір із сюжетом','Твір без сюжету, у якому виражені думки, почуття й переживання','Твір із діалогами','Твір про історію'],1,'Наприклад, «За сонцем хмаронька пливе…».'],
+ ['До якого роду літератури належить «Микита Кожум’яка»?','choice',['Епічного','Ліричного','Драматичного','Це не художній твір'],2,'Казка-п’єса, написана для сцени.'],
+ ['Що є кульмінацією оповідання?','choice',['Народження Тараса','Розповідь про стовпи','Зникнення хлопця й пошуки всім селом','Гра в гості'],2,'Найнапруженіший момент — тривога рідних.'],
+ ['Яку роль відіграє епіграф?','choice',['Прикрашає початок','Задає головну думку твору і пояснює назву','Називає автора','Вказує на жанр'],1,'«Та поклонися тим нашим бур’янам...»'],
+ ['Що таке персоніфікація?','choice',['Перебільшення','Олюднення: ознаки людини переносяться на неживе','Порівняння','Прихована насмішка'],1,'«Сонце, як мати»; хмаронька пливе.'],
+ ['Чому підручник радить читати уривок за ролями?','choice',['Він короткий','Бо він майже весь побудований на репліках і цим близький до драматичного твору','Так легше вивчити','Там є вірші'],1,'Характери показані через мову персонажів.'],
+ ['Навіщо у творі згадано Кармелюка?','choice',['Він родич Шевченків','Щоб показати, чим жили й про що говорили люди в селі тих часів','Він приїздив у Кирилівку','Він навчав Тараса'],1,'Народний месник, що діяв тоді на Поділлі.'],
+ ['У чому виявляється авторська позиція Васильченка?','choice',['Він засуджує родину','Він показує, що велика людина виросла з найубогіших умов, і ставиться до цього з любов’ю','Він жаліє панів','Він не має позиції'],1,'Звідси й казковий зачин, і епіграф.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Дітей треба глядіти','Найбільший поет України виріс у бур’янах біля вбогої хати — і вже там було видно, що він незвичайний','Кріпацтво — це погано','Не можна тікати з дому'],1,'Друге твердження теж правильне, але воно лише частина.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--wheat)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Хто автор твору і про кого він написаний?',
+ 'Автор оповідання «У бур’янах» — український письменник Степан Васильченко. А герой твору — Тарас Шевченко, точніше його дитинство. Це важливо не переплутати. Оповідання є частиною повісті «Широкий шлях», яку Васильченко задумав про все життя поета, але не закінчив, тому окремі її розділи читають як самостійні твори. Сам Шевченко жив із 1814 до 1861 року, народився кріпаком і став найбільшим українським поетом, а ще був талановитим художником.'],
+['Знайди на початку твору казковий зачин і поясни, навіщо він.',
+ 'Твір починається так: за широкими морями, за лісами дрімучими ще й за горами кам’яними, у не нашій далекій стороні. Це типовий казковий зачин. Автор пояснює це сам у першому ж абзаці: життя нашого поета таке дивне, що можна було б назвати його легендою, коли б усе те не діялось перед нашими очима. Тобто зачин потрібен, щоб показати: історія хлопчика-кріпака, який став голосом цілого народу, звучить неймовірно, як казка, — а насправді вона правдива.'],
+['Як ти розумієш слова «народилася нова панові кріпацька душа»?',
+ 'Кріпак — це селянин, який належав панові разом із землею: він не міг вільно піти, навчатися чи одружитися без дозволу. Батько Тараса, Григорій Шевченко, був кріпаком пана Енгельгардта, а отже, і його діти від народження належали тому самому панові. Тому автор і пише так гірко: народилася нова панові кріпацька душа, а Україні — її великий співець. В одному реченні поєднано дві долі: раба для пана і поета для народу.'],
+['Що передбачали про Тараса різні персонажі?',
+ 'Майже кожен персонаж каже щось про його майбутнє. Баба-повитуха розповіла матері, що заглянула у вікно й аж обімліла, бо побачила: виросте син неабияка людина й буде змагатися з панами та царями. Мати не повірила й відповіла, що доля в них одна на всіх — довічне панське ярмо. Батько жартома казав, що вийде з нього великий розбіяка, другий Кармелюк. А сусід переказував думку всього кутка, що з хлопця щось добряще вийде. Справдилося передбачення баби. Але дуже показово, що ніхто не сказав, ніби виросте звичайний кріпак, як усі.'],
+['Чи можна дитинство Тараса вважати щасливим?',
+ 'Тут можна відповісти і так, і ні, головне — довести. Незаможним і тяжким воно було безперечно: родина кріпацька, батьки цілими днями на панщині, дитини нема кому глядіти, вбога хата, а мати певна, що попереду тільки панське ярмо. Але водночас у хлопця було те, чого не купиш: ціле небо, ціле поле, чумацькі пісні на шляху, дідові розповіді про гайдамаків і повна свобода вигадувати. Мати сама каже, що небо йому як рідна хата, а сонце як мати. Тобто дитинство було бідне на речі й дуже багате на враження.'],
+['Розкажи про епізод, коли хлопець зник.',
+ 'Одного дня Тарас пішов з дому й не повертався. Його шукали цілий день: бігали й до ставка, і до греблі, обшукали всі бур’яни — як у воду впав. Катерина стояла заплакана, спершись на яблуню, і не брала ложки в руки, батько сердито буркнув «Догляділи!», а мати не могла вечеряти й на кожен шелест кидалася: чи не хлопець? Аж під вечір селом покотилася чумацька пісня, і Катря радісно й сердито гукнула: а ось і наш волоцюга! Виявилося, що Тарас пішов шукати край світу, заблукав, а чумаки пояснили йому дорогу, посадили на віз і навіть дали батіг воли поганяти. А вночі він розповів братові й сестрі, що бачив залізні стовпи, які підпирають небо, і ворота, куди сонце заходить.'],
+['Чим епічний твір відрізняється від ліричного й драматичного?',
+ 'В епічному творі розгортаються події й розповідається про життя героїв — до епічних належать оповідання, повість, роман, казка. «У бур’янах» саме такий. У ліричному творі сюжету немає: у ньому виражаються думки, почуття й переживання людини, і пишуть їх переважно віршованою мовою — наприклад, вірш Шевченка «За сонцем хмаронька пливе…». А драматичний твір призначений для постановки на сцені: у ньому немає мови автора, є репліки дійових осіб і ремарки — як у казці-п’єсі «Микита Кожум’яка» Олександра Олеся.'],
+['Яка головна думка твору?',
+ 'Найбільший поет України виріс не в палаці, а в бур’янах біля вбогої кріпацької хати — і саме там уже було видно, що з нього виросте незвичайна людина. Автор доводить це і казковим зачином, і словами баби про долю, і тим, як хлопець іде шукати край світу й повертається з готовою історією. А найточніше про це сказано в епіграфі, узятому з листа самого Шевченка: та поклонися тим нашим бур’янам.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
