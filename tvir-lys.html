@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Фарбований Лис — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#101A15; --card:#17251E;
+  --ink:#EFEDE3; --dim:#93A897;
+  --paint:#4E7FD4; --rust:#D2733F; --leaf:#79C08D;
+  --line:rgba(239,237,227,.14);
+  --ok:#79C08D; --no:#DE7A66;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 22px;overflow:hidden;
+  background:radial-gradient(115% 85% at 82% 0%,#1E3329 0%,var(--bg) 70%)}
+.blob{position:absolute;top:-30px;right:-20px;width:150px;height:150px;border-radius:50% 50% 46% 54%/54% 48% 52% 46%;
+  background:radial-gradient(circle at 38% 34%,rgba(78,127,212,.42),rgba(78,127,212,.10) 70%);
+  filter:blur(2px);pointer-events:none}
+.drip{position:absolute;top:112px;right:52px;width:9px;height:44px;border-radius:0 0 9px 9px;
+  background:linear-gradient(180deg,rgba(78,127,212,.35),transparent);pointer-events:none}
+.hero h1{margin:0;font-size:34px;line-height:1.05;letter-spacing:-.5px}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rust),var(--paint));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--leaf)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--leaf);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--rust)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--paint);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic}
+.note{background:rgba(210,115,63,.11);border:1px solid rgba(210,115,63,.32);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+.tl{position:relative;padding-left:26px}
+.tl:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--rust),var(--paint))}
+.tl div{position:relative;margin-bottom:15px}
+.tl div:before{content:"";position:absolute;left:-23px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--rust);box-shadow:0 0 0 3px var(--bg)}
+.tl b{color:var(--rust);font-size:13px;display:block}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--paint);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--leaf);font-size:13.5px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(78,127,212,.16);color:#9EBEF0}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--rust)}
+
+.btn{background:var(--rust);color:#fff;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink)}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(121,192,141,.15)}
+.opt.no{border-color:var(--no);background:rgba(222,122,102,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(121,192,141,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(222,122,102,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--leaf);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--rust);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--rust)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="blob"></div><div class="drip"></div>
+    <h1>Фарбований<br>Лис</h1>
+    <p class="by">Іван Франко · зі збірки «Коли ще звірі говорили»</p>
+    <div class="meta">
+      <span class="tag">літературна казка</span>
+      <span class="tag">про тварин</span>
+      <span class="tag">алегорія</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#101A15')}catch(e){}}
+
+const KEY='lys-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Автор</span><b>Іван Якович Франко</b></div>
+  <div><span>Роки життя</span><b>1856–1916</b></div>
+  <div><span>Назва</span><b>«Фарбований Лис»</b></div>
+  <div><span>Збірка</span><b>«Коли ще звірі говорили» — 50 казок</b></div>
+  <div><span>Жанр</span><b>літературна казка; казка про тварин</b></div>
+  <div><span>Форма мови</span><b>прозова</b></div>
+  <div><span>Тема</span><b>історія хитрого Лиса Микити, який випадково пофарбувався в синє, видав себе за посланого з неба звіра Остромисла й цілий рік царював над звірами</b></div>
+  <div><span>Головна думка</span><b>обман може піднести високо, але тримається лише доти, доки триває маска: рано чи пізно природа бере своє й брехня викривається</b></div>
+  <div><span>Головний герой</span><b>Лис Микита</b></div>
+  <div><span>Інші персонажі</span><b>Вовчик-братик, Ведмідь, Мавпа Фрузя, звірі лісового царства, пси</b></div>
+  <div><span>Особливість кінцівки</span><b>казка завершується поясненням приповідки «Я на нім пізнався, як на фарбованім Лисі»</b></div>
+  <div><span>Зачин</span><b>«Жив собі в однім лісі Лис Микита, хитрий-прехитрий»</b></div>
+</div>
+<div class="note"><b>Не сплутай два твори.</b> Крім казки «Фарбований Лис», Франко написав ще й велику віршовану поему-казку «Лис Микита» — з тим самим героєм, але це окремий твір.</div>
+${fin('passport')}`});
+
+/* ================= 2. АВТОР ================= */
+T('author',{g:0,ic:'👤',t:'Автор',s:'Людина, яка встигала все',html:`
+<p class="lead">Франко був поетом, прозаїком, драматургом, літературознавцем, ученим, перекладачем, критиком і політичним діячем — і при цьому знаходив час писати казки для дітей.</p>
+
+<div class="blk"><h3>Нагуєвичі</h3>
+<p>Іван Франко народився 27 серпня 1856 року в селі Нагуєвичах неподалік Львова. Батько був сільським ковалем, а мати походила зі шляхетського роду, мала горду вдачу й чутливе до краси серце та багато співала народних пісень — це дуже вплинуло на майбутнього письменника.</p>
+<div class="note">Сусіди казали про хлопця: «Якесь воно не таке, як люди». Те саме помічав і батько — і вирішив віддати сина в науку.</div></div>
+
+<div class="blk"><h3>Феноменальна пам’ять</h3>
+<p>За два роки в початковій школі він навчився читати українською, німецькою та польською мовами — причому українською опанував читання за десять днів. У Дрогобицькій гімназії йому велося важко: учителі поважали лише дітей із заможних родин. Попри це за підсумками року він виявився найкращим учнем.</p>
+<p>Франко згадував, що міг переказати майже слово в слово цілу годинну лекцію з історії.</p></div>
+
+<div class="blk"><h3>Книжки й пісні</h3>
+<p>Ще гімназистом він зібрав бібліотеку майже на п’ятсот книжок і захопився фольклором: спершу записував пісні від матері, потім усюди, де випадала нагода, — і невдовзі мав два великі зошити, майже вісімсот творів.</p>
+<p>У дев’ятнадцять вступив на філософський факультет Львівського університету; як талановитого студента його звільнили від плати й призначили стипендію. Згодом навчався в Чернівцях, а у Відні захистив наукову роботу й здобув ступінь доктора філософії.</p></div>
+
+<div class="blk"><h3>Казки для власних дітей</h3>
+<p>У Франка була одна донька і троє синів. Коли вони були зовсім малі, він щовечора розповідав їм казки, складені просто на ходу. Згодом записав ці історії на папері й видав окремою книжкою.</p>
+<div class="note">Якщо хочеться дізнатися більше про дитинство самого письменника, є його автобіографічні оповідання «У кузні», «Малий Мирон» та «Олівець».</div></div>
+${fin('author')}`});
+
+/* ================= 3. ІСТОРІЯ ================= */
+T('history',{g:0,ic:'📜',t:'Збірка «Коли ще звірі говорили»',s:'Звідки взялася ця казка',html:`
+<p class="lead">«Фарбований Лис» — не окрема книжка, а одна з п’ятдесяти казок збірки. Про це на уроці питають дуже часто.</p>
+<div class="blk"><div class="tl">
+<div><b>щовечора</b>Франко розповідає своїм чотирьом дітям казки, які складає просто на ходу. Діти сидять у нього на колінах і ловлять кожне слово.</div>
+<div><b>потім</b>Він записує ці історії на папері.</div>
+<div><b>збірка</b>Виходить книжка «Коли ще звірі говорили» — 50 казок. Серед них «Фарбований Лис», «Осел і Лев», «Як Лисиця сама себе перехитрила», «Лисичка і Журавель».</div>
+<div><b>у чому сила</b>У казках майстерно змальовано риси тварин: хитрість лисиці, упертість осла, незграбність ведмедя. Ці твори змушують дітей сміятися і думати водночас.</div>
+<div><b>досі</b>Збірка лишається однією з найпопулярніших українських дитячих книжок.</div>
+</div></div>
+<div class="note"><b>Що треба на уроці:</b> Іван Франко, 1856–1916, село Нагуєвичі, збірка «Коли ще звірі говорили», 50 казок, «Фарбований Лис» — літературна казка про тварин, написана прозою.</div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Хитрий і гордий',
+  'У лісі живе Лис Микита, хитрий-прехитрий. Його гонили стрільці, труїли псами, ставили пастки — і нічого не могли вдіяти. Він глузував із мисливців, оминав небезпеки й ще й товаришів остерігав. Постійне щастя й хитрість зробили його страшенно гордим: йому здавалося, що для нього немає нічого неможливого. І він вихваляється, що завтра серед білого дня піде в місто й украде курку просто з торговиці.',
+  'Зав’язка тут — не пригода, а характер. Усе, що станеться далі, виросло з однієї похвальби.'],
+ ['Місто',
+  'Городами й плотами він дістається до середмістя, але там гамір, вози, коні, свині, крик — такого Лис і в сні не бачив. Пересидівши кілька годин у бур’яні, він набирається відваги й вискакує на вулицю. Люди й не помічають — думають, що це пес. Але дорогою до торговиці на нього кидаються собаки.',
+  'Хитрість, яка діяла в лісі, у місті раптом виявляється безсилою.'],
+ ['Діжка з фарбою',
+  'Рятуючись, Лис ускакує в сіни, потім на подвір’я і, недовго думаючи, стрибає в діжку. Собаки обнюхують подвір’я, кілька разів підходять до діжки — та відганяє їх поганий запах. Виявляється, у діжці більш ніж до половини синьої олійної фарби: у тому домі жив маляр і розвів її на завтра. Лис мусить просидіти у фарбі до самого вечора.',
+  'Найважливіший поворот — і він цілком випадковий. Лис нічого не задумував: його врятував і водночас занапастив звичайний збіг обставин.'],
+ ['Хто це?',
+  'Уночі він добігає до лісу, засинає в чужій норі, а вранці бачить себе — і не впізнає. Синій-синій звір із препоганим запахом, укритий не то лускою, не то колючками, з важким хвостом. Він пробує обтруситися, качатися в траві, дряпати, лизати, стрибає в калюжу — фарба висохла й не сходить.',
+  'Смішна й водночас страшна сцена: герой уперше в житті не може дати собі ради.'],
+ ['Переполох у лісі',
+  'Першим його бачить Вовчик-братик і мчить геть, ледве хлипаючи. Звірі його заспокоюють, Мавпа Фрузя навіть вистригає йому три жмінки волосся з-між очей і пускає на вітер, щоб розвіявся переполох, — не помагає. Тоді всі йдуть подивитися й теж кидаються врозтіч.',
+  'Ніхто не питає, хто це насправді. Достатньо було, щоб воно було незрозуміле.'],
+ ['Звір Остромисл',
+  'Лис бачить, як його бояться, і вирішує цим скористатися. Він іде на лісовий майдан, сідає на пеньок, де завжди сидів Ведмідь, і ласкаво кличе звірів ближче. А тоді розповідає: святий Миколай сьогодні вранці зліпив його з небесної глини, оживив своїм духом і послав на землю бути звірячим царем, заводити лад і судити по правді.',
+  'Кульмінація обману. Лис не переконує силою — він дає звірам красиву історію, у яку їм самим хочеться вірити.'],
+ ['Рік царювання',
+  'Звірі шаленіють від радості. Орли й вовки носять новому цареві здобич, він бере частку собі, а решту ділить. Його хвалять як премудрого Соломона. Насправді ж справедливість була така, як звичайно у звірів: хто дужчий, той і кращий. Жили всі точно так само, як і без царя. А Лис боїться одного — щоб фарба не злізла: не виходить у дощ, не лізе в гущавину, не чухається і спить тільки на м’якій перині.',
+  'Найдотепніша частина казки: нічого не змінилося, але всі щасливі, бо мають незвичайного царя.'],
+ ['Концерт і розплата',
+  'На роковини царювання звірі влаштовують великий концерт. Ведмеді ревуть басом, вовки тягнуть соло, а коли молоді лисички задзявкотіли тоненькими тенорами, цар не витримав — підняв морду й задзявкав по-лисячому. Усі відразу все зрозуміли. Забувши і про його добродійства, і про мудрість, звірі кинулися на Лиса й розірвали його на шматочки. Відтоді й пішла приповідка про фарбованого Лиса.',
+  'Розв’язка: його губить не чужий розум, а власна природа, яку неможливо перефарбувати.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'8 кроків казки + елементи сюжету',html:`
+<p class="lead">Казка коротка, тож її легко втримати в голові цілком. Натисни на будь-який крок.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><p>${c[1]}</p><div class="key">▸ ${c[2]}</div></div></div>`).join('')}
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['У лісі живе хитрий і гордий Лис Микита','експозиція'],
+ ['Він вихваляється, що вкраде курку з міської торговиці','зав’язка'],
+ ['Втеча від псів, діжка з фарбою, переполох у лісі','розвиток дії'],
+ ['Лис оголошує себе звіром Остромислом і стає царем','кульмінація'],
+ ['На концерті він дзявкає по-лисячому, і звірі його розривають','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: зав’язка — похвальба, а не діжка з фарбою. Усе почалося з гордості.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Лис Микита','головний герой',
+  ['хитрий','спритний','гордий','брехливий','боягузливий'],
+  'Найспритніший злодій у лісі: його не беруть ні пастки, ні пси, ні отрута. Але постійне щастя зробило його страшенно гордим — і саме гордість штовхнула на похвальбу, з якої почалася біда. Ставши царем, він не змінює нічого в лісі, лише боїться дощу й гущавини. Гине не від чужої сили, а від власного голосу.',
+  'Досі я ходив по селах, а завтра піду до міста.'],
+ ['Вовчик-братик','перший, хто побачив синього звіра',
+  ['лякливий','простодушний'],
+  'Ще вчора був добрим знайомим Микити, а тепер, побачивши синє страхіття, завиває з переляку й тікає, ледве хлипаючи. Не може навіть пояснити іншим, що саме бачив: тільки повторює, що там страшне й люте.',
+  'Он там! Ой, та й страшне ж!'],
+ ['Ведмідь','найповажніший звір у лісі',
+  ['поважний','обережний'],
+  'Єдиний наважується запитати нового звіра, хто він такий. Показово, що Лис сідає саме на пеньок, де завжди любив сидіти Ведмідь: чужу владу він займає буквально.',
+  'А ти ж хто такий?'],
+ ['Мавпа Фрузя','лісова знахарка',
+  ['метушлива','кумедна'],
+  'Лікує переполох Вовка так, як лікували в селах: вистригає три жмінки волосся з-між очей і пускає на вітер. Не помагає. Деталь дрібна, але саме такі дрібниці роблять казку живою і смішною.',
+  '(вистригає волосся й пускає на вітер)'],
+ ['Лісове царство','усі звірі разом',
+  ['довірливі','захоплені','мстиві'],
+  'Спершу вони бояться незрозумілого, потім захоплюються ним, славлять царя як премудрого Соломона й носять йому здобич. А коли обман розкрився — забувають і про добродійства, і про мудрість і розривають Лиса. Найважливіше: вони люті не так через сам обман, як через те, що самі так довго давали себе дурити.',
+  'Ах ти, брехуне! Ах ти, ошуканче!'],
+ ['Пси','мешканці міста',
+  ['чуйні','невблаганні'],
+  'Єдині, кого Лис не зумів обдурити: вони одразу занюхали, хто він насправді. Саме через них він і опинився в діжці. Їх зупинив не розум, а запах фарби.',
+  'Тут він був! Шукайте його!'],
+ ['Маляр','людина, якої в казці немає',
+  ['згадується один раз'],
+  'Про нього сказано одне речення: у тому домі жив маляр, який розвів діжу синьої фарби, щоб завтра малювати паркан. Цей невидимий персонаж і запустив усю історію.',
+  '(розвів фарбу на завтра)']
+];
+
+T('chars',{g:1,ic:'👥',t:'Персонажі',s:'Хто вони і навіщо в казці',html:`
+<p class="lead">У казках про тварин кожен звір — це водночас і звір зі своїми звичками, і людський характер. Такий образ називають алегоричним.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">Дуже корисне спостереження для відповіді: у казці <b>немає жодного позитивного героя</b>. Лис бреше, звірі вірять із власної вигоди, а розправа наприкінці нітрохи не благородна. Франко нікого не виправдовує — він показує, як це буває.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">Казка коротка, але думок у ній кілька — і не всі вони про Лиса.</p>
+
+<div class="blk"><h3>Гордість передує падінню</h3>
+<p>Лиса не спіймали ні стрільці, ні пси, ні отрута. Його підвела одна фраза, сказана перед товаришами заради хвастощів. Він міг не йти в місто — але вже пообіцяв.</p>
+<div class="q">Йому здавалося, що нема нічого неможливого для нього.</div></div>
+
+<div class="blk"><h3>Обман тримається, поки триває маска</h3>
+<p>Цілий рік Лис живе царем — і весь рік боїться дощу, гущавини й того, що захочеться почухатися. Обманщик у цій казці не насолоджується владою: він постійно стежить за собою. А потім однієї миті все закінчується.</p></div>
+
+<div class="blk"><h3>Природа бере своє</h3>
+<p>Його викриває не розслідування й не розумний звір, а власний голос. Достатньо було почути спів лисичок — і хитрий цар задзявкав по-лисячому. Пофарбувати шерсть можна, а вдачу — ні.</p></div>
+
+<div class="blk"><h3>Чому звірі повірили</h3>
+<p>Ніхто не перевіряв. Спершу вони злякалися незрозумілого, а коли їм запропонували красиву історію про небесну глину й святого Миколая, вони самі радо в неї повірили — бо вона їм подобалася. Це найгостріша думка казки, і стосується вона не Лиса, а всіх інших.</p></div>
+
+<div class="blk"><h3>Влада, від якої нічого не змінилося</h3>
+<p>Франко описує рік царювання з убивчою іронією: справедливість була така, як звичайно у звірів — хто дужчий, той і кращий. Хто зловив, той їв; кого вбили стрільці, той загинув. Тобто все точнісінько як раніше. Але всі задоволені, бо цар незвичайний.</p></div>
+
+<div class="blk"><h3>Розправа теж не робить честі</h3>
+<p>Звірі розривають Лиса не за зло, яке він їм зробив — його добродійства вони одразу забувають. Вони люті за те, що так довго давали себе дурити. Це помста за власний сором, а не справедливість.</p></div>
+
+<div class="blk" style="border-color:var(--rust)"><h3>Головна думка одним реченням</h3>
+<p>Обман може піднести високо, але тримається лише доти, доки триває маска: рано чи пізно природа бере своє й брехня викривається.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'🎨',t:'Символи й деталі',s:'Що ховається за образами',html:`
+<p class="lead">Шість деталей, через які в казці сказано більше, ніж прямим текстом.</p>
+${[
+['🪣','Синя фарба','Маска, яку неможливо зняти. Вона рятує Лиса від псів — і вона ж робить його чужим самому собі. Найточніший образ будь-якого обману: спершу рятує, потім тримає в полоні.'],
+['🛢️','Діжка маляра','Чиста випадковість. Лис нічого не задумував — усе, що з ним сталося, почалося з того, що хтось напередодні розвів фарбу на паркан.'],
+['🪵','Пеньок Ведмедя','Лис сідає саме туди, де завжди сидів найповажніший звір. Одна деталь — і зрозуміло, що він займає чуже місце.'],
+['☁️','Небесна глина','Вигадка, у яку хочеться вірити. Не сила й не розум переконали звірів, а гарна історія про святого Миколая.'],
+['🌧️','Дощ і гущавина','Те, чого цар боїться найбільше. Ціна обману — вічна сторожкість: не мокнути, не чухатися, спати тільки на перині.'],
+['🎶','Концерт','Мить, коли природа бере своє. Його зраджує не ворог, а власне серце, переповнене від співу своїх.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни на прикладах із твору',html:`
+<p class="lead">Означення подані так, як їх дають підручники, а приклади взяті з самої казки.</p>
+${[
+['Літературна казка','Створений автором художній твір, в основі якого лежить вигадана історія, що об’єднує елементи дійсності та фантастики. Може бути прозовою або віршованою.','«Фарбований Лис» має конкретного автора — Івана Франка — і написаний прозою.'],
+['Чим вона різниться від народної','Народні казки побутують в усній формі й мають багато варіантів. Літературні існують лише в писемній формі, тому їхній текст незмінний.','Народну казку можна переказати по-своєму, а Франкову — ні: слова закріплені.'],
+['Казка про тварин','Казка, героями якої є звірі з людськими рисами й людською мовою.','Уся збірка так і називається — «Коли ще звірі говорили».'],
+['Алегорія','Зображення людських рис чи явищ через образи тварин, рослин, предметів.','Лис — хитрість і брехливість, Вовк — лякливість, звірі-піддані — довірливий натовп.'],
+['Мова автора і мова персонажів','Розповідь від імені оповідача — це мова автора; репліки дійових осіб — мова персонажів. Репліки подаються з тире, у них переважають знаки оклику й питання.','«Жив собі в однім лісі Лис Микита» — мова автора. «А ти ж хто такий?» — мова персонажа.'],
+['Прозова мова','Мова, не організована ритмічно, подібна до звичайної розмовної.','Прозою написані й народні казки «Мудра дівчина» та «Летючий корабель», і ця казка.'],
+['Гумор та іронія','Гумор — добродушний сміх. Іронія — прихована насмішка, коли сказано одне, а мається на увазі протилежне.','Гумор — Мавпа Фрузя, що лікує переполох. Іронія — опис «справедливості» нового царя.'],
+['Приповідка в кінцівці','Народний вислів, яким завершується твір і в якому міститься його висновок.','Про людину, що дала себе одурити, кажуть: «Я на нім пізнався, як на фарбованім Лисі».']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">Казка коротка, тож цитати варто знати майже дослівно.</p>
+${[
+['Жив собі в однім лісі Лис Микита, хитрий-прехитрий.','автор','перше речення','Зачин, у якому одразу названо і героя, і його головну рису.'],
+['Йому здавалося, що нема нічого неможливого для нього.','автор','про гордість Лиса','Ключове речення експозиції: саме звідси починається все лихо.'],
+['Що, дурниць! Ану, побачите!','Лис Микита','перед товаришами','Похвальба, після якої відступити вже неможливо.'],
+['Любі мої! Не бійтеся мене!','Лис Микита','на лісовому майдані','Ласкава мова — його найсильніша зброя, значно сильніша за колючий вигляд.'],
+['Хто був дужчий, той ліпший, а хто слабший, той ніколи не виграв справи.','автор','про рік царювання','Найіронічніше речення казки: нового ладу не настало жодного.'],
+['Та се Лис! Простісінький фарбований Лис!','звірі','на концерті','Мить викриття. Слово «простісінький» тут найважливіше — усе величне вмить стало дрібним.'],
+['Я на нім пізнався, як на фарбованім Лисі.','приповідка','кінцівка казки','Заради цього вислову, за словами автора, казка й розказана.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Слід у культурі',s:'Що лишилося від цієї казки',html:`
+<div class="blk"><h3>Приповідка, яка живе окремо</h3>
+<p>Франко закінчує казку поясненням: коли людина повірить фальшивому приятелеві й дасть себе одурити, а потім стане хоч трохи мудрішою по шкоді, кажуть — «я на нім пізнався, як на фарбованім Лисі». Вислів досі вживають люди, які й не пам’ятають, звідки він.</p></div>
+
+<div class="blk"><h3>Той самий герой у поемі</h3>
+<p>Лис Микита — улюблений персонаж Франка. Крім цієї казки, письменник створив велику віршовану казку-поему «Лис Микита», де той самий хитрун діє вже в цілій історії з судом і королем звірів. Це окремий твір, який часто плутають із «Фарбованим Лисом».</p></div>
+
+<div class="blk"><h3>Збірка, яку читають понад сто років</h3>
+<p>«Коли ще звірі говорили» лишається однією з найпопулярніших українських дитячих книжок. Крім «Фарбованого Лиса», до неї входять «Осел і Лев», «Як Лисиця сама себе перехитрила», «Лисичка і Журавель» — усього п’ятдесят казок.</p></div>
+
+<div class="blk"><h3>Мультфільми й вистави</h3>
+<p>За казкою знімали мультфільми й ставили вистави в дитячих театрах. Образ синього звіра, який виявився звичайним лисом, добре надається і до малюнка, і до сцени.</p></div>
+
+<div class="blk"><h3>Чому казка не старіє</h3>
+<p>Бо йдеться в ній не про звірів. Історія про того, хто вдав із себе не того, ким є, і про тих, хто радо повірив, бо їм так було приємніше, повторюється в кожному поколінні.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'🦊',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Постав події по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай події від першої до останньої.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Мова автора чи мова персонажів?</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Уривки з казки. Визнач, чиї це слова.</p>
+<div id="ma"></div><div class="say" id="mas"></div></div>
+
+<div class="blk"><h3>Алегорія: хто що втілює</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Яку людську рису показано через кожен образ?</p>
+<div id="al"></div><div class="say" id="als"></div></div>
+${fin('train')}`,
+init(){initWho();initOrder();initMa();initAl()}});
+
+const WHO=[
+ ['Що, дурниць! Ану, побачите!','Лис Микита',['Лис Микита','Вовчик-братик','Ведмідь']],
+ ['А ти ж хто такий?','Ведмідь',['Ведмідь','Мавпа Фрузя','Вовк']],
+ ['Он там! Ой, та й страшне ж!','Вовчик-братик',['Вовчик-братик','Ведмідь','Кабан']],
+ ['Любі мої! Не бійтеся мене!','Лис Микита',['Ведмідь','Лис Микита','святий Миколай']],
+ ['Ах ти, брехуне! Ах ти, ошуканче!','звірі на концерті',['звірі на концерті','пси','Вовчиця']],
+ ['Тут він був! Шукайте його!','пси',['пси','селяни','звірі']],
+ ['Ой господи! Так се ти маєш бути наш цар?','звірі',['звірі','Мавпа Фрузя','Вовк']],
+ ['Так, дітоньки.','Лис Микита',['Ведмідь','Лис Микита','маляр']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Репліка ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const ORD=[
+ 'Лис вихваляється, що вкраде курку в місті',
+ 'На вулиці на нього кидаються пси',
+ 'Лис ховається в діжці з синьою фарбою',
+ 'Вранці він не впізнає сам себе',
+ 'Вовчик-братик тікає з переляку',
+ 'Лис оголошує себе звіром Остромислом',
+ 'Цілий рік він царює над звірами',
+ 'На концерті він дзявкає по-лисячому'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','Уся казка — від однієї похвальби до розправи. Між ними лише один випадок із діжкою.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — ця подія буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const MA=[
+ ['Жив собі в однім лісі Лис Микита, хитрий-прехитрий.',1,'Розповідь від імені оповідача — це мова автора. Речення спокійне, у кінці крапка.'],
+ ['— Ану, побачите!',0,'Репліка дійової особи: перед нею тире, у кінці знак оклику.'],
+ ['Серце у бідолахи билося сильно, голод крутив кишки.',1,'Оповідач описує стан героя збоку — мова автора.'],
+ ['— А ти ж хто такий?',0,'Пряме запитання персонажа, подане з тире.'],
+ ['— Любі мої! Не бійтеся мене!',0,'Два знаки оклику поспіль — типова ознака мови персонажів.'],
+ ['Так минув рік. Надходили роковини того дня, коли він настав на царство.',1,'Оповідач переходить до наступної частини історії — це мова автора.']
+];
+function initMa(){
+  const b=$('#ma');if(!b)return;
+  b.innerHTML=MA.map((m,i)=>`<div style="margin-bottom:14px">
+    <div class="q" style="margin-top:0">${m[0]}</div>
+    <div class="row" id="ma${i}">
+      <button class="chip" onclick="ansMa(${i},1,this)">мова автора</button>
+      <button class="chip" onclick="ansMa(${i},0,this)">мова персонажів</button>
+    </div><div class="say" id="mae${i}"></div></div>`).join('');
+}
+function ansMa(i,v,el){
+  const ok=(MA[i][1]===v);
+  $$('#ma'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  say('#mae'+i,MA[i][2],ok);
+  buzz(ok?'success':'error');
+  if($$('#ma .chip.ok').length+$$('#ma .chip.no').length>=MA.length)
+    say('#mas','Найпростіша підказка: тире на початку і знак оклику в кінці — майже завжди мова персонажів.',true);
+}
+
+const AL=[
+ ['Лис Микита','хитрість і брехливість'],
+ ['Вовчик-братик','лякливість'],
+ ['Ведмідь','поважність і статечність'],
+ ['Звірі-піддані','довірливий натовп'],
+ ['Пси','ті, кого не обдуриш'],
+ ['Синя фарба','маска, яка приховує справжнє обличчя']
+];
+function initAl(){
+  const b=$('#al');if(!b)return;
+  const roles=AL.map(r=>r[1]).sort(()=>Math.random()-.5);
+  b.innerHTML=AL.map((r,i)=>`<div style="margin-bottom:13px">
+    <div style="font-size:14.5px;margin-bottom:6px;color:var(--rust)">${r[0]}</div>
+    <div class="row" id="al${i}">${roles.map(o=>
+      `<button class="chip" style="font-size:13px" onclick="ansAl(${i},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function ansAl(i,el){
+  const ok=(el.textContent===AL[i][1]);
+  $$('#al'+i+' .chip').forEach(b=>{b.disabled=true;if(b.textContent===AL[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  buzz(ok?'success':'error');
+  if($$('#al .chip.ok').length>=AL.length)
+    say('#als','Ось це й називають алегорією: за кожним звіром стоїть людська риса.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто написав казку «Фарбований Лис»?','choice',['Іван Франко','Леся Українка','Василь Симоненко','Всеволод Нестайко'],0,'Іван Якович Франко, 1856–1916.'],
+ ['До якої збірки входить казка?','choice',['«Коли ще звірі говорили»','«Лис Микита»','«У кузні»','«Малий Мирон»'],0,'До неї увійшло 50 казок.'],
+ ['Де народився Іван Франко?','choice',['У Львові','У селі Нагуєвичах на Львівщині','У Дрогобичі','У Чернівцях'],1,'Батько був сільським ковалем.'],
+ ['Чим вихвалявся Лис Микита перед товаришами?','choice',['Що переможе вовка','Що вкраде курку з міської торговиці серед білого дня','Що стане царем','Що обдурить псів'],1,'І мусив виконати обіцянку.'],
+ ['Куди сховався Лис від псів?','choice',['У нору','У діжку з фарбою','На дерево','У бур’ян'],1,'Її розвів маляр, щоб завтра малювати паркан.'],
+ ['Якого кольору була фарба?','choice',['Червона','Зелена','Синя','Біла'],2,'Олійна, розведена на олії.'],
+ ['Ким Лис назвав себе перед звірами?','choice',['Царем Микитою','Звіром Остромислом','Святим Миколаєм','Ведмедем'],1,'Мовляв, його зліпили з небесної глини.'],
+ ['Скільки він царював?','choice',['Місяць','Пів року','Рік','Три роки'],2,'До самих роковин царювання.'],
+ ['Що видало Лиса?','choice',['Дощ змив фарбу','Він задзявкав по-лисячому на концерті','Його впізнав Ведмідь','Прийшов маляр'],1,'Не витримав, почувши спів молодих лисичок.'],
+ ['Чим закінчується казка?','choice',['Лис утік у ліс','Звірі розірвали його на шматочки','Він став справжнім царем','Його простили'],1,'І від того пішла відома приповідка.'],
+ ['«Фарбований Лис» — народна казка.','tf',null,false,'Це літературна казка: у неї є автор.'],
+ ['Казка написана прозою.','tf',null,true,'Літературна казка може бути і прозовою, і віршованою.']
+];
+const Q2=[
+ ['Що насправді стало причиною всіх бід Лиса?','choice',['Пси','Власна гордість і похвальба','Маляр','Ведмідь'],1,'Йому здавалося, що для нього немає нічого неможливого.'],
+ ['Чому пси не знайшли Лиса в діжці?','choice',['Він добре сховався','Їх відганяв поганий запах фарби','Вони втомилися','Їх покликав господар'],1,'Порятунок цілком випадковий.'],
+ ['Чому звірі повірили в історію про небесну глину?','choice',['Вона була переконлива','Вони злякалися незрозумілого, а потім самі захотіли повірити в гарну історію','Її підтвердив Ведмідь','Так наказав цар'],1,'Ніхто навіть не спробував перевірити.'],
+ ['Що змінилося в лісі за рік царювання Лиса?','choice',['Настав лад і справедливість','Нічого: хто дужчий, той і кращий, як завжди','Звірі почали голодувати','З’явилися закони'],1,'Але всі були задоволені, бо цар незвичайний.'],
+ ['Чого Лис боявся найбільше, ставши царем?','choice',['Ведмедя','Що фарба злізе і його впізнають','Мисливців','Голоду'],1,'Тому не виходив у дощ і не чухався.'],
+ ['Чому саме концерт став фатальним?','choice',['Було надто гучно','Почувши спів своїх, Лис не витримав і озвався по-лисячому','Його штовхнули','Пішов дощ'],1,'Природа виявилася сильнішою за обережність.'],
+ ['За що насправді звірі розірвали Лиса?','choice',['За зло, яке він їм зробив','За те, що самі так довго давали себе дурити','За крадіжку курей','За брехню про Миколая'],1,'Про його добродійства вони одразу забули.'],
+ ['Що таке алегорія в цій казці?','choice',['Опис лісу','Людські риси, показані через образи звірів','Розмова автора з читачем','Кінцівка з приповідкою'],1,'Лис — хитрість, Вовк — лякливість.'],
+ ['Навіщо в казці згадано маляра, який навіть не з’являється?','choice',['Для краси','Щоб пояснити, звідки взялася фарба, і показати випадковість усього','Це головний герой','Щоб посміятися з людей'],1,'Одне речення запускає всю історію.'],
+ ['Чому Лис сів саме на пеньок Ведмедя?','choice',['Там було зручно','Щоб одразу зайняти чуже місце найповажнішого','Так велів звичай','Випадково'],1,'Дрібна деталь, яка багато каже.'],
+ ['У казці є хоча б один цілком позитивний герой.','tf',null,false,'Ні Лис, ні звірі, ні розправа наприкінці не викликають схвалення.'],
+ ['Лиса викрив хтось із розумних звірів.','tf',null,false,'Його викрив власний голос.']
+];
+const Q3=[
+ ['Яке означення літературної казки правильне?','choice',['Казка, яку переказують з уст в уста','Створений автором твір, де вигадана історія об’єднує елементи дійсності й фантастики','Казка лише про тварин','Віршована казка'],1,'Може бути прозовою або віршованою.'],
+ ['Чим літературна казка відрізняється від народної?','choice',['Довжиною','Має автора й незмінний текст, існує лише в писемній формі','Завжди сумна','Не має чарів'],1,'Народна має багато варіантів, літературна — жодного.'],
+ ['Що є кульмінацією твору?','choice',['Стрибок у діжку','Промова про звіра Остромисла й проголошення царем','Втеча від псів','Концерт'],1,'Саме там обман досягає вершини.'],
+ ['Що таке мова автора?','choice',['Слова письменника в передмові','Розповідь від імені оповідача, на відміну від реплік персонажів','Діалоги','Приповідка'],1,'У ній переважає крапка, а не знак оклику.'],
+ ['Як подається мова персонажів?','choice',['У лапках','У діалогічній формі, репліки чергуються, перед ними стоїть тире','Курсивом','Без розділових знаків'],1,'І в ній часто знак оклику чи питання.'],
+ ['Який прийом у реченні про справедливість нового царя?','choice',['Гіпербола','Іронія','Порівняння','Епітет'],1,'Сказано «справедливість», а мається на увазі протилежне.'],
+ ['Яку роль виконує приповідка в кінці?','choice',['Прикрашає текст','Містить висновок усього твору й пояснює, заради чого його розказано','Розважає','Називає автора'],1,'«Я на нім пізнався, як на фарбованім Лисі».'],
+ ['Чому казку називають казкою про тварин?','choice',['Там багато звірів','Її героями є звірі, наділені людською мовою і людськими рисами','Вона про природу','Так називається збірка'],1,'Збірка й зветься «Коли ще звірі говорили».'],
+ ['У чому виявляється авторська позиція Франка?','choice',['Він виправдовує Лиса','Він нікого не виправдовує: смішними й винними виявляються і обманщик, і ті, хто радо повірив','Він засуджує тільки звірів','Він не має позиції'],1,'Тому в казці й немає позитивного героя.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Не можна красти курей','Обман тримається лише доти, доки триває маска: природа рано чи пізно бере своє','Звірі жорстокі','Гордість — це добре'],1,'Лиса викриває власний голос, а не чужий розум.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--rust)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Розкажи про автора твору.',
+ 'Іван Якович Франко жив із 1856 до 1916 року, народився в селі Нагуєвичах на Львівщині. Батько був сільським ковалем, а мати походила зі шляхетського роду й багато співала народних пісень. Франко був поетом, прозаїком, драматургом, ученим, перекладачем, критиком і політичним діячем. Він мав феноменальну пам’ять, зібрав гімназистом бібліотеку майже на п’ятсот книжок, навчався у Львівському та Чернівецькому університетах, а у Відні здобув ступінь доктора філософії. При всьому цьому він знаходив час писати казки для дітей.'],
+['Як з’явилася збірка «Коли ще звірі говорили»?',
+ 'У Франка була одна донька і троє синів. Коли вони були зовсім маленькі, він щовечора розповідав їм казки, складені просто на ходу, а діти сиділи в нього на колінах і ловили кожне слово. Згодом він записав ці історії на папері й видав окремою книжкою. До збірки «Коли ще звірі говорили» увійшло п’ятдесят казок, серед них «Фарбований Лис», «Осел і Лев», «Лисичка і Журавель», «Як Лисиця сама себе перехитрила».'],
+['Визнач жанр твору й доведи.',
+ 'Це літературна казка, а точніше — казка про тварин, написана прозою. Літературна вона тому, що має конкретного автора — Івана Франка, на відміну від народної, яку складав народ і яка існує в багатьох варіантах. Літературна казка існує тільки в писемній формі, тому її текст незмінний. А казкою про тварин її роблять герої: звірі тут говорять і поводяться, як люди, — недарма й збірка називається «Коли ще звірі говорили».'],
+['Перекажи сюжет казки.',
+ 'У лісі жив хитрий-прехитрий Лис Микита, якого не могли здолати ні стрільці, ні пси, ні отрута. Постійне щастя зробило його гордим, і він похвалився, що серед білого дня вкраде курку з міської торговиці. У місті на нього накинулися собаки, і, рятуючись, він скочив у діжку, де маляр розвів синю олійну фарбу. Просидівши там до вечора, Лис утік до лісу, а вранці побачив, що став синім і фарба не змивається. Звірі перелякалися незнаного страховиська, і Лис цим скористався: сказав, що його зліпив з небесної глини святий Миколай і послав бути звірячим царем. Цілий рік він царював, аж поки на святковому концерті не витримав і задзявкав по-лисячому. Звірі зрозуміли обман і розірвали його.'],
+['Схарактеризуй Лиса Микиту.',
+ 'Лис Микита — головний герой казки, хитрий, спритний і винахідливий: він оминав пастки, глузував із мисливців і ніколи не вертався з полювання з порожніми руками. Але саме постійне щастя зробило його страшенно гордим — йому здавалося, що для нього немає нічого неможливого. Через похвальбу він і потрапив у біду. Ставши царем, він виявився ще й брехливим і боязким: цілий рік боявся дощу, гущавини й того, що захочеться почухатися. А гине він не від чужої сили, а від власної природи, яку не змогла приховати навіть фарба.'],
+['Чому звірі повірили Лисові?',
+ 'По-перше, вони злякалися: ніхто ніколи не бачив такого звіра, і невідомо було, яка в нього сила, які зуби й кігті. Ніхто навіть не наважився підійти ближче. По-друге, Лис заговорив із ними ласкаво й запропонував красиву історію: святий Миколай зліпив його з небесної глини й послав заводити лад і судити по правді. Звірям самим захотілося в це повірити, бо історія була приємна. І показово, що ніхто не спробував її перевірити — за цілий рік.'],
+['Що таке алегорія і як вона виявляється в казці?',
+ 'Алегорія — це зображення людських рис або явищ через образи тварин, рослин чи предметів. У «Фарбованому Лисі» Лис Микита втілює хитрість і брехливість, Вовчик-братик — лякливість, Ведмідь — поважність, а звірі-піддані — довірливий натовп, готовий повірити в те, що йому приємно. Сама синя фарба теж алегорична: це маска, яка приховує справжнє обличчя і яку неможливо носити вічно.'],
+['Яка головна думка твору?',
+ 'Обман може піднести високо, але тримається лише доти, доки триває маска: рано чи пізно природа бере своє й брехня викривається. Франко доводить це самою розв’язкою — Лиса викриває не чужий розум і не розслідування, а власний голос. Але в казці є й друга думка, звернена вже не до обманщика: звірі розірвали Лиса не за зло, яке він їм зробив, а за те, що самі так довго давали себе дурити. Тому й приповідка в кінці — про людину, яка стала мудрішою вже по шкоді.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
