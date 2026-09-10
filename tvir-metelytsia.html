@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Пані Метелиця — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#131A22; --card:#1D2733;
+  --ink:#EFF4F9; --dim:#93A6B8;
+  --snow:#DCE8F2; --gold:#DFB65E; --tar:#8A7A66;
+  --line:rgba(239,244,249,.14);
+  --ok:#77C09B; --no:#DD7A6C;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 22px;overflow:hidden;
+  background:radial-gradient(118% 90% at 80% 0%,#26323F 0%,var(--bg) 68%)}
+.flakes{position:absolute;inset:0;pointer-events:none}
+.flakes i{position:absolute;border-radius:50%;background:rgba(220,232,242,.55)}
+.well{position:absolute;bottom:-16px;right:24px;width:70px;height:54px;border-radius:8px 8px 0 0;
+  border:2px solid rgba(223,182,94,.28);border-bottom:none}
+.hero h1{margin:0;font-size:34px;line-height:1.05;letter-spacing:-.5px}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--snow),var(--gold));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--ok)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--snow);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--gold)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--gold);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic;white-space:pre-line}
+.note{background:rgba(223,182,94,.11);border:1px solid rgba(223,182,94,.3);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+/* дві колонки */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px;font-size:14px}
+.two div{background:var(--card);padding:10px 12px}
+.two .h{background:rgba(255,255,255,.05);font-weight:700;font-size:12.5px;color:var(--dim)}
+.two .g{color:var(--gold)}.two .t{color:var(--tar)}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--snow);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--ok);font-size:13.5px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(220,232,242,.14);color:var(--snow)}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--gold)}
+
+.btn{background:var(--gold);color:#1A1408;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink);font-weight:600}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(119,192,155,.15)}
+.opt.no{border-color:var(--no);background:rgba(221,122,108,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(119,192,155,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(221,122,108,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--snow);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--gold);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--gold)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="well"></div>
+    <div class="flakes">
+      <i style="top:28px;left:24px;width:5px;height:5px"></i>
+      <i style="top:60px;left:66px;width:3px;height:3px"></i>
+      <i style="top:92px;left:22px;width:4px;height:4px"></i>
+      <i style="top:44px;left:116px;width:3px;height:3px"></i>
+      <i style="top:110px;left:88px;width:5px;height:5px"></i>
+      <i style="top:20px;left:168px;width:3px;height:3px"></i>
+    </div>
+    <h1>Пані<br>Метелиця</h1>
+    <p class="by">Німецька народна казка · записали брати Грімм · переклад Сидора Сакидона</p>
+    <div class="meta">
+      <span class="tag">народна казка</span>
+      <span class="tag">чарівна</span>
+      <span class="tag">Німеччина</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#131A22')}catch(e){}}
+
+const KEY='metelytsia-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Хто автор</span><b>автора немає: це німецька народна казка. Брати Якоб і Вільгельм Грімм її не написали, а <b>записали</b></b></div>
+  <div><span>Назва</span><b>«Пані Метелиця» (інша назва — «Баба Зима»)</b></div>
+  <div><span>Жанр</span><b>народна казка, чарівна</b></div>
+  <div><span>Де надрукована</span><b>1812 року в першому томі збірки «Дитячі та сімейні казки»</b></div>
+  <div><span>Звідки взялася</span><b>з легенди, що передавалася з уст в уста в Центральній Німеччині; брати записали її зі слів майбутньої дружини Вільгельма</b></div>
+  <div><span>Тема</span><b>історія двох сестер, які по черзі потрапили до чарівниці з колодязя і дістали від неї те, на що заслужили</b></div>
+  <div><span>Головна думка (мораль)</span><b>важка праця винагороджується, а лінощі караються</b></div>
+  <div><span>Герої</span><b>пасербиця, рідна донька-ледащиця, вдова-мачуха, пані Метелиця, піч із хлібом, яблуня, півень</b></div>
+  <div><span>Будова</span><b>дзеркальна: шлях пасербиці точно повторює рідна донька — але з протилежним результатом</b></div>
+  <div><span>Переклад</span><b>українською — Сидір Сакидон</b></div>
+  <div><span>Схожа українська казка</span><b>«Дідова дочка і бабина дочка» — той самий мандрівний сюжет</b></div>
+</div>
+<div class="note"><b>Найчастіша помилка.</b> Не можна казати «казка братів Грімм»: правильно — німецька народна казка, <b>записана</b> братами Грімм. Вони були фольклористами, тобто збирачами народної творчості.</div>
+${fin('passport')}`});
+
+/* ================= 2. БРАТИ ГРІММ ================= */
+T('author',{g:0,ic:'👤',t:'Брати Грімм',s:'Збирачі, а не автори',html:`
+<p class="lead">Питання «Брати Грімм — збирачі чи автори казок?» стоїть просто в підручнику. Правильна відповідь — збирачі.</p>
+
+<div class="blk"><h3>Хто вони</h3>
+<p>Якоб і Вільгельм Грімм — німецькі вчені, мовознавці й фольклористи, одні з найуславленіших казкарів Європи. Фольклористи — це люди, які збирають і досліджують народну творчість: казки, пісні, легенди, прислів’я.</p>
+<p>Брати ходили по містечках і селах, слухали й записували те, що люди розповідали одне одному вже сотні років, — і рятували ці історії від зникнення.</p></div>
+
+<div class="blk"><h3>Збірка 1812 року</h3>
+<p>1812 року вони видали збірку «Дитячі та сімейні казки». Найвідоміші з них — «Хлопчик-Мізинчик», «Білосніжка», «Спляча красуня», «Червона шапочка», «Попелюшка», «Вовк і семеро козенят», «Бременські вуличні музиканти» і, звісно, «Пані Метелиця».</p>
+<div class="note">«Пані Метелицю» брати записали зі слів дівчини, яка згодом стала дружиною Вільгельма. Тобто казка потрапила в книжку просто з домашньої розмови.</div></div>
+
+<div class="blk"><h3>Чому це важливо</h3>
+<p>До братів Грімм народні казки жили тільки в усній формі: кожен оповідач щось додавав, а щось забував, тому в однієї казки було багато варіантів. Записавши їх, брати зберегли для Європи цілий пласт культури, який інакше зник би разом із тими, хто його пам’ятав.</p></div>
+
+<div class="blk"><h3>Народна казка й літературна</h3>
+<p>Тут проходить головна межа, яку варто засвоїти з першого уроку року:</p>
+<div class="two">
+  <div class="h">народна</div><div class="h">літературна</div>
+  <div>автор — увесь народ</div><div>автор — конкретний письменник</div>
+  <div>існує в багатьох варіантах</div><div>має один авторський варіант</div>
+  <div>проста система подій</div><div>складна система подій</div>
+  <div>короткі описи</div><div>розлогі описи природи, місця, героїв</div>
+  <div>герої поділені на добрих і поганих, змальовані загально</div><div>герої складніші, з індивідуальними рисами</div>
+</div>
+<div class="note">«Пані Метелиця» — народна. «Фарбований Лис» Франка чи «Хлопчик-зірка» Уайльда — літературні.</div></div>
+${fin('author')}`});
+
+/* ================= 3. ОЗНАКИ КАЗКИ ================= */
+T('history',{g:0,ic:'📜',t:'Ознаки народної казки',s:'І як вони працюють тут',html:`
+<p class="lead">Підручник перелічує сталі ознаки народних казок. Найзручніше вивчати їх саме на «Пані Метелиці», бо тут є всі.</p>
+
+<div class="blk"><h3>Шість ознак</h3>
+<ul>
+<li><b>Основний конфлікт — добро проти зла</b>, і зазвичай перемагає добро. Тут — працьовитість проти лінощів.</li>
+<li><b>Чіткий поділ героїв</b> на позитивних і негативних: роботяща пасербиця й гидка ледащиця.</li>
+<li><b>Щасливий фінал:</b> позитивна героїня винагороджена золотом, а її супротивниця покарана смолою.</li>
+<li><b>Постійна будова:</b> казкові зачини й кінцівки, трикратність.</li>
+<li><b>Сюжетні повтори:</b> шлях пасербиці в чарівному колодязі майже дослівно копіює рідна дочка.</li>
+<li><b>Дія поза конкретним часом і простором:</b> «жила на світі одна вдова» — і жодної дати чи назви міста.</li>
+</ul></div>
+
+<div class="blk"><h3>Три зустрічі</h3>
+<p>Кожна дівчина зустрічає на своєму шляху три випробування: <b>піч із хлібом</b>, <b>яблуню</b> і <b>саму пані Метелицю</b>. Це і є класична казкова трикратність — і водночас найпростіший спосіб перевірити людину: не словами, а тим, як вона поводиться, коли її просять допомогти.</p></div>
+
+<div class="blk"><h3>Мандрівний сюжет</h3>
+<p>Оповідь про недоброзичливе ставлення мачухи до пасербиці — одна з найпоширеніших у світі. Такі схожі історії в різних народів називають мандрівними сюжетами. Українська відповідниця «Пані Метелиці» — казка «Дідова дочка і бабина дочка».</p>
+<div class="note">Ці сюжети схожі не тому, що хтось у когось списав, а тому, що люди в різних куточках світу думали про ті самі речі: про справедливість, працю й родину.</div></div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Дві доньки',
+  'Жила на світі вдова, і мала вона двох доньок. Одна, пасербиця, була гарна й роботяща, друга, рідна, — гидка й лінива. Вдова любила куди більше рідну, хоч та була лінива, а пасербиця мусила виконувати всю хатню роботу й була попелюшкою в домі. Бідна дівчина щодня сиділа при дорозі біля криниці й пряла доти, доки нитка прорізала їй пальці до крові.',
+  'Зачин задає несправедливість, яку казка й виправлятиме: працює одна, а люблять другу.'],
+ ['Починок у криниці',
+  'Одного разу дівчина так порізала пальці, що кров’ю залило весь починок. Схилилася над криницею вимити його — а він вислизнув із рук і впав у воду. Мачуха лаяла її на всі заставки й наказала: вміла вкинути — лізь і дістань. З великого жалю й страху дівчина стрибнула в криницю і знепритомніла.',
+  'Зав’язка. Вона потрапляє в чарівний світ не з цікавості, як в інших казках, а від безвиході.'],
+ ['Піч і яблуня',
+  'Опритомніла дівчина на чудовій луці, де ясно світило сонце й цвіли тисячі квітів. Ідучи, вона натрапила на піч, повну хліба, і хліб загукав: витягни мене, бо згорю, я вже давно спікся. Вона повитягала все лопатою. Далі трапилася яблуня, обсипана яблуками: обтруси мене, мої яблука давно достигли. Дівчина трусила, поки на дереві не лишилося жодного, і згорнула їх на купу.',
+  'Обидва рази вона зупиняється й допомагає, хоч ніхто нічого їй за це не обіцяв.'],
+ ['Служба в пані Метелиці',
+  'У хатині з віконця визирнула стара баба з великими зубами — дівчина хотіла тікати, але та лагідно покликала її залишитися. Головна робота — стелити постіль і так вибивати подушки, щоб пір’я летіло: тоді на світі йде сніг, бо це ж пані Метелиця. Дівчина в усьому догоджала старій, ніколи не чула лихого слова і щодня їла смажене й пряжене.',
+  'Диво пояснене просто й красиво: сніг у світі — це пір’я з подушок пані Метелиці.'],
+ ['Золотий дощ',
+  'Через якийсь час дівчина засумувала й сама спершу не знала, чого їй бракує: виявилося, туги за домом. Пані Метелиця похвалила її за це бажання й сама привела до брами. Щойно дівчина ступила на поріг, на неї пролився золотий дощ, і все золото пристало до неї. А вдома півень злетів на цямрину й заспівав: наша дівчина йде, на ній золота без ліку.',
+  'Нагороду вона отримала не за те, що просила, — вона взагалі нічого не просила.'],
+ ['Друга сестра',
+  'Почувши, як пасербиця дослужилася до багатства, мачуха загорілася добути таке саме щастя й рідній доньці. Ледарка сіла прясти біля криниці, а щоб починок був у крові, навмисне вколола пальця об густий терен, кинула починок у колодязь і стрибнула сама.',
+  'Ось у чому головна різниця: перша впала, друга стрибнула — і стрибнула по золото.'],
+ ['Той самий шлях, інші відповіді',
+  'Вона опинилася на тій самій луці й пішла тією самою стежкою. Хліб знову закричав, що згорить, — а вона відповіла, що не має охоти бруднитися. Яблуня попросила обтрусити — вона відказала, що ще якесь яблуко на голову впаде. До хатини пані Метелиці прийшла без страху, бо про зуби вже чула, і відразу найнялася.',
+  'Дзеркальна половина казки. Слова ті самі, стежка та сама — інші тільки відповіді.'],
+ ['Казан смоли',
+  'Першого дня ледащиця дуже старалася, бо в неї тільки й думки було, що про золото. Другого почала лінуватися, третього не захотіла навіть уставати, постелі не стелила й подушок не збивала. Пані Метелиця сказала, що служба скінчилася, і привела її до брами. Щойно дівчина ступила на поріг, на неї перекинувся великий казан смоли. Півень заспівав: наша ледащиця йде, що брудна буде довіку. І смола так пристала, що не відмилася, скільки вона жила на світі.',
+  'Розв’язка: обидві отримали рівно те, що заробили, — і саме та, хто працювала заради золота, лишилася ні з чим.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'Вісім кроків казки',html:`
+<p class="lead">Казка коротка, і найкраще читати її, тримаючи в голові її дзеркальність. Натисни на будь-який крок.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><p>${c[1]}</p><div class="key">▸ ${c[2]}</div></div></div>`).join('')}
+
+<div class="blk"><h3>Дві сестри — одна стежка</h3>
+<div class="two">
+  <div class="h g">пасербиця</div><div class="h t">ледащиця</div>
+  <div class="g">впала в криницю випадково, від страху</div><div class="t">стрибнула навмисне, по золото</div>
+  <div class="g">повитягала хліб із печі</div><div class="t">не схотіла бруднитися</div>
+  <div class="g">обтрусила яблуню до останнього яблука</div><div class="t">побоялася, що яблуко впаде на голову</div>
+  <div class="g">злякалася зубів, але лишилася й працювала</div><div class="t">не злякалася, бо вже чула, і найнялася по золото</div>
+  <div class="g">золотий дощ</div><div class="t">казан смоли</div>
+</div></div>
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['Удова з двома доньками: одна роботяща, друга лінива','експозиція'],
+ ['Починок падає в криницю, і пасербиця стрибає за ним','зав’язка'],
+ ['Піч, яблуня, служба в пані Метелиці, повернення з золотом','розвиток дії'],
+ ['Ледащиця йде тією самою стежкою й усім відмовляє','кульмінація'],
+ ['На неї перекидається казан смоли, що не відмився довіку','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: у народній казці все просто й чітко — кожна опора видима з першого читання.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Пасербиця','позитивна героїня',
+  ['роботяща','добра','терпляча','скромна'],
+  'Гарна й роботяща, у домі попелюшка: виконує всю роботу й пряде, доки нитка не проріже пальці до крові. Допомагає печі й яблуні, хоч ніхто нічого їй не обіцяв. У пані Метелиці збиває подушки так, що аж пір’я летить. І золота вона не просить — просто починає сумувати за домом.',
+  '(мовчки береться до роботи)'],
+ ['Рідна донька','негативна героїня',
+  ['лінива','заздрісна','розрахунклива'],
+  'Гидка й лінива, але мати любить її куди більше. Побачивши золото на сестрі, повторює її шлях крок у крок — тільки заради нагороди. Печі відповідає, що не має охоти бруднитися, яблуні — що яблуко впаде їй на голову. Першого дня старається, другого лінується, третього навіть не встає.',
+  'Тільки мені й охоти бруднитися біля тебе!'],
+ ['Мачуха-вдова','мати обох',
+  ['несправедлива','жадібна','сліпа до правди'],
+  'Любить рідну доньку більше, хоч та лінива. Пасербицю лає на всі заставки й посилає в криницю по починок. А почувши про золото, «аж загорілася» бажанням добути таке саме щастя й своїй доньці — тобто хоче нагороди без праці.',
+  'Уміла вкинути починок, то зараз же лізь і дістань його.'],
+ ['Пані Метелиця','чарівниця з колодязя',
+  ['страшна на вигляд','лагідна','справедлива'],
+  'Стара баба з такими великими зубами, що дівчина хотіла тікати, — а заговорила лагідно. Коли вона вибиває подушки, на світі йде сніг. Вона нікого не змушує й не карає наперед: обидві дівчини самі показують, чого варті. І кожній вона віддає рівно те, що та заробила.',
+  'А чого ти боїшся, люба дитино?'],
+ ['Піч із хлібом','перше випробування',
+  ['говорить','просить допомоги'],
+  'Хліб кричить, що давно спікся і зараз згорить. Це найпростіша перевірка: чи зупинишся ти заради того, від кого тобі нічого не буде.',
+  'Ох, витягни мене, витягни, бо згорю!'],
+ ['Яблуня','друге випробування',
+  ['говорить','обтяжена плодами'],
+  'Просить обтрусити її, бо яблука давно достигли. Пасербиця трусить, доки не лишається жодного, і ще й згортає їх на купу — тобто робить роботу до кінця, а не аби відчепитися.',
+  'Ох, обтруси мене! Яблука мої давно вже достигли.'],
+ ['Півень','голос дому',
+  ['помітливий','гучний'],
+  'Злітає на цямрину криниці й оголошує вирок обом сестрам двома майже однаковими віршиками: на одній золота без ліку, друга брудна буде довіку. Він нічого не робить — він просто називає те, що всі й так бачать.',
+  'Кукуріку! Наша дівчина йде, на ній золота без ліку.']
+];
+
+T('chars',{g:1,ic:'👥',t:'Персонажі',s:'Хто вони і навіщо в казці',html:`
+<p class="lead">У народній казці герої чітко поділені на позитивних і негативних і змальовані загальними рисами — саме тому їх легко порівнювати.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">Питання, яке часто ставлять на уроці: <b>чому першою в колодязь падає саме працьовита дівчина?</b> Бо інакше не було б із чим порівнювати: спершу казка показує, як має бути, і лише потім — як не треба.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">Казка коротка, і мораль у ній сказана прямо. Але кілька думок сховані глибше.</p>
+
+<div class="blk"><h3>Праця винагороджується, лінощі караються</h3>
+<p>Це головна мораль, і вона є в багатьох казках, зібраних братами Грімм. Але зверни увагу на дрібницю: пасербиця не просто працює — вона доводить роботу до кінця. Трусить яблуню, поки не впаде останнє яблуко, і ще й згортає яблука на купу.</p></div>
+
+<div class="blk"><h3>Не можна отримати нагороду, женучись за нагородою</h3>
+<p>Ледащиця робить точнісінько те саме, що й сестра, — приходить до тієї самої баби, наймається на ту саму роботу. І все одно отримує смолу. Бо в неї «тільки й думки було, що про золото», і надовго її не вистачило. Добро, зроблене заради виплати, перестає бути добром.</p></div>
+
+<div class="blk"><h3>Хто відгукується на прохання</h3>
+<p>Піч і яблуня нічого не обіцяють і нічим не погрожують. Вони просто просять. І весь характер людини видно саме тут — задовго до того, як вона дійде до хатини з дивами.</p></div>
+
+<div class="blk"><h3>Туга за домом</h3>
+<p>Дівчині в пані Метелиці добре: ласкаве слово щодня і смажене й пряжене. І все одно вона засумувала й сама не одразу зрозуміла чому. Виявилося — за домом, де її ніхто не любив. Це найтепліша й найлюдяніша деталь казки.</p></div>
+
+<div class="blk"><h3>Справедливість, а не помста</h3>
+<p>Пані Метелиця нікого не карає наперед і нікого не вмовляє. Вона дає обом однакову роботу й однакові умови — і просто повертає кожній те, що та заробила. Тому питання «чи вважаєш ти її справедливою?» на уроці має цілком очевидну відповідь.</p></div>
+
+<div class="blk"><h3>Мандрівний сюжет</h3>
+<p>Та сама історія про мачуху й пасербицю розказана в багатьох народів. Українська її версія — «Дідова дочка і бабина дочка». Це не збіг: люди в різних країнах думали про ті самі речі — про працю, справедливість і несправедливу родину.</p></div>
+
+<div class="blk" style="border-color:var(--gold)"><h3>Головна думка одним реченням</h3>
+<p>Важка праця винагороджується, а лінощі караються — і кожен зрештою отримує рівно те, що заробив, хоч би як старанно вдавав.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'❄️',t:'Образи й деталі',s:'Що ховається за ними',html:`
+<p class="lead">Шість деталей, через які в казці сказано більше, ніж прямим текстом.</p>
+${[
+['🕳️','Криниця','Межа між звичайним світом і чарівним. Одна дівчина падає в неї від розпачу, друга стрибає з розрахунку — і вже цим усе про них сказано.'],
+['🧵','Закривавлений починок','Пряжа, залита кров’ю від порізаних пальців. Найкоротший опис того, як живеться пасербиці в рідному домі.'],
+['🍞','Хліб у печі','Перше прохання, на яке треба відгукнутися. Ані нагороди, ані покарання за це не обіцяно — тому воно й показує людину.'],
+['🍎','Яблуня','Друге прохання. Важливо, що пасербиця трусить її до останнього яблука: робота, доведена до кінця, — це вже характер.'],
+['🪶','Подушки пані Метелиці','Коли їх вибивають так, що летить пір’я, у світі йде сніг. Найкрасивіший образ казки: звичайна хатня робота виявляється причиною погоди на всій землі.'],
+['🖤','Казан смоли','Дзеркальна відповідь на золотий дощ. І найстрашніше в ній не бруд, а те, що він не відмився довіку.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни на прикладах із твору',html:`
+<p class="lead">Це перший твір курсу, і на ньому вводять базові поняття, потрібні на цілий рік.</p>
+${[
+['Народна казка','Казка, у якої немає одного автора: її складав народ і передавав усно, тому вона існує в багатьох варіантах.','«Пані Метелиця» жила в переказах Центральної Німеччини, доки її не записали.'],
+['Літературна (авторська) казка','Казка, у якої є конкретний автор; вона записується в момент створення й має один варіант.','«Фарбований Лис» Франка, «Хлопчик-зірка» Уайльда.'],
+['Фольклорист','Той, хто збирає й досліджує народну творчість.','Брати Грімм не писали цю казку — вони її записали.'],
+['Чарівна казка','Різновид народної казки, де діють надприродні сили й чарівні істоти.','Криниця, що веде на чудову луку; піч і яблуня, які говорять; пані Метелиця, від чиїх подушок іде сніг.'],
+['Трикратність','Казковий прийом: подія або випробування повторюється тричі.','Піч, яблуня, служба в пані Метелиці — і так для кожної з сестер.'],
+['Сюжетний повтор','Той самий шлях проходить інший герой — і виходить протилежний результат.','Ледащиця йде тією самою стежкою й чує ті самі слова.'],
+['Мандрівний сюжет','Схожа історія, що трапляється у фольклорі різних народів.','Українська «Дідова дочка і бабина дочка».'],
+['Зачин і кінцівка','Сталі формули на початку й у кінці казки.','«Жила на світі одна вдова…» — і фінальний віршик півня.'],
+['Оригінал і переклад','Оригінал — текст мовою, якою його записано; переклад — той самий твір іншою мовою.','Німецький оригінал; українською переклав Сидір Сакидон.']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">Казка коротка, тож ці рядки варто знати майже дослівно.</p>
+${[
+['Жила на світі одна вдова, і мала вона дві доньки.','зачин','перше речення','Класичний казковий початок: ані часу, ані місця, ані імен — одразу до справи.'],
+['Уміла вкинути починок, то зараз же лізь і дістань його.','мачуха','після пропажі починка','Найжорстокіші слова в казці — і сказані вони рідній людині.'],
+['Ох, витягни мене, витягни, бо згорю, я вже давно спікся!','хліб у печі','на луці','Прохання, на яке відповідають по-різному. Уся казка тримається на цій різниці.'],
+['Тільки мені й охоти бруднитися біля тебе!','ледащиця','тій самій печі','Ті самі слова хліба — і зовсім інша відповідь.'],
+['А чого ти боїшся, люба дитино?','пані Метелиця','біля хатини','Страшна на вигляд стара говорить найлагідніше в цілій казці.'],
+['Тоді на світі йтиме сніг, бо я ж пані Метелиця.','пані Метелиця','пояснюючи роботу','Найкрасивіший рядок: хатня робота виявляється причиною погоди на всій землі.'],
+['Наша дівчина йде, на ній золота без ліку.','півень','коли пасербиця вернулася','Перший вирок.'],
+['Наша ледащиця йде, що брудна буде довіку.','півень','коли вернулася друга','Другий вирок — тими самими словами, тільки навпаки.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Слід у культурі',s:'Казка, якій понад двісті років',html:`
+<div class="blk"><h3>Збірка, що змінила Європу</h3>
+<p>«Дитячі та сімейні казки» братів Грімм вийшли 1812 року й стали однією з найважливіших книжок європейської культури. Саме звідти всі знають Білосніжку, Попелюшку, Червону шапочку, Хлопчика-Мізинчика й Бременських музикантів.</p></div>
+
+<div class="blk"><h3>Німеччина пам’ятає</h3>
+<p>У Німеччині є туристичні маршрути, присвячені казкам братів Грімм і місцям, де ті казки записували чи де нібито відбувалися. А про пані Метелицю там і досі кажуть, коли йде густий сніг: це вона вибиває свої подушки.</p></div>
+
+<div class="blk"><h3>Кіно</h3>
+<p>За казкою знімали фільми й мультфільми, зокрема повнометражний фільм «Пані Метелиця». Сюжет добре надається до екранізації: він короткий, дуже наочний і має яскравий фінал.</p></div>
+
+<div class="blk"><h3>Українська сестра цієї казки</h3>
+<p>«Дідова дочка і бабина дочка» — українська народна казка з тим самим мандрівним сюжетом. Порівняти дві версії — стандартне завдання на уроці: спільне в них те, як побудована історія, а різне — деталі побуту й те, які саме випробування трапляються дівчатам.</p></div>
+
+<div class="blk"><h3>Чому казка не старіє</h3>
+<p>Бо вона про річ, зрозумілу в будь-якому віці: удавати старанність можна недовго. І про те, що людину найкраще видно не тоді, коли на неї дивляться, а тоді, коли її просто просять про допомогу.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'🪶',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Постав події по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай події від першої до останньої.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Дві сестри — одна стежка</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Головна вправа файлу: як повелася кожна в тій самій ситуації?</p>
+<div id="tw"></div><div class="say" id="tws"></div></div>
+
+<div class="blk"><h3>Народна чи літературна?</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Розподіли твори, які ти вже читав, за походженням.</p>
+<div id="nk"></div><div class="say" id="nks"></div></div>
+${fin('train')}`,
+init(){initWho();initOrder();initTw();initNk()}});
+
+const WHO=[
+ ['Уміла вкинути починок, то зараз же лізь і дістань його.','мачуха',['мачуха','пані Метелиця','ледащиця']],
+ ['Ох, витягни мене, витягни, бо згорю!','хліб у печі',['хліб у печі','яблуня','півень']],
+ ['Ох, обтруси мене! Яблука мої давно вже достигли.','яблуня',['яблуня','хліб у печі','пані Метелиця']],
+ ['Тільки мені й охоти бруднитися біля тебе!','ледащиця',['ледащиця','пасербиця','мачуха']],
+ ['А чого ти боїшся, люба дитино?','пані Метелиця',['пані Метелиця','мачуха','яблуня']],
+ ['Тоді на світі йтиме сніг, бо я ж пані Метелиця.','пані Метелиця',['пані Метелиця','півень','вдова']],
+ ['Наша дівчина йде, на ній золота без ліку.','півень',['півень','мачуха','пані Метелиця']],
+ ['Оце тобі твій заробіток.','пані Метелиця',['пані Метелиця','мачуха','півень']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Репліка ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const ORD=[
+ 'Пасербиця пряде біля криниці й ранить пальці',
+ 'Починок падає в криницю, і мачуха жене дівчину по нього',
+ 'Дівчина витягає хліб із печі й обтрушує яблуню',
+ 'Служба в пані Метелиці й вибивання подушок',
+ 'Золотий дощ на порозі й пісня півня',
+ 'Ледащиця навмисне стрибає в колодязь',
+ 'Вона відмовляє і печі, і яблуні',
+ 'На неї перекидається казан смоли'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','Перші п’ять подій — шлях пасербиці, останні три — той самий шлях ледащиці. Дзеркало.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — це буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const TW=[
+ ['Як кожна потрапила в колодязь?','Пасербиця впала від страху, ледащиця стрибнула навмисне по золото',
+  ['Пасербиця впала від страху, ледащиця стрибнула навмисне по золото','Обидві впали випадково','Обох укинула мачуха'],
+  'Уже цим сказано все: одна — від безвиході, друга — з розрахунку.'],
+ ['Що зробила кожна з хлібом у печі?','Пасербиця повитягала весь хліб, ледащиця відмовилася бруднитися',
+  ['Пасербиця повитягала весь хліб, ледащиця відмовилася бруднитися','Обидві допомогли','Обидві пройшли мимо'],
+  'Прохання те саме, слова ті самі — різні тільки відповіді.'],
+ ['Що зробила кожна з яблунею?','Пасербиця обтрусила до останнього яблука, ледащиця побоялася, що яблуко впаде на голову',
+  ['Пасербиця обтрусила до останнього яблука, ледащиця побоялася, що яблуко впаде на голову','Обидві обтрусили','Жодна не підійшла'],
+  'І пасербиця ще й згорнула яблука на купу — робота доведена до кінця.'],
+ ['Як кожна поводилася в пані Метелиці?','Пасербиця старалася весь час, ледащиця — лише перший день',
+  ['Пасербиця старалася весь час, ледащиця — лише перший день','Обидві працювали однаково','Обидві лінувалися'],
+  'Другого дня ледащиця почала лінуватися, третього не захотіла навіть уставати.'],
+ ['Що кожна отримала на прощання?','Пасербиця — золотий дощ, ледащиця — казан смоли',
+  ['Пасербиця — золотий дощ, ледащиця — казан смоли','Обидві золото','Обидві нічого'],
+  'І смола так пристала, що не відмилася, скільки та жила на світі.'],
+ ['Чому пасербиця захотіла додому?','Засумувала за домом, хоч їй було там добре',
+  ['Засумувала за домом, хоч їй було там добре','Її вигнали','Вона посварилася з пані Метелицею'],
+  'Найлюдяніша деталь казки: додому тягне навіть туди, де тебе не любили.']
+];
+function initTw(){
+  const b=$('#tw');if(!b)return;
+  b.innerHTML=TW.map((t,i)=>`<div style="margin-bottom:16px">
+    <div style="font-size:14.5px;margin-bottom:7px;color:var(--gold)">${t[0]}</div>
+    <div id="tw${i}">${t[2].map(o=>`<button class="opt" style="font-size:14px;padding:9px 12px" onclick="ansTw(${i},this)">${o}</button>`).join('')}</div>
+    <div class="say" id="twe${i}"></div></div>`).join('');
+}
+function ansTw(i,el){
+  const t=TW[i],ok=(el.textContent===t[1]);
+  $$('#tw'+i+' .opt').forEach(b=>{b.disabled=true;if(b.textContent===t[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  say('#twe'+i,t[3],ok);
+  buzz(ok?'success':'error');
+  if($$('#tw .opt.ok').length>=TW.length)
+    say('#tws','Ось і вся казка: та сама стежка, ті самі слова — і протилежний результат.',true);
+}
+
+const NK=[
+ ['«Пані Метелиця»','народна','Її склав народ, а брати Грімм лише записали.'],
+ ['«Фарбований Лис» Івана Франка','літературна','Має конкретного автора й один незмінний варіант.'],
+ ['«Хлопчик-зірка» Оскара Уайльда','літературна','Автор — Оскар Уайльд.'],
+ ['«Дідова дочка і бабина дочка»','народна','Українська народна казка з тим самим мандрівним сюжетом.'],
+ ['«Микита Кожум’яка» Олександра Олеся','літературна','Казка-п’єса, написана за мотивами народної казки.'],
+ ['«Хуха-Моховинка» Василя Королева-Старого','літературна','Спирається на народні вірування, але написав її автор.']
+];
+const NNAMES=['народна','літературна'];
+function initNk(){
+  const b=$('#nk');if(!b)return;
+  b.innerHTML=NK.map((n,i)=>`<div style="margin-bottom:14px">
+    <div style="font-size:14.5px;margin-bottom:6px">${n[0]}</div>
+    <div class="row" id="nk${i}">${NNAMES.map(o=>
+      `<button class="chip" onclick="ansNk(${i},'${o}',this)">${o}</button>`).join('')}</div>
+    <div class="say" id="nke${i}"></div></div>`).join('');
+}
+function ansNk(i,v,el){
+  const ok=(NK[i][1]===v);
+  $$('#nk'+i+' .chip').forEach(b=>{b.disabled=true;if(b.textContent===NK[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  say('#nke'+i,NK[i][2],ok);
+  buzz(ok?'success':'error');
+  if($$('#nk .chip.ok').length>=NK.length)
+    say('#nks','Просте правило: є ім’я автора — літературна; склав народ, а хтось лише записав — народна.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто написав казку «Пані Метелиця»?','choice',['Брати Грімм','Ніхто: це народна казка, брати Грімм її записали','Шарль Перро','Ганс Крістіан Андерсен'],1,'Вони були фольклористами, тобто збирачами.'],
+ ['У якому році вийшла збірка з цією казкою?','choice',['1712','1812','1912','2012'],1,'«Дитячі та сімейні казки», перший том.'],
+ ['Як звали братів Грімм?','choice',['Якоб і Вільгельм','Ганс і Фрідріх','Карл і Йоганн','Отто і Пауль'],0,'Німецькі вчені й фольклористи.'],
+ ['Яка донька була роботяща?','choice',['Рідна','Пасербиця','Обидві','Жодна'],1,'А мачуха любила більше рідну, хоч та була лінива.'],
+ ['Що впало в криницю?','choice',['Веретено','Починок','Хустка','Ключ'],1,'Пряжа, намотана на веретено.'],
+ ['Кого пасербиця зустріла першим на чудовій луці?','choice',['Яблуню','Піч із хлібом','Пані Метелицю','Півня'],1,'Хліб кричав, що зараз згорить.'],
+ ['Яка головна робота була в пані Метелиці?','choice',['Прясти','Стелити постіль і вибивати подушки','Пекти хліб','Носити воду'],1,'Тоді на світі йде сніг.'],
+ ['Чим нагородили пасербицю?','choice',['Яблуками','Золотим дощем','Хлібом','Веретеном'],1,'І золото пристало до неї.'],
+ ['Що дісталося ледащиці?','choice',['Золото','Казан смоли','Нічого','Яблука'],1,'І смола не відмилася довіку.'],
+ ['Хто оголошував повернення сестер?','choice',['Мачуха','Півень','Пані Метелиця','Сусіди'],1,'Він злітав на цямрину криниці й співав.'],
+ ['«Пані Метелиця» — народна казка.','tf',null,true,'Її склав народ, а брати Грімм записали.'],
+ ['Українська казка з тим самим сюжетом — «Дідова дочка і бабина дочка».','tf',null,true,'Це приклад мандрівного сюжету.']
+];
+const Q2=[
+ ['Чому пасербиця стрибнула в криницю?','choice',['Хотіла багатства','Від жалю й страху, бо мачуха наказала дістати починок','Її штовхнули','З цікавості'],1,'А її сестра потім стрибнула навмисне.'],
+ ['Чому першою в колодязь падає саме працьовита дівчина?','choice',['Так вийшло випадково','Щоб казка спершу показала, як має бути, і лише потім — як не треба','Вона була старша','Вона знала дорогу'],1,'Без цього не було б із чим порівнювати.'],
+ ['Що показують епізоди з піччю та яблунею?','choice',['Що дівчата голодні','Характер людини, бо їм нічого не обіцяють — просто просять','Що ліс чарівний','Що треба поспішати'],1,'Одна допомагає, друга відмахується.'],
+ ['Чому ледащиця не отримала золота, хоч ішла тим самим шляхом?','choice',['Пані Метелиця її не злюбила','Бо працювала лише заради нагороди й швидко перестала старатися','Вона запізнилася','Золото скінчилося'],1,'Другого дня почала лінуватися, третього не встала.'],
+ ['Чому пасербиця захотіла повернутися додому?','choice',['Їй було погано в пані Метелиці','Вона засумувала за домом, хоч жилося їй добре','Її вигнали','Вона злякалася зубів'],1,'І сама спершу не розуміла, чого їй бракує.'],
+ ['Чи справедлива пані Метелиця?','choice',['Ні, вона надто сувора','Так: обом дала однакову роботу й умови, а нагороду — за заслугами','Ні, вона любить пасербицю','Вона нікого не карала'],1,'Вона нікого не змушує й не карає наперед.'],
+ ['Що означає, що ледащиця «не злякалася зубів»?','choice',['Вона смілива','Вона знала про них наперед, тож це не сміливість, а розрахунок','Зуби зникли','Вона їх не бачила'],1,'Про них вона вже чула від сестри.'],
+ ['Навіщо в казці той самий шлях проходить друга сестра?','choice',['Щоб довше було','Це сюжетний повтор: та сама ситуація показує різницю характерів','Автор забув','Щоб було страшніше'],1,'Ознака народної казки.'],
+ ['Що таке мандрівний сюжет?','choice',['Казка про подорож','Схожа історія, яка трапляється у фольклорі різних народів','Казка, яку переказують','Довга казка'],1,'Мачуха й пасербиця — один із найпоширеніших.'],
+ ['Чому важливо, що пасербиця обтрусила яблуню до останнього яблука?','choice',['Так було легше','Це показує, що вона доводить роботу до кінця, а не аби відчепитися','Яблука були важкі','Так наказала яблуня'],1,'Вона ще й згорнула їх на купу.'],
+ ['Брати Грімм самі вигадали цю казку.','tf',null,false,'Вони записали її зі слів майбутньої дружини Вільгельма.'],
+ ['Мачуха любила більше рідну доньку, хоч та була лінива.','tf',null,true,'Це сказано в першому ж абзаці.']
+];
+const Q3=[
+ ['Чим народна казка відрізняється від літературної?','choice',['Довжиною','Народну склав народ і вона має багато варіантів; літературна має автора й один варіант','Народна завжди сумна','Літературна не має героїв'],1,'Це головна межа, яку вводять на першому уроці.'],
+ ['Хто такі фольклористи?','choice',['Автори казок','Ті, хто збирає й досліджує народну творчість','Перекладачі','Ілюстратори'],1,'Саме ними й були брати Грімм.'],
+ ['Які ознаки народної казки є в цьому творі?','choice',['Лише щасливий фінал','Конфлікт добра і зла, поділ героїв, щасливий фінал, трикратність, сюжетні повтори','Тільки чарівні істоти','Жодних'],1,'Тому казку й вивчають найпершою.'],
+ ['Що є кульмінацією твору?','choice',['Падіння починка','Служба пасербиці','Мить, коли ледащиця йде тим самим шляхом і всім відмовляє','Пісня півня'],2,'Саме там вирішується, чим усе закінчиться.'],
+ ['Що таке трикратність?','choice',['Три герої','Казковий прийом, коли випробування повторюється тричі','Три частини казки','Три автори'],1,'Піч, яблуня, служба в пані Метелиці.'],
+ ['Чому казку називають чарівною?','choice',['Вона гарна','У ній діють надприродні сили: говорять піч і яблуня, а колодязь веде в інший світ','Вона про зиму','Її записали вчені'],1,'І сніг іде від подушок пані Метелиці.'],
+ ['Яку роль відіграє півень?','choice',['Він рятує героїнь','Він оголошує вирок обом сестрам двома майже однаковими віршиками','Він охороняє криницю','Він друг пасербиці'],1,'Він нічого не робить — лише називає те, що всі бачать.'],
+ ['У чому виявляється позиція народу — автора казки?','choice',['Він жаліє мачуху','Він на боці працьовитої пасербиці й засуджує лінощі та розрахунок','Він на боці обох','Позиції немає'],1,'Мораль сказана прямо: праця винагороджується, лінощі караються.'],
+ ['Чому смола не відмилася довіку?','choice',['Вона була чарівна','Це образ: удаване старання лишає слід, який не змиєш','Її було багато','Так вирішила пані Метелиця'],1,'Найжорсткіший образ казки.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Не можна стрибати в колодязь','Кожен отримує рівно те, що заробив, хоч би як старанно вдавав','Мачухи завжди злі','Треба слухатися старших'],1,'Обидві сестри йшли тим самим шляхом.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--gold)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Брати Грімм — збирачі чи автори казок?',
+ 'Збирачі. Якоб і Вільгельм Грімм були німецькими вченими й фольклористами, тобто людьми, які збирають і досліджують народну творчість. Вони ходили й записували казки, що вже сотні років передавалися з уст в уста, і 1812 року видали збірку «Дитячі та сімейні казки». «Пані Метелицю» вони записали зі слів дівчини, яка згодом стала дружиною Вільгельма, а в основу казки лягла легенда, поширена в Центральній Німеччині. Тому правильно казати не «казка братів Грімм», а німецька народна казка, записана братами Грімм.'],
+['Чим народна казка відрізняється від літературної?',
+ 'Народну казку склав народ: вона багато століть передавалася усно, кожен оповідач щось додавав, а щось забував, тому в неї немає автора й існує вона в багатьох варіантах. Літературна казка має конкретного автора, записується в момент створення й має один авторський варіант. Крім того, у народній казці проста система подій, короткі описи, а герої чітко поділені на позитивних і негативних і змальовані загальними рисами; у літературній події складніші, описи розлогі, а герої мають індивідуальні риси. «Пані Метелиця» — народна, а от «Фарбований Лис» Франка чи «Хлопчик-зірка» Уайльда — літературні.'],
+['Перекажи сюжет казки.',
+ 'Жила вдова з двома доньками: пасербиця була гарна й роботяща, а рідна — гидка й лінива, але мати любила більше рідну. Одного разу пасербиця, прядучи біля криниці, впустила туди закривавлений починок, і мачуха наказала дістати його. Дівчина зі страху стрибнула в криницю й опинилася на чудовій луці. Дорогою вона витягла хліб із печі, обтрусила яблуню, а потім найнялася до пані Метелиці й старанно вибивала їй подушки, від чого на світі йшов сніг. Засумувавши за домом, вона попросилася назад — і на порозі її обсипало золотом. Тоді мачуха послала в колодязь рідну доньку, але та відмовила і хлібові, і яблуні, а в пані Метелиці працювала лише перший день. На прощання на неї перекинувся казан смоли, який не відмився довіку.'],
+['Як поводилися сестри з піччю, яблунею і пані Метелицею?',
+ 'Зовсім по-різному, хоч ситуації були однакові. Пасербиця витягла з печі весь хліб лопатою, обтрусила яблуню, поки не впало останнє яблуко, і ще й згорнула яблука на купу, а в пані Метелиці в усьому догоджала і збивала подушки так, що аж пір’я летіло. Ледащиця хлібові відповіла, що не має охоти бруднитися, яблуні — що ще якесь яблуко впаде їй на голову, а в пані Метелиці старалася тільки перший день, другого почала лінуватися, а третього не захотіла навіть уставати. Найважливіше тут те, що ані піч, ані яблуня нічого не обіцяли — вони просто просили. І саме на цьому видно людину.'],
+['Чи вважаєш ти пані Метелицю справедливою?',
+ 'Так. Вона нікого не карає наперед і нікого не змушує: обом дівчатам вона дає ту саму роботу, ті самі умови й однакове ставлення. Пасербицю вона жодного разу не насварила, годувала смаженим і пряженим і сама провела до брами. Ледащиці вона теж дала шанс і чекала три дні. А потім кожній віддала рівно те, що та заробила: одній золотий дощ, другій казан смоли зі словами «оце тобі твій заробіток». Тобто нагорода й покарання в казці — це не примха чарівниці, а наслідок власних учинків.'],
+['Чому ледащиця не дістала золота, хоч ішла тим самим шляхом?',
+ 'Тому що вона робила все заради нагороди. Вона навіть у колодязь не впала, а стрибнула навмисне, ще й спеціально вколола пальця об терен, щоб починок був у крові. У неї, як сказано в казці, тільки й думки було, що про золото, яке стара їй подарує. Через це її не вистачило надовго: першого дня старалася, а далі лінувалася. Тобто повторити вчинки можна, а вдачу — ні. Добро, зроблене заради виплати, перестає бути добром.'],
+['Що таке мандрівний сюжет? Наведи приклад.',
+ 'Мандрівний сюжет — це схожа історія, яка трапляється у фольклорі різних народів світу. Одна з найпоширеніших — оповідь про недоброзичливе ставлення мачухи до пасербиці. Українська відповідниця «Пані Метелиці» — народна казка «Дідова дочка і бабина дочка»: там теж дві дівчини по черзі проходять випробування й отримують протилежні нагороди. Такі збіги виникають не тому, що хтось у когось списав, а тому, що люди в різних країнах думали про ті самі речі — про працю, справедливість і родину.'],
+['Яка головна думка казки?',
+ 'Важка праця винагороджується, а лінощі караються — і кожен зрештою отримує рівно те, що заробив. Казка доводить це дуже наочно: обидві сестри йдуть однією стежкою, чують ті самі слова й наймаються до тієї самої господині, а результат виходить протилежний. І показово, що пасербиця золота взагалі не просила — вона просто працювала й засумувала за домом.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
