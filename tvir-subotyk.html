@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Машина для здійснення бажань — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#171A1E; --card:#212630;
+  --ink:#F0F2F5; --dim:#98A5B4;
+  --brass:#D8A24A; --red:#D45A4A; --mint:#6FC2A8;
+  --line:rgba(240,242,245,.14);
+  --ok:#6FC2A8; --no:#DE7767;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 22px;overflow:hidden;
+  background:radial-gradient(115% 88% at 84% 2%,#2C333F 0%,var(--bg) 68%)}
+.funnel{position:absolute;top:26px;right:26px;width:0;height:0;
+  border-left:34px solid transparent;border-right:34px solid transparent;
+  border-top:44px solid rgba(216,162,74,.24)}
+.lamp{position:absolute;top:86px;right:52px;width:16px;height:16px;border-radius:50%;
+  background:var(--red);box-shadow:0 0 22px rgba(212,90,74,.7)}
+.lever{position:absolute;top:104px;right:96px;width:4px;height:40px;border-radius:4px;
+  background:rgba(216,162,74,.4);transform:rotate(-22deg)}
+.hero h1{margin:0;font-size:27px;line-height:1.12;letter-spacing:-.4px;max-width:76%}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--brass));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--ok)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--mint);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--brass)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--red);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic}
+.note{background:rgba(216,162,74,.11);border:1px solid rgba(216,162,74,.3);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+/* тиждень */
+.week{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:10px}
+.week div{background:var(--card);padding:10px 13px;display:flex;gap:12px;font-size:14.5px}
+.week span{color:var(--brass);flex:none;width:82px;font-weight:600}
+.week.fin div:last-child{background:rgba(111,194,168,.13)}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--red);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--ok);font-size:13.5px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(111,194,168,.15);color:var(--mint)}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--brass)}
+
+.btn{background:var(--red);color:#fff;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink)}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(111,194,168,.15)}
+.opt.no{border-color:var(--no);background:rgba(222,119,103,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(111,194,168,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(222,119,103,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--mint);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--brass);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--brass)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="funnel"></div><div class="lamp"></div><div class="lever"></div>
+    <h1>Машина для<br>здійснення бажань</h1>
+    <p class="by">Пауль Маар · переклад Євгенії Горевої</p>
+    <div class="meta">
+      <span class="tag">повість-казка</span>
+      <span class="tag">Німеччина</span>
+      <span class="tag">гумор</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#171A1E')}catch(e){}}
+
+const KEY='subotyk-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Автор</span><b>Пауль Маар, німецький дитячий письменник, драматург та ілюстратор</b></div>
+  <div><span>Рік народження</span><b>1937</b></div>
+  <div><span>Повна назва</span><b>«Машина для здійснення бажань, або Суботик повертається в суботу»</b></div>
+  <div><span>Жанр</span><b>повість-казка</b></div>
+  <div><span>Будова</span><b>сім розділів із власними назвами</b></div>
+  <div><span>Тема</span><b>тиждень із життя тихого пана Пляшкера, до якого повертається Суботик і майструє машину, що виконує бажання</b></div>
+  <div><span>Головна думка</span><b>здійснення бажань нічого не варте, якщо не знаєш, чого хочеш насправді: найбільше змінює людину не машина, а друг поруч</b></div>
+  <div><span>Головні герої</span><b>пан Пляшкер, Суботик</b></div>
+  <div><span>Інші герої</span><b>пані Моркван, пан Вівторакус, пан Амфібер і ціла компанія звірят</b></div>
+  <div><span>Скільки книжок про Суботика</span><b>дев’ять</b></div>
+  <div><span>Переклад</span><b>українською — Євгенія Горева; твори Маара перекладали також Ольга Сидор, Володимир Романець, Олекса Логвиненко</b></div>
+  <div><span>Мова оригіналу</span><b>німецька</b></div>
+</div>
+<div class="note"><b>Головне про Суботика.</b> Це руде створіння з поросячим носиком і синіми цятками замість ластовиння. Кожне виконане бажання забирає в нього одну цятку — тому коли цятки закінчаться, він мусить піти.</div>
+${fin('passport')}`});
+
+/* ================= 2. АВТОР ================= */
+T('author',{g:0,ic:'👤',t:'Автор',s:'Учитель малювання, який вигадав Суботика',html:`
+<p class="lead">Пауль Маар почав писати для дітей тому, що не знайшов у бібліотеці цікавої книжки для власного сина.</p>
+
+<div class="blk"><h3>За фахом — художник</h3>
+<p>Народився 1937 року в Німеччині. За професією він учитель малювання: після закінчення Академії мистецтв десять років працював за фахом. Тому й свої книжки він не тільки пише, а й ілюструє сам.</p></div>
+
+<div class="blk"><h3>Як усе почалося</h3>
+<p>Писати для дітей його спонукав п’ятирічний син, який попросив почитати щось цікавеньке. Не знайшовши в місцевій бібліотеці захопливих книжок, Пауль Маар вирішив створювати власні історії. Перша його книжка називалася «Собака з татуюванням».</p>
+<div class="note">Твори Пауля Маара перекладено тридцятьма мовами, а книжок про Суботика він написав аж дев’ять.</div></div>
+
+<div class="blk" style="border-color:var(--red)"><h3>Дитинство, якого не було</h3>
+<p>Маар вважає, що дитячий письменник або пригадує у своїх творах власні щасливі дитячі роки, або вигадує прекрасний світ дитинства, якого не мав насправді. Про себе він каже, що належить до другої категорії.</p>
+<p>Саме тому в його казкових історіях панують радість і довіра, а безглуздих обмежень та образ дітей з боку дорослих там немає зовсім. Це дуже важлива річ для розуміння всієї книжки.</p></div>
+
+<div class="blk"><h3>Хто такий Суботик</h3>
+<p>Головним героєм Маара став вигаданий персонаж Суботик — добре створіння з поросячим носиком, енергійне й здатне зробити такими всіх, з ким зустрічається. Це втілення природного, дитячого погляду на світ.</p>
+<p>Суботик сам обирає собі тата — трохи старомодного й нудного пана Пляшкера, який усього боїться. Про те, як поступово змінюється цей новоспечений татусь, і розповідають усі книжки циклу.</p></div>
+${fin('author')}`});
+
+/* ================= 3. ПРАВИЛА ================= */
+T('history',{g:0,ic:'📜',t:'Правила Суботика',s:'Шість умов, без яких він не прийде',html:`
+<p class="lead">Це найважливіше, що треба знати перед читанням: Суботик приходить не коли захоче, а лише коли цілий тиждень складеться в потрібний спосіб.</p>
+
+<div class="blk"><h3>Тиждень, який має скластися</h3>
+<div class="week fin">
+  <div><span>Неділя</span>світить сонце</div>
+  <div><span>Понеділок</span>настає одразу по неділі</div>
+  <div><span>Вівторок</span>навідується друг пан Вівторакус</div>
+  <div><span>Середа</span>припадає на середину тижня</div>
+  <div><span>Четвер</span>чотири рази гримить грім</div>
+  <div><span>П’ятниця</span>з роботи відпускають раніше</div>
+  <div><span>Субота</span>приходить Суботик</div>
+</div>
+<div class="note">Придивись уважно: половина умов виконується сама собою. Понеділок і так настає після неділі, а середа й так посеред тижня. Складні лише дві — сонце в неділю й чотириразовий грім у четвер.</div></div>
+
+<div class="blk"><h3>Чому це смішно</h3>
+<p>Пан Пляшкер уже три тижні поспіль чекає, і щоразу щось не збігається. Він навіть починає підлаштовувати тиждень: домовляється з паном Вівторакусом навідуватися саме щовівторка, через що господиня пані Моркван погрожує брати з того плату за помешкання.</p></div>
+
+<div class="blk"><h3>Сині цятки</h3>
+<p>Обличчя Суботика вкрите синіми цятками замість ластовиння. Кожне виконане бажання забирає одну цятку. Тому вся книжка має вбудований лічильник: що більше бажань здійснюється, то менше часу лишається до прощання. Останній розділ так і називається — «Остання цятка».</p></div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Грім у четвер',
+  'Пан Пляшкер третій тиждень поспіль чекає на Суботика й на роботі щоп’ять хвилин зиркає на годинник, чим дивує начальника. Тиждень нарешті складається як треба: у неділю світило сонце, у вівторок прийшов пан Вівторакус зі своїм звіринцем — папугою паном Кулесом, хом’яком Анді й новенькою білою мишкою Кларцею. Господиня пані Моркван обурюється: якщо Вівторакус приходитиме щовівторка, вона братиме з нього плату за помешкання.',
+  'Зав’язка. Уся книжка тримається на диві, для якого треба спершу правильно скласти звичайний тиждень.'],
+ ['Машина для здійснення бажань полюбляє точність',
+  'Суботик приходить і одразу береться до справи: замовляє бляшаний аркуш, розбирає стіл і майструє з усього цього машину. У неї є розтруб, у який треба говорити бажання, важіль, що ставиться на «ввімкнено», і маленька червона лампочка — знак, що машина готова. Назва розділу попереджає про головне: машина виконує сказане дослівно, тож формулювати треба точно.',
+  'Тут задано правило, на якому побудовані всі подальші пригоди.'],
+ ['Пан Кулес вилетів',
+  'Папуга пана Вівторакуса вилітає у відчинене вікно й опиняється в чужій квартирі — у пана Амфібера, який саме приліг перепочити по обіді. Тим часом Суботик грає в індіанця, припалює чужу газету — і, щоб виправдатися, переказує напам’ять усе, що там було написано, разом із прогнозом погоди про циклон і холодні маси арктичного повітря.',
+  'Найкумедніший розділ. Суботик не зловмисник — він просто діє так, як йому здається природним.'],
+ ['Ще одна втеча',
+  'Машину виводять надвір, і вона перегрівається просто на тротуарі. З’являється поліціянт: щойно виписане посвідчення рятує пана Пляшкера від штрафу першого ж дня, але машину наказано негайно прибрати. А потім бажання спрацьовує так, що пан Пляшкер опиняється на острові сам: пальми, пісок і море, а Суботика поруч немає. Довелося загадувати ще раз — щоб бути там удвох.',
+  'Ось воно, «полюбляє точність»: сказав про себе — і опинився сам.'],
+ ['Суботик у небезпеці',
+  'Уранці пан Пляшкер знаходить у своєму ліжку пісок. Машина починає поводитися дивно: замість звичного світла з неї пробивається блакитний промінець, і Суботик кричить триматися. Але не встигає нічого пояснити, як їх уже переносить із місця на місце.',
+  'Кульмінація небезпеки: диво виходить з-під контролю, і власник машини вже нічого не вирішує.'],
+ ['Коротке замикання',
+  'Машина ламається остаточно. Суботик береться її лагодити — і робить це власним матеріалом на ім’я ікс-квадратва, який, за його словами, легко не горить. Пан Пляшкер сумнівається: дратвою колись шили взуття, а що як вона враз згорить?',
+  'Смішне слово, за яким стоїть проста думка: диво теж треба лагодити руками.'],
+ ['Остання цятка',
+  'Пан Пляшкер загадує машині купюру в тридцять чотири марки — і швидко з’ясовується, що такої купюри просто не існує, а отже, купити за неї нічого не можна. Спроби перехитрити машину теж не дають нічого. Синіх цяток на обличчі Суботика лишається все менше. Машину відносять назад на горище й ставлять на те саме місце, де вона стояла раніше. Пан Пляшкер сумно озирається й питає себе, що ж, власне, вона йому дала.',
+  'Розв’язка: машина, яка виконує будь-які бажання, не зробила героя ані щасливішим, ані багатшим. Змінив його Суботик.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'Сім розділів повісті',html:`
+<p class="lead">Автор сам поділив повість на сім розділів і дав кожному назву. Натисни на будь-який.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><p>${c[1]}</p><div class="key">▸ ${c[2]}</div></div></div>`).join('')}
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['Тихе життя пана Пляшкера, який третій тиждень чекає на Суботика','експозиція'],
+ ['Тиждень нарешті складається, і Суботик майструє машину','зав’язка'],
+ ['Пригоди з бажаннями: ресторан, папуга, поліціянт, острів','розвиток дії'],
+ ['Машина виходить з-під контролю й ламається','кульмінація'],
+ ['Машину відносять на горище, і в Суботика лишається остання цятка','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: розв’язка тут сумна не тому, що машина зламалася, а тому, що Суботик мусить піти.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Пан Пляшкер','головний герой, тихий службовець',
+  ['сором’язливий','нерішучий','добрий','змінюється'],
+  'Трохи старомодний і нудний чоловік, який усього боїться: начальника, господині, поліціянта, а надто того, що про нього подумають. Живе в найманій кімнаті й працює в конторі. Але вже третій тиждень щоп’ять хвилин зиркає на годинник, чекаючи на Суботика, — і саме поруч із ним він потроху перестає боятися.',
+  'Що ж, власне, вона мені дала, ця машина здійснення бажань?'],
+ ['Суботик','руде створіння, яке саме обрало собі тата',
+  ['енергійний','безстрашний','вигадливий','вірний'],
+  'Має поросячий носик і сині цятки замість ластовиння; кожне виконане бажання забирає одну цятку. Ходить у водолазному костюмі, говорить віршиками, грає в індіанця, майструє машину з бляшаного аркуша й старого стола. Він утілення природного дитячого погляду на світ: у нього немає жодних «так не можна».',
+  'Ікс-квадратва легко не горить.'],
+ ['Пані Моркван','господиня будинку',
+  ['прискіплива','цікава','бурчлива'],
+  'Стежить, чи витер гість ноги, і обурюється, що пан Вівторакус із його звіринцем не вибуває з дому. Постійно допитується, що це пан Пляшкер замовив і чому їй нічогісінько не сказали. Смішна, але не зла — і саме вона наприкінці веде Вівторакуса показати продуктову крамницю.',
+  'Між іншим, ви забулися витерти ноги.'],
+ ['Пан Вівторакус','друг пана Пляшкера',
+  ['гарячий','говіркий','любить тварин'],
+  'Приходить щовівторка й тягне за собою цілий звіринець. Сам собі ставить запитання і сам на них відповідає. Обурюється, коли хтось при ньому згадує вислів про двох зайців, і називає пана Пляшкера нищителем звіряток. Його прихід — одна з умов появи Суботика.',
+  'Убиваєш двох неповинних зайців! Ти, нищителю звіряток!'],
+ ['Пан Кулес','папуга пана Вівторакуса',
+  ['галасливий','утікач'],
+  'Вилітає у відчинене вікно й опиняється в квартирі пана Амфібера, який саме приліг перепочити по обіді. Його втеча дала назву цілому розділу.',
+  '(вмощується на рейці для гардини)'],
+ ['Анді й Кларця','хом’як і біла мишка',
+  ['дрібні','постійно з Вівторакусом'],
+  'Анді — хом’як у клітці, Кларця — новенька біла мишка. Пані Моркван хом’яків не любить; пан Кулес, за словами Вівторакуса, теж терпіти їх не може. Уся ця компанія створює в тихій кімнаті пана Пляшкера постійний безлад.',
+  '(подорожують у клітках і коробках)'],
+ ['Пан Амфібер','мешканець іншої частини міста',
+  ['спокійний','здивований'],
+  'Приліг по обіді на канапу — і тут у відчинене вікно впурхнув чужий папуга й умостився на рейці для гардини. Через нього історія з паном Кулесом виходить за межі одного будинку.',
+  '(підкрадається до вікна)'],
+ ['Машина для здійснення бажань','майже персонаж',
+  ['точна','примхлива','перегрівається'],
+  'Зроблена з бляшаного аркуша й стільниці. Має розтруб для бажань, важіль на «ввімкнено» і червону лампочку готовності. Виконує сказане буквально, перегрівається на сонці, дає блакитне світло, коли з нею щось не так, і врешті йде в коротке замикання.',
+  '(гуде — і бажання здійснюється)']
+];
+
+T('chars',{g:1,ic:'👥',t:'Персонажі',s:'Хто вони і навіщо в повісті',html:`
+<p class="lead">Головна пара тут — дорослий, який усього боїться, і дитина, яка не боїться нічого. На цьому побудована вся книжка.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">У підручнику це сказано прямо: Суботик — <b>утілення природного й дитячого погляду на світ</b>, і він здатний зробити такими всіх, з ким зустрічається. Тому головна зміна в книжці відбувається не з ним, а з паном Пляшкером.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">Повість весела, але думка в ній доросла: мати можливість здійснити будь-яке бажання — ще не означає стати щасливим.</p>
+
+<div class="blk"><h3>Бажання треба вміти сформулювати</h3>
+<p>Назва другого розділу попереджає: машина полюбляє точність. Вона виконує не те, що ти мав на увазі, а те, що сказав. Тому пан Пляшкер опиняється на острові сам, а купюра в тридцять чотири марки виявляється папірцем, за який нічого не купиш.</p></div>
+
+<div class="blk"><h3>Що дала машина</h3>
+<p>Наприкінці машину відносять назад на горище, і пан Пляшкер сумно питає сам себе, що ж вона, власне, йому дала. Відповідь очевидна: майже нічого. Ані грошей, ані спокою. Зате був цілий тиждень пригод — і поруч був Суботик.</p></div>
+
+<div class="blk"><h3>Дорослий, який учиться в дитини</h3>
+<p>Пан Пляшкер боїться начальника, господині, поліціянта й чужої думки. Суботик не боїться нікого й нічого — не з нахабства, а тому, що йому просто не спадає на думку боятися. Поступово це передається й «татусеві». Про це прямо йдеться і в підручнику.</p></div>
+
+<div class="blk"><h3>Диво за розкладом</h3>
+<p>Найсмішніше в книжці те, що чарівне створіння приходить не з чарів, а з розкладу: сонце в неділю, Вівторакус у вівторок, грім у четвер. Диво тут не протистоїть буденності — воно з неї виростає.</p></div>
+
+<div class="blk"><h3>Час, якого меншає</h3>
+<p>Кожне виконане бажання забирає в Суботика одну синю цятку. Отже, чим більше дива, тим менше його лишається. Ця вигадка робить веселу книжку непомітно сумною й змушує читача рахувати разом із героями.</p></div>
+
+<div class="blk"><h3>Дорослі, які не ображають</h3>
+<p>Маар казав, що вигадує той світ дитинства, якого сам не мав. У його книжках панують радість і довіра, а безглуздих обмежень і образ дітей з боку дорослих немає. Навіть буркотлива пані Моркван нікого по-справжньому не кривдить.</p></div>
+
+<div class="blk" style="border-color:var(--brass)"><h3>Головна думка одним реченням</h3>
+<p>Здійснення бажань нічого не варте, якщо не знаєш, чого хочеш насправді: найбільше змінює людину не машина, а друг поруч.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'⚙️',t:'Образи й деталі',s:'Що ховається за ними',html:`
+<p class="lead">Шість деталей, через які в повісті сказано більше, ніж прямим текстом.</p>
+${[
+['🔵','Сині цятки','Лічильник дива. Кожне бажання забирає одну — тож книжка від початку рухається до прощання, хоч і сміється всю дорогу.'],
+['📢','Розтруб машини','Бажання треба сказати вголос і точно. Уся книжка про те, як важко це зробити, коли ти сам до пуття не знаєш, чого хочеш.'],
+['🔴','Червона лампочка','Знак, що машина готова. Але готовність машини не робить готовим того, хто загадує.'],
+['🏝️','Острів із пальмами','Здійснена мрія, у якій герой опиняється сам, бо саме так і сказав. Найточніший урок точності в усій книжці.'],
+['💵','Купюра в тридцять чотири марки','Машина видала рівно те, що просили, — а такої купюри просто не існує. Виконане бажання, яке нічого не варте.'],
+['🪜','Горище','Машину звідти взяли й туди ж повернули. Диво, що припадає пилом, — найсумніший образ фіналу.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни на прикладах із твору',html:`
+<p class="lead">Означення подані так, як їх дають підручники, а приклади взяті з самої повісті.</p>
+${[
+['Повість-казка','Великий прозовий твір, у якому реальне життя героїв переплітається з дивами.','Контора, наймана кімната, поліціянт і штраф — реальні; Суботик і машина бажань — казкові.'],
+['Елементи казки в повісті','Умови появи чарівного помічника, здійснення бажань, чарівний предмет.','Шість умов тижня, машина з розтрубом, сині цятки, що зникають.'],
+['Промовисті імена','Імена, які самі щось розповідають про героя.','Вівторакус приходить у вівторок, Суботик — у суботу; Пляшкер, Моркван, Амфібер звучать кумедно вже самі собою.'],
+['Гумор','Добродушний сміх, що не принижує.','Пан Вівторакус сам собі ставить запитання і сам на них відповідає; Суботик переказує напам’ять газету, яку щойно припалив.'],
+['Мовна гра','Жарти, побудовані на самих словах.','Улюблене слівце Суботика «карколомний», яким він описує геть усе; вигадане слово «ікс-квадратва».'],
+['Комічна ситуація','Смішне становище, у яке потрапляє герой.','Машина перегрівається просто на тротуарі, і поліціянт вимагає негайно прибрати її.'],
+['Оригінал і переклад','Оригінал — текст мовою автора, переклад — той самий твір іншою мовою.','Маар писав німецькою; українською повість переклала Євгенія Горева.'],
+['Цикл','Кілька творів, об’єднаних спільними героями.','Пауль Маар написав про Суботика дев’ять книжок.'],
+['Автор-ілюстратор','Письменник, який сам малює до своїх книжок.','Маар за фахом учитель малювання й ілюструє себе сам — як і Туве Янсон.']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">Кілька цитат, сказаних до місця, важать більше, ніж переказ усього тексту.</p>
+${[
+['Машина для здійснення бажань полюбляє точність.','назва другого розділу','на початку','Головне правило книжки, винесене просто в заголовок.'],
+['Між іншим, ви забулися витерти ноги.','пані Моркван','щойно герой убігає в дім','Її перша репліка — і одразу зрозуміло, який у цьому домі порядок.'],
+['Убиваєш двох неповинних зайців! Ти, нищителю звіряток!','пан Вівторакус','почувши звичний вислів','Найсмішніший приклад того, як буквально можна зрозуміти слова.'],
+['Ікс-квадратва легко не горить.','Суботик','лагодячи машину','Вигадане слово, сказане з абсолютною впевненістю. Уся вдача Суботика в одній фразі.'],
+['Що ж, власне, вона мені дала, ця машина здійснення бажань?','пан Пляшкер','коли машину віднесли на горище','Головне питання твору — і воно поставлене вже після того, як усе скінчилося.'],
+['Ось і кінець моїм радощам!','пан Пляшкер','коли купюра виявилася непотрібною','Мить, коли стає ясно: виконане бажання й здійснена мрія — не те саме.'],
+['Не турбуйтесь! Як усе складеться добре, то сьогодні він прийде востаннє.','пан Пляшкер','пані Моркван','Він каже це, щоб заспокоїти господиню, — і сам собі не вірить.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Слід у культурі',s:'Дев’ять книжок і тридцять мов',html:`
+<div class="blk"><h3>Цілий цикл</h3>
+<p>Пауль Маар написав про Суботика дев’ять книжок. «Машина для здійснення бажань, або Суботик повертається в суботу» — одна з них, і в назві вже закладено, що герой повертається: отже, до цього була історія про те, як він з’явився і як пішов.</p></div>
+
+<div class="blk"><h3>Тридцять мов</h3>
+<p>Твори Маара перекладено тридцятьма мовами. Українською його перекладали Євгенія Горева, Ольга Сидор, Володимир Романець та Олекса Логвиненко; українське видання «Машини для здійснення бажань» вийшло 2018 року.</p></div>
+
+<div class="blk"><h3>Театр і малюнки</h3>
+<p>Маар — не лише прозаїк, а й драматург та ілюстратор. Він за фахом учитель малювання, тому й ілюстрації до своїх книжок робить сам, як і Туве Янсон.</p></div>
+
+<div class="blk"><h3>Чому книжку люблять</h3>
+<p>Бо вона виконує обіцянку, яку дає назвою: тут справді є машина, що здійснює бажання. І водночас чесно показує, що з такою машиною робити, якщо ти сам не знаєш, чого хочеш.</p></div>
+
+<div class="blk"><h3>Порада для читання далі</h3>
+<p>Якщо сподобалося, варто читати інші книжки циклу — і звернути увагу, як від книжки до книжки міняється пан Пляшкер. Саме заради цієї зміни, а не заради чарів, історії про Суботика й написані.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'🧰',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав або зробив?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Тиждень Суботика</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Головна вправа файлу: яка умова має справдитися кожного дня?</p>
+<div id="wk"></div><div class="say" id="wks"></div></div>
+
+<div class="blk"><h3>Постав розділи по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай назви від першого розділу до сьомого.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Хто є хто в цій компанії</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Тут легко заплутатися: у пана Вівторакуса ціла звіряча компанія.</p>
+<div id="rl"></div><div class="say" id="rls"></div></div>
+${fin('train')}`,
+init(){initWho();initWk();initOrder();initRl()}});
+
+const WHO=[
+ ['Між іншим, ви забулися витерти ноги.','пані Моркван',['пані Моркван','пан Амфібер','начальник']],
+ ['Убиваєш двох неповинних зайців! Ти, нищителю звіряток!','пан Вівторакус',['пан Вівторакус','Суботик','пані Моркван']],
+ ['Ікс-квадратва легко не горить.','Суботик',['Суботик','пан Пляшкер','поліціянт']],
+ ['Що ж, власне, вона мені дала, ця машина?','пан Пляшкер',['пан Пляшкер','Суботик','пані Моркван']],
+ ['Змайстрував машину з бляшаного аркуша й стільниці','Суботик',['Суботик','пан Вівторакус','пан Амфібер']],
+ ['Вилетів у відчинене вікно й опинився в чужій квартирі','пан Кулес',['пан Кулес','Анді','Кларця']],
+ ['Вимагав негайно прибрати машину з тротуару','поліціянт',['поліціянт','пані Моркван','начальник']],
+ ['Опинився на острові сам, бо неточно сказав бажання','пан Пляшкер',['пан Пляшкер','Суботик','пан Вівторакус']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Пункт ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const WK=[
+ ['Неділя','світить сонце'],
+ ['Понеділок','настає одразу по неділі'],
+ ['Вівторок','навідується пан Вівторакус'],
+ ['Середа','припадає на середину тижня'],
+ ['Четвер','чотири рази гримить грім'],
+ ['П’ятниця','з роботи відпускають раніше']
+];
+function initWk(){
+  const b=$('#wk');if(!b)return;
+  const conds=WK.map(r=>r[1]).sort(()=>Math.random()-.5);
+  b.innerHTML=WK.map((r,i)=>`<div style="margin-bottom:13px">
+    <div style="font-size:15px;margin-bottom:6px;color:var(--brass);font-family:Georgia,serif">${r[0]}</div>
+    <div id="wk${i}">${conds.map(o=>
+      `<button class="opt" style="font-size:13.5px;padding:9px 12px" onclick="ansWk(${i},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function ansWk(i,el){
+  const ok=(el.textContent===WK[i][1]);
+  $$('#wk'+i+' .opt').forEach(b=>{b.disabled=true;if(b.textContent===WK[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  buzz(ok?'success':'error');
+  if($$('#wk .opt.ok').length>=WK.length)
+    say('#wks','І тільки коли всі шість умов справдяться, у суботу приходить Суботик. Половина з них, до речі, справджується сама собою.',true);
+}
+
+const ORD=[
+ 'Грім у четвер',
+ 'Машина для здійснення бажань полюбляє точність',
+ 'Пан Кулес вилетів',
+ 'Ще одна втеча',
+ 'Суботик у небезпеці',
+ 'Коротке замикання',
+ 'Остання цятка'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','За самими назвами розділів уже видно всю історію: від грому в четвер до останньої цятки.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — цей розділ буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const RL=[
+ ['пан Кулес','папуга пана Вівторакуса'],
+ ['Анді','хом’як у клітці'],
+ ['Кларця','новенька біла мишка'],
+ ['пані Моркван','господиня будинку'],
+ ['пан Амфібер','до нього в вікно залетів чужий папуга'],
+ ['пан Пляшкер','той, кому Суботик виконує бажання']
+];
+function initRl(){
+  const b=$('#rl');if(!b)return;
+  const roles=RL.map(r=>r[1]).sort(()=>Math.random()-.5);
+  b.innerHTML=RL.map((r,i)=>`<div style="margin-bottom:13px">
+    <div style="font-size:14.5px;margin-bottom:6px;color:var(--brass)">${r[0]}</div>
+    <div id="rl${i}">${roles.map(o=>
+      `<button class="opt" style="font-size:13.5px;padding:9px 12px" onclick="ansRl(${i},this)">${o}</button>`).join('')}</div></div>`).join('');
+}
+function ansRl(i,el){
+  const ok=(el.textContent===RL[i][1]);
+  $$('#rl'+i+' .opt').forEach(b=>{b.disabled=true;if(b.textContent===RL[i][1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');
+  buzz(ok?'success':'error');
+  if($$('#rl .opt.ok').length>=RL.length)
+    say('#rls','Уся ця компанія створює в тихій кімнаті пана Пляшкера постійний галас — і саме цього йому й бракувало.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто написав «Машину для здійснення бажань»?','choice',['Пауль Маар','Роальд Дал','Туве Янсон','Оскар Уайльд'],0,'Німецький дитячий письменник, нар. 1937 року.'],
+ ['Хто такий Суботик?','choice',['Хлопчик із сусіднього будинку','Руде створіння з поросячим носиком і синіми цятками','Робот','Папуга'],1,'Він сам обрав собі тата.'],
+ ['Кому Суботик виконує бажання?','choice',['Пані Моркван','Панові Пляшкеру','Панові Вівторакусу','Панові Амфіберу'],1,'Тихому службовцеві, який усього боїться.'],
+ ['Скільки розділів у повісті?','choice',['П’ять','Шість','Сім','Дев’ять'],2,'І кожен має власну назву.'],
+ ['З чого Суботик змайстрував машину?','choice',['З пилососа','З бляшаного аркуша й стільниці','З велосипеда','З радіо'],1,'У неї є розтруб, важіль і червона лампочка.'],
+ ['Що означає червона лампочка на машині?','choice',['Небезпеку','Що машина готова до роботи','Що бажань більше немає','Перегрів'],1,'Тоді важіль ставлять на «ввімкнено».'],
+ ['Хто такий пан Кулес?','choice',['Сусід','Папуга пана Вівторакуса','Хом’як','Поліціянт'],1,'Він вилетів у вікно й дав назву третьому розділу.'],
+ ['Що забирає в Суботика кожне виконане бажання?','choice',['Одну синю цятку','День життя','Голос','Один вірш'],0,'Тому останній розділ і зветься «Остання цятка».'],
+ ['Чому купюра в тридцять чотири марки виявилася марною?','choice',['Вона була фальшива','Такої купюри насправді не існує, тож нею нічого не купиш','Її загубили','Машина помилилася'],1,'Машина видала рівно те, що просили.'],
+ ['Чим закінчується повість?','choice',['Машина працює далі','Машину відносять назад на горище','Суботик лишається назавжди','Машину продають'],1,'І пан Пляшкер сумно питає, що ж вона йому дала.'],
+ ['Пауль Маар сам ілюструє свої книжки.','tf',null,true,'За фахом він учитель малювання.'],
+ ['Про Суботика написано лише одну книжку.','tf',null,false,'Їх дев’ять.']
+];
+const Q2=[
+ ['Чому пан Пляшкер третій тиждень нервує на роботі?','choice',['Він хворий','Він чекає, коли тиждень нарешті складеться за всіма умовами','Він посварився з начальником','Він шукає нову роботу'],1,'І щоп’ять хвилин зиркає на годинник.'],
+ ['Які дві умови найважче виконати?','choice',['Понеділок і середа','Сонце в неділю й чотириразовий грім у четвер','Вівторок і п’ятниця','Усі однаково важкі'],1,'Понеділок і середа справджуються самі собою.'],
+ ['Що означає назва другого розділу?','choice',['Машина точна в часі','Машина виконує сказане дослівно, тому формулювати треба точно','Машина потребує ремонту','Машина рахує бажання'],1,'На цьому побудовані всі подальші пригоди.'],
+ ['Чому пан Пляшкер опинився на острові сам?','choice',['Суботик відмовився','Він сказав бажання лише про себе','Машина зламалася','Так вирішила машина'],1,'Довелося загадувати ще раз — щоб удвох.'],
+ ['Чому пані Моркван обурюється через пана Вівторакуса?','choice',['Він галасливий','Він приходить щовівторка зі звіринцем, і вона погрожує брати плату за помешкання','Він не платить за каву','Він зламав двері'],1,'А його прихід — одна з умов появи Суботика.'],
+ ['Чим Суботик відрізняється від пана Пляшкера?','choice',['Він молодший','Він нічого не боїться, бо йому просто не спадає на думку боятися','Він сильніший','Він багатший'],1,'І поступово це передається «татусеві».'],
+ ['Навіщо в книжці вигадка про сині цятки?','choice',['Щоб було красиво','Щоб читач разом із героями відлічував час до прощання','Щоб пояснити чари','Щоб полічити бажання для машини'],1,'Що більше дива, то менше його лишається.'],
+ ['Що дала панові Пляшкеру машина?','choice',['Багатство','Майже нічого, крім тижня пригод поруч із Суботиком','Нову роботу','Спокій'],1,'Він сам про це й питає наприкінці.'],
+ ['Чому диво в цій книжці приходить «за розкладом»?','choice',['Так вирішив автор навмання','Щоб показати, що чарівне виростає зі звичайного тижня','Так простіше рахувати','Це помилка перекладу'],1,'Сонце в неділю, Вівторакус у вівторок, грім у четвер.'],
+ ['Чому Суботика називають утіленням дитячого погляду на світ?','choice',['Він малий','Він поводиться природно й не знає безглуздих заборон','Він любить іграшки','Він ходить до школи'],1,'Про це прямо сказано в підручнику.'],
+ ['Пані Моркван у творі — злий персонаж.','tf',null,false,'Вона буркотлива й прискіплива, але нікого по-справжньому не кривдить.'],
+ ['Машина виконувала бажання так, як герой їх задумував.','tf',null,false,'Вона виконувала їх дослівно — так, як їх було сказано.']
+];
+const Q3=[
+ ['Яке означення повісті-казки правильне?','choice',['Короткий твір про одну подію','Великий прозовий твір, де реальне життя героїв переплітається з дивами','Твір для сцени','Вірш із сюжетом'],1,'Контора й поліціянт — реальні, Суботик і машина — казкові.'],
+ ['Що є кульмінацією твору?','choice',['Поява Суботика','Похід у ресторан','Мить, коли машина виходить з-під контролю й ламається','Купівля бляхи'],2,'Саме тоді диво перестає слухатися героїв.'],
+ ['Які елементи казки є в повісті?','choice',['Тільки чарівний предмет','Умови появи чарівного помічника, чарівний предмет, здійснення бажань','Лише говорючі тварини','Жодних'],1,'Про це просять розказати в підручнику.'],
+ ['Що таке промовисті імена?','choice',['Довгі імена','Імена, які самі щось розповідають про героя','Імена з великої літери','Прізвиська'],1,'Вівторакус приходить у вівторок, Суботик — у суботу.'],
+ ['Яку роль відіграє мовна гра в цій книжці?','choice',['Ускладнює текст','Створює гумор: улюблене слівце «карколомний», вигадана «ікс-квадратва»','Пояснює сюжет','Її немає'],1,'Суботик грається словами так само вільно, як і речами.'],
+ ['У чому виявляється авторська позиція Маара?','choice',['Він засуджує дорослих','Він вигадує світ дитинства без безглуздих обмежень і образ, де панують радість і довіра','Він на боці пані Моркван','Він не має позиції'],1,'Письменник сам про це казав.'],
+ ['Що символізує горище наприкінці?','choice',['Забуття: диво знову припадає пилом','Багатство','Втечу','Нову пригоду'],0,'Машину повернули точно на те саме місце.'],
+ ['Чому фінал не можна назвати цілком веселим?','choice',['Машина зламалася','Бо цятки закінчуються і Суботик мусить піти','Пан Пляшкер захворів','Пані Моркван виселила героя'],1,'Веселою книжка залишається до останніх сторінок.'],
+ ['Що спільного між Пауль Мааром і Туве Янсон?','choice',['Обоє з Німеччини','Обоє самі ілюстрували свої книжки','Обоє писали віршами','Обоє були вчителями'],1,'Маар за фахом учитель малювання, Янсон — художниця.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Мрії здійснюються','Здійснення бажань нічого не варте, якщо не знаєш, чого хочеш; змінює людину не машина, а друг','Треба бути точним у словах','Чарів не буває'],1,'Третє твердження теж є в книжці, але воно лише частина.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--brass)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Розкажи про автора твору.',
+ 'Пауль Маар — популярний німецький дитячий письменник, драматург та ілюстратор, народився 1937 року. За професією він учитель малювання: після Академії мистецтв десять років працював за фахом, тому й свої книжки ілюструє сам. Писати для дітей його спонукав п’ятирічний син, який попросив почитати щось цікавеньке, а в бібліотеці не знайшлося захопливих книжок. Перша книжка Маара називалася «Собака з татуюванням», а всього про Суботика він написав дев’ять книжок. Його твори перекладено тридцятьма мовами.'],
+['Хто такий Суботик?',
+ 'Це вигаданий персонаж Пауля Маара — добре руде створіння з поросячим носиком і синіми цятками замість ластовиння, яке ходить у водолазному костюмі. Він має дуже енергійний характер і здатний зробити такими самими всіх, з ким зустрічається. У підручнику сказано, що Суботик — утілення природного, дитячого погляду на світ. Він сам обирає собі тата: трохи старомодного й нудного пана Пляшкера, котрий усього боїться. Кожне виконане бажання забирає в Суботика одну синю цятку.'],
+['За яких умов приходить Суботик?',
+ 'Тиждень має скластися в цілком певний спосіб: у неділю має світити сонце, понеділок — настати одразу по неділі, у вівторок має навідатися друг пан Вівторакус, середа має припасти на середину тижня, у четвер чотири рази має прогриміти грім, а в п’ятницю мають відпустити з роботи раніше. Тоді в суботу приходить Суботик. Найсмішніше тут те, що половина умов справджується сама собою — понеділок і так іде після неділі, а середа й так посеред тижня. По-справжньому складні лише дві: сонце в неділю й чотири громи в четвер.'],
+['Визнач жанр твору й доведи.',
+ 'Це повість-казка. Повість — бо твір великий, поділений на сім розділів, і в ньому багато подій та героїв. А казковими його роблять елементи чарівного: сам Суботик, умови його появи, чарівна машина, що виконує бажання, і сині цятки, які зникають після кожного здійсненого бажання. При цьому все довкола цілком реальне: контора й начальник, наймана кімната, господиня, поліціянт зі штрафом. Саме на цьому поєднанні книжка й тримається.'],
+['Що означає назва другого розділу — «Машина для здійснення бажань полюбляє точність»?',
+ 'Це головне правило всієї книжки: машина виконує не те, що ти мав на увазі, а те, що ти сказав уголос у розтруб. Через це пан Пляшкер, побажавши побачити острів, опиняється там сам-один — без Суботика, бо саме так і сформулював. Довелося загадувати ще раз, щоб бути там удвох. А коли він забажав купюру в тридцять чотири марки, машина її видала — тільки такої купюри насправді не існує, тож купити за неї нічого не можна. Тобто здійснене бажання й здійснена мрія — це різні речі.'],
+['Як змінюється пан Пляшкер?',
+ 'На початку це тихий службовець, який усього боїться: начальника, господині пані Моркван, поліціянта і взагалі того, що про нього подумають. Він живе в найманій кімнаті за чужими правилами й навіть ноги витирає під наглядом. Поруч із Суботиком, який не боїться нічого і якому просто не спадає на думку боятися, він поступово розкріпачується: замовляє дивні речі, майструє, подорожує, сперечається з поліціянтом. У підручнику прямо сказано, що саме про цю зміну «новоспеченого татуся» й розповідають книжки про Суботика.'],
+['Що дала панові Пляшкеру машина для здійснення бажань?',
+ 'Майже нічого. Ані грошей — купюра виявилася непотрібною, ані спокою — машина перегрівалася, ламалася й виходила з-під контролю. Наприкінці її відносять назад на горище, ставлять на те саме місце, де вона й стояла, і пан Пляшкер сумно озирається та питає сам себе, що ж вона, власне, йому дала. Але тиждень із Суботиком він таки прожив — і саме це, а не машина, його змінило.'],
+['Яка головна думка твору?',
+ 'Здійснення бажань нічого не варте, якщо не знаєш, чого хочеш насправді: найбільше змінює людину не машина, а друг поруч. Автор доводить це двічі. По-перше, бажаннями, які виконуються дослівно й тому не приносять радості. По-друге, фіналом: машина повертається на горище припадати пилом, а сумно героєві не через неї, а через те, що в Суботика лишається остання цятка.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
