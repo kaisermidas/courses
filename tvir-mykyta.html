@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Микита Кожум'яка — розбір твору</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#1A1214; --card:#241A1C;
+  --ink:#F2E9E0; --dim:#A8968F;
+  --gold:#E3B34F; --crimson:#C24E45; --steel:#8FA3B0;
+  --line:rgba(242,233,224,.14);
+  --ok:#7CBE93; --no:#DE7264;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  overscroll-behavior:none}
+body{padding:0 0 40px}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman",serif;font-weight:600}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.scr{display:none}.scr.on{display:block}
+
+.hero{position:relative;padding:26px 16px 22px;overflow:hidden;
+  background:radial-gradient(110% 80% at 84% 6%,#3B2020 0%,var(--bg) 68%)}
+.fire{position:absolute;top:10px;right:14px;width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 50% 55%,rgba(226,120,60,.35),rgba(194,78,69,.12) 55%,transparent 72%);
+  filter:blur(4px);pointer-events:none}
+.mace{position:absolute;top:96px;right:98px;width:4px;height:70px;background:linear-gradient(180deg,transparent,rgba(227,179,79,.35));
+  transform:rotate(24deg);border-radius:4px;pointer-events:none}
+.hero h1{margin:0;font-size:32px;line-height:1.06;letter-spacing:-.5px}
+.hero .by{margin:8px 0 0;color:var(--dim);font-size:14px}
+.hero .meta{margin-top:14px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;padding:4px 10px;border:1px solid var(--line);border-radius:20px;color:var(--dim)}
+.bar{margin-top:16px;height:5px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--crimson),var(--gold));transition:width .5s}
+.barlab{margin-top:7px;font-size:12px;color:var(--dim)}
+
+.gh{margin:26px 0 10px;font-size:12px;color:var(--dim);letter-spacing:.5px}
+.mod{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:13px 14px;margin-bottom:9px;color:var(--ink);font-size:15px;cursor:pointer}
+.mod:active{transform:scale(.985)}
+.mod .ic{font-size:22px;width:28px;text-align:center;flex:none}
+.mod b{display:block;font-weight:600}
+.mod small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.mod .dot{margin-left:auto;flex:none;width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.15)}
+.mod.done .dot{background:var(--ok)}
+
+.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:12px 16px;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+.back{background:none;border:none;color:var(--steel);font-size:15px;padding:4px 0;cursor:pointer}
+.top h2{margin:0;font-size:16px;flex:1}
+#t-body{padding:16px}
+
+.blk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px}
+.blk h3{margin:0 0 8px;font-size:17px;color:var(--gold)}
+.blk p{margin:0 0 9px}.blk p:last-child{margin-bottom:0}
+.blk ul{margin:6px 0 0;padding-left:19px}.blk li{margin-bottom:5px}
+.lead{color:var(--dim);font-size:14px;margin:0 0 14px}
+.q{border-left:3px solid var(--crimson);padding:2px 0 2px 12px;margin:10px 0;
+  font-family:Georgia,serif;font-style:italic}
+.rem{border-left:3px dashed var(--steel);padding:2px 0 2px 12px;margin:10px 0;
+  font-size:14px;color:var(--steel);font-style:italic}
+.note{background:rgba(227,179,79,.11);border:1px solid rgba(227,179,79,.3);
+  border-radius:10px;padding:10px 12px;font-size:14.5px;margin-top:10px}
+
+.facts{display:grid;grid-template-columns:1fr;gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.facts div{background:var(--card);padding:11px 14px;display:flex;gap:12px}
+.facts span{color:var(--dim);font-size:13px;flex:none;width:104px;padding-top:1px}
+.facts b{font-weight:600;font-size:14.5px}
+
+.tl{position:relative;padding-left:26px}
+.tl:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--crimson),var(--gold))}
+.tl div{position:relative;margin-bottom:15px}
+.tl div:before{content:"";position:absolute;left:-23px;top:6px;width:9px;height:9px;
+  border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--bg)}
+.tl b{color:var(--gold);font-size:13px;display:block}
+
+.ch{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.ch>button{width:100%;display:flex;gap:11px;align-items:center;background:none;border:none;
+  color:var(--ink);padding:12px 14px;text-align:left;font-size:14.5px;cursor:pointer;font-family:inherit}
+.ch .n{font-family:Georgia,serif;color:var(--crimson);font-size:18px;width:26px;flex:none}
+.ch .body{display:none;padding:0 14px 14px;font-size:14.5px}
+.ch.open .body{display:block}
+.ch .body .key{margin-top:9px;color:var(--ok);font-size:13.5px}
+.ch .body .scene{font-size:12.5px;color:var(--steel);font-style:italic;margin-bottom:8px}
+
+.per{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:10px}
+.per h4{margin:0;font-size:16px;font-family:Georgia,serif}
+.per .role{color:var(--dim);font-size:12.5px;margin:2px 0 8px}
+.per .tr{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.per .tr i{font-style:normal;font-size:12px;padding:3px 9px;border-radius:20px;
+  background:rgba(143,163,176,.16);color:var(--steel)}
+.per .said{font-family:Georgia,serif;font-style:italic;font-size:14px;color:var(--gold)}
+
+.btn{background:var(--crimson);color:#fff;border:none;border-radius:11px;padding:12px 18px;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.g{background:rgba(255,255,255,.09);color:var(--ink)}
+.btn:active{opacity:.85}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:8px;
+  font-size:15px;cursor:pointer;font-family:inherit}
+.opt.ok{border-color:var(--ok);background:rgba(124,190,147,.15)}
+.opt.no{border-color:var(--no);background:rgba(222,114,100,.13)}
+.opt:disabled{opacity:.75}
+.say{margin:10px 0;padding:10px 12px;border-radius:11px;font-size:14.5px;display:none}
+.say.on{display:block}
+.say.y{background:rgba(124,190,147,.15);border:1px solid var(--ok)}
+.say.n{background:rgba(222,114,100,.13);border:1px solid var(--no)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;font-size:14px;cursor:pointer;color:var(--ink);font-family:inherit}
+.chip.used{opacity:.3;pointer-events:none}
+.chip.ok{border-color:var(--ok)}.chip.no{border-color:var(--no)}
+.slot{min-height:44px;border:1px dashed var(--line);border-radius:11px;padding:8px;
+  margin:10px 0;font-size:14px;color:var(--dim)}
+.prog{font-size:13px;color:var(--dim);margin-bottom:10px}
+
+.sp{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:10px}
+.sp b{display:block;font-size:15px;margin-bottom:8px}
+.sp .ans{display:none;font-size:14.5px;border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.sp.open .ans{display:block}
+.sp button{background:rgba(255,255,255,.08);border:none;color:var(--steel);
+  border-radius:9px;padding:8px 12px;font-size:13.5px;cursor:pointer;font-family:inherit}
+
+.lvl{display:flex;gap:12px;align-items:center;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;
+  color:var(--ink);cursor:pointer;text-align:left;font-family:inherit}
+.lvl .ic{font-size:24px}
+.lvl b{display:block;font-size:15px}
+.lvl small{color:var(--dim);font-size:12.5px}
+.lvl .sc{margin-left:auto;color:var(--gold);font-size:13px;font-family:Georgia,serif}
+.res{text-align:center;padding:20px 0}
+.res .big{font-size:46px;font-family:Georgia,serif;color:var(--gold)}
+.res .st{font-size:26px;letter-spacing:4px;margin:6px 0 12px}
+.wrongs{text-align:left;margin-top:18px}
+.wrongs .w{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:12px;margin-bottom:9px;font-size:14px}
+.wrongs .w em{color:var(--no);font-style:normal}
+.wrongs .w s{color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div id="s-home" class="scr on">
+  <div class="hero">
+    <div class="fire"></div><div class="mace"></div>
+    <h1>Микита<br>Кожум'яка</h1>
+    <p class="by">Олександр Олесь · казка-п'єса в чотирьох картинах</p>
+    <div class="meta">
+      <span class="tag">драматичний твір</span>
+      <span class="tag">казка-п'єса</span>
+      <span class="tag">за народною казкою</span>
+    </div>
+    <div class="bar"><i id="pbar"></i></div>
+    <div class="barlab" id="plab">Пройдено 0 з 13</div>
+  </div>
+  <div class="wrap" id="menu"></div>
+</div>
+
+<div id="s-tool" class="scr">
+  <div class="top">
+    <button class="back" onclick="home()">‹ Назад</button>
+    <h2 id="t-title"></h2>
+  </div>
+  <div class="wrap"><div id="t-body"></div></div>
+</div>
+
+<script>
+/* ============ ядро ============ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+let TIMERS=[];
+function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id}
+function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[]}
+const TG=window.Telegram&&window.Telegram.WebApp;
+if(TG){TG.ready();TG.expand();try{TG.setHeaderColor('#1A1214')}catch(e){}}
+
+const KEY='mykyta-tvir-v1';
+let PR={done:{},best:{}};
+function load(cb){
+  try{const l=localStorage.getItem(KEY);if(l)PR=Object.assign(PR,JSON.parse(l))}catch(e){}
+  if(TG&&TG.CloudStorage){
+    TG.CloudStorage.getItem(KEY,(err,val)=>{
+      if(!err&&val){try{PR=Object.assign(PR,JSON.parse(val))}catch(e){}}
+      cb();
+    });
+  } else cb();
+}
+function save(){
+  const s=JSON.stringify(PR);
+  try{localStorage.setItem(KEY,s)}catch(e){}
+  if(TG&&TG.CloudStorage){try{TG.CloudStorage.setItem(KEY,s)}catch(e){}}
+}
+function mark(k){if(!PR.done[k]){PR.done[k]=1;save()}paint()}
+function buzz(t){try{TG.HapticFeedback.notificationOccurred(t)}catch(e){}}
+function say(sel,txt,ok){const e=$(sel);if(!e)return;e.className='say on '+(ok?'y':'n');e.innerHTML=txt}
+function hide(sel){const e=$(sel);if(e)e.className='say'}
+
+const GROUPS=['Про твір','Розібратися','Перевірити себе'];
+const M={},ORDER=[];
+function T(k,o){M[k]=o;ORDER.push(k)}
+
+function paint(){
+  $('#menu').innerHTML=GROUPS.map((g,gi)=>{
+    const items=ORDER.filter(k=>M[k].g===gi).map(k=>{
+      const m=M[k];
+      return `<button class="mod ${PR.done[k]?'done':''}" onclick="open_('${k}')">
+        <span class="ic">${m.ic}</span>
+        <span><b>${m.t}</b><small>${m.s}</small></span>
+        <span class="dot"></span></button>`;
+    }).join('');
+    return `<div class="gh">${g}</div>${items}`;
+  }).join('');
+  const n=ORDER.filter(k=>PR.done[k]).length;
+  $('#pbar').style.width=Math.round(n/ORDER.length*100)+'%';
+  $('#plab').textContent=`Пройдено ${n} з ${ORDER.length}`;
+}
+function open_(k){
+  stopAll();
+  const m=M[k];
+  $('#t-title').textContent=m.t;
+  $('#t-body').innerHTML=m.html;
+  $('#s-home').classList.remove('on');
+  $('#s-tool').classList.add('on');
+  window.scrollTo(0,0);
+  if(m.init)m.init();
+  if(TG&&TG.BackButton){TG.BackButton.show();TG.BackButton.onClick(home)}
+}
+function home(){
+  stopAll();
+  $('#s-tool').classList.remove('on');
+  $('#s-home').classList.add('on');
+  window.scrollTo(0,0);
+  if(TG&&TG.BackButton)TG.BackButton.hide();
+  paint();
+}
+function done(k){mark(k);home()}
+function fin(k){return `<button class="btn" style="width:100%;margin-top:6px" onclick="done('${k}')">Готово, зрозумів</button>`}
+function toggle(el){el.parentNode.classList.toggle('open')}
+
+/* ================= 1. ПАСПОРТ ================= */
+T('passport',{g:0,ic:'📋',t:'Паспорт твору',s:'Те, що просять назвати першим',html:`
+<p class="lead">Відповіді, з яких починається будь-яка усна відповідь на уроці.</p>
+<div class="facts">
+  <div><span>Автор</span><b>Олександр Олесь — псевдонім; справжнє ім’я Олександр Іванович Кандиба</b></div>
+  <div><span>Роки життя</span><b>1878–1944</b></div>
+  <div><span>Назва</span><b>«Микита Кожум’яка»</b></div>
+  <div><span>Жанр</span><b>казка-п’єса — різновид драматичного твору, написаного для постановки на сцені</b></div>
+  <div><span>Будова</span><b>чотири картини, кожна відбувається в іншому місці</b></div>
+  <div><span>Основа</span><b>однойменна народна казка про богатиря-змієборця</b></div>
+  <div><span>Тема</span><b>боротьба народу зі Змієм, якому князівство платить страшну данину, і подвиг простого кожум’яки, що врятував Князівну й цілий край</b></div>
+  <div><span>Головна думка</span><b>рятує країну не той, хто має владу й титул, а звичайна людина з праці й сумління: «хто не бореться, той раб»</b></div>
+  <div><span>Дійові особи</span><b>Микита Кожум’яка, Батько (він же Дід), Князь, Княгиня, Князівна, воєводи, сини, парубок, старий дід, дівчинка, гонець, джура, юрба</b></div>
+  <div><span>Особливість</span><b>у драматичному творі немає мови автора: усе розкривається через репліки дійових осіб і ремарки</b></div>
+  <div><span>Головний засіб</span><b>гіпербола — надмірне перебільшення сили героя</b></div>
+</div>
+<div class="note"><b>Не сплутай два твори.</b> У книжці «Княжа Україна» Олеся є ще коротка віршована оповідь про Кожум’яку, який поборов печенізького велетня. А на уроці вивчають саме казку-п’єсу в чотирьох картинах, де він б’ється зі Змієм.</div>
+${fin('passport')}`});
+
+/* ================= 2. АВТОР ================= */
+T('author',{g:0,ic:'👤',t:'Автор',s:'Поет, який прокинувся знаменитим',html:`
+<p class="lead">Олександр Олесь відомий передусім як тонкий лірик — але писав і для дітей, і для дитячого театру.</p>
+
+<div class="blk"><h3>Справжнє ім’я</h3>
+<p>Олександр Олесь — це псевдонім. Насправді письменника звали Олександр Іванович Кандиба, жив він із 1878 до 1944 року.</p></div>
+
+<div class="blk"><h3>Слава за одну ніч</h3>
+<p>Він належить до тих людей, яким не довелося довго чекати визнання: наступного дня після виходу першої збірки віршів «З журбою радість обнялась» він прокинувся знаменитим. Поезія одразу припала читачам до душі.</p>
+<div class="note">Леся Українка навіть заявила, що Олесь її випередив — і тепер писати вірші їй не варто.</div></div>
+
+<div class="blk"><h3>Книжка про давнину</h3>
+<p>Для дітей Олесь створив книжку «Княжа Україна» — віршовані оповіді, сюжети яких постали на основі літописних даних. Читаючи їх, ніби переносишся на тисячу років назад: там і «Заспів», і оповідь про князя Ярослава, якого народ нарік Мудрим.</p></div>
+
+<div class="blk"><h3>Театр для дітей</h3>
+<p>Олесь піклувався про розвиток дитячого театру — і саме тому «Микита Кожум’яка» написаний не як оповідання, а як п’єса: щоб діти могли її зіграти. Основою став сюжет однойменної народної казки.</p></div>
+
+<div class="blk"><h3>Хто такий Кожум’яка</h3>
+<p>Микита (за іншою версією — Кирило) Кожум’яка — народний богатир-змієборець. Уперше його згадано в літописі «Повість минулих літ». За переказом, він жив у Києві на Подолі й там-таки переміг великого й страшного Змія, а на місці бою збудували Кирилівську церкву. У мирний час він, як і сусіди, м’яв шкіри — звідси й прізвисько.</p></div>
+${fin('author')}`});
+
+/* ================= 3. ІСТОРІЯ ================= */
+T('history',{g:0,ic:'📜',t:'Звідки взявся цей сюжет',s:'Від літопису до мультфільму',html:`
+<div class="blk"><div class="tl">
+<div><b>давнина</b>Народна казка про Кожум’яку, який звільнив рідну землю від великого лиха, живе в усних переказах.</div>
+<div><b>літопис</b>Богатиря вперше згадано в «Повісті минулих літ». За переказом, він жив у Києві на Подолі й переміг Змія, а на тому місці постала Кирилівська церква.</div>
+<div><b>прізвисько</b>У мирний час він м’яв шкіри, як і всі його сусіди, — звідси й Кожум’яка.</div>
+<div><b>Олександр Олесь</b>За мотивами народної казки письменник створює казку-п’єсу в чотирьох картинах — спеціально для постановки на сцені дитячого театру.</div>
+<div><b>ілюстрації</b>Образ Кожум’яки малювали українські художники, зокрема Петро Андрусів.</div>
+<div><b>2016</b>Виходить український анімаційний фільм «Микита Кожум’яка» режисера Манука Депояна — за мотивами книжки Антона Сіяніки. Це вже інша історія, але з тим самим героєм.</div>
+</div></div>
+<div class="note"><b>Що треба на уроці:</b> Олександр Олесь (Кандиба), 1878–1944, казка-п’єса в чотирьох картинах, створена за народною казкою, герой уперше згаданий у «Повісті минулих літ».</div>
+${fin('history')}`});
+
+/* ================= 4. СЮЖЕТ ================= */
+const CH=[
+ ['Картина перша','Палати Князя',
+  'Князь сумний: на чоло йому лягли хмари. Змій вимагає данину, і черга дійшла до Князівни — Змій хоче взяти її собі. Княгиня каже, що навіть коли орда кипіла в степах, вона так серцем не боліла. Князь вирішує підняти весь народ і скликати воєвод на нараду.',
+  'Зав’язка: біда названа, і зрозуміло, чого вона коштує саме цій родині.'],
+ ['Картина друга','Велика світлиця в палатах',
+  'За столами сидять воєводи. Князь питає, за яку провину вони мусять платити данину, і кличе на двобій. Воєводи говорять красиво — «час до вітру обернутись», «хай загине лютий Змій» — але щойно Князь питає, хто ж піде, западає тиша. Тоді приходить простий Дід і каже, що Змія поборов би його найменший син. Князь відпускає воєвод зі словами, що орли є не в цій палаті, а в мужицькій простій хаті. Ті виходять із ніяково похиленими головами.',
+  'Найгостріша картина твору: сміливі слова й порожні місця під ними.'],
+ ['Картина третя','Подвір’я Кожум’яки',
+  'Сини при роботі: гнуть дуги, мнуть шкури. Микита бере по дванадцять шкур одразу. До нього по черзі приходять просити: спершу дванадцять парубків, потім дванадцять дідів — і обом він кидає «Одчепіться!». І тільки коли приходять діти й дівчинка каже про Князівну, він відповідає, що скарбів не хоче, але на двобій піде. Тут вбігає гонець: Змій украв Князівну з палат.',
+  'Триразовий повтор, як у народних казках, — і саме третій, найслабший на вигляд посланець виявляється найсильнішим.'],
+ ['Картина четверта','Майдан за містом',
+  'Світає. Удалині на горі — химерний замок Змія з освітленими вікнами. Юрба збирається й переказує все, що бачить: як Микиті всю ніч кували залізну булаву, як він стукає у ворота, як Змій сипле іскри з рота. Далі бій переказують голоси з дерев: схопились, відскочили, Змій пустив пару, гупає булава, площу вкрив дим. Нарешті Змій падає, і Микита ще раз б’є його об землю. Кричать «Слава Микиті!», і герой виносить із палацу Князівну на руках.',
+  'Розв’язка. Бій ми не бачимо — його переказують очевидці, і від цього напруження тільки більше.']
+];
+
+T('plot',{g:0,ic:'🗺️',t:'Сюжет',s:'Чотири картини п’єси',html:`
+<p class="lead">Драматичний твір ділять на дії або картини, і кожна відбувається в іншому місці. Тут їх чотири — натисни на будь-яку.</p>
+${CH.map((c,i)=>`<div class="ch"><button onclick="toggle(this)">
+  <span class="n">${i+1}</span><span>${c[0]}</span></button>
+  <div class="body"><div class="scene">Місце дії: ${c[1]}</div><p>${c[2]}</p><div class="key">▸ ${c[3]}</div></div></div>`).join('')}
+
+<div class="blk"><h3>Триразовий повтор</h3>
+<p>У народних казках події часто повторюються тричі. Тут це видно чітко: до Микити приходять <b>парубки</b>, потім <b>діди</b>, потім <b>діти</b>. Перших двох він проганяє, а третіх слухає. Ще один повтор — число дванадцять: дванадцять шкур, дванадцять парубків, дванадцять дідів, дванадцять дітей.</p></div>
+
+<div class="blk" style="margin-top:18px"><h3>Елементи сюжету</h3>
+<p style="font-size:14.5px">Признач кожній події її опору.</p>
+<div id="comp"></div>
+<div class="say" id="cs"></div></div>
+${fin('plot')}`,
+init(){buildComp()}});
+
+const COMP=[
+ ['Сумний Князь, Княгиня і Князівна в палатах; край платить данину Змієві','експозиція'],
+ ['Черга дійшла до Князівни, і Князь скликає воєвод на двобій','зав’язка'],
+ ['Воєводи мовчать; Дід називає сина; посланці ходять до Микити','розвиток дії'],
+ ['Двобій Микити зі Змієм на горі','кульмінація'],
+ ['Змій переможений, Микита виносить Князівну','розв’язка']
+];
+const CNAMES=['експозиція','зав’язка','розвиток дії','кульмінація','розв’язка'];
+function buildComp(){
+  const box=$('#comp');if(!box)return;
+  box.innerHTML=COMP.map((c,i)=>`<div style="margin:12px 0 16px">
+    <div style="font-size:14.5px;margin-bottom:7px">${c[0]}</div>
+    <div class="row" id="cr${i}">${CNAMES.map(n=>
+      `<button class="chip" onclick="pickComp(${i},'${n}',this)">${n}</button>`).join('')}</div></div>`).join('');
+}
+function pickComp(i,n,el){
+  const ok=COMP[i][1]===n;
+  $$('#cr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  if(!ok){$$('#cr'+i+' .chip').forEach(b=>{if(b.textContent===COMP[i][1])b.classList.add('ok')})}
+  buzz(ok?'success':'error');
+  if($$('#comp .chip.ok').length>=5)
+    say('#cs','Зверни увагу: кульмінацію глядач не бачить — бій переказують голоси з юрби. Для сцени це навмисний прийом.',true);
+}
+
+/* ================= 5. ПЕРСОНАЖІ ================= */
+const PERS=[
+ ['Микита Кожум’яка','головна дійова особа, простий ремісник',
+  ['неймовірно сильний','мовчазний','упертий','добрий','скромний'],
+  'Найменший із синів, а найдужчий: бере по дванадцять шкур одразу, змалку боров батька, колись перекинув коня через тин. Спершу відмахується від усіх посланців, бо не любить, коли відривають від роботи. Але скарбів не хоче зовсім — його переконують не золото й не наказ Князя, а слова дітей про Князівну й про правду.',
+  'Скарбів, діти, я не хочу!'],
+ ['Батько (він же Дід)','батько Микити',
+  ['мудрий','безкорисливий','з гумором'],
+  'Сам іде до Князя і пропонує сина, хоч від нагороди відмовляється: каже, що нічого не просить, а хотів лише помогти в тяжкій журбі. Він же дає єдину правильну пораду — посилати спершу молодих, потім старих, а як не вийде, то дітей, бо наймиліша синові дитина.',
+  'Не прошу нічого в тебе.'],
+ ['Князь','правитель краю',
+  ['рішучий на словах','справедливий','безсилий сам'],
+  'Він перший каже головні слова твору про те, що хто не бореться, той раб. Але сам на двобій не йде і мусить шукати рятівника. Найважливіша його репліка — про орлів, яких немає в палаті, зате є в мужицькій хаті: правитель сам визнає, де справжня сила краю.',
+  'Хто не бореться, той раб!'],
+ ['Воєводи','військова знать',
+  ['красномовні','боязкі'],
+  'П’ятеро воєвод по черзі промовляють гучні слова: час обернутися вітром, час підставити груди, хай загине лютий Змій. Але щойно Князь питає, хто саме вкриє себе славою, настає тиша. З палати вони виходять із ніяково похиленими головами.',
+  'Мусим ми скоритись долі.'],
+ ['Князівна','дочка Князя',
+  ['мужня','гідна','любить батьків'],
+  'Саме її черга йти до Змія. Вона намагається заспокоїти батька й матір, а не плаче й не благає. Про її красу говорять як про недосяжну зірку, але важливіша тут не краса, а те, як вона тримається в біді.',
+  '(заспокоює батька й матір)'],
+ ['Дівчинка','посланка від дітей',
+  ['смілива','щира'],
+  'Третій і найдієвіший посланець. Її мова зовсім не схожа на прохання парубків і дідів: вона говорить про Князівну через порівняння з квіткою, небом, коралами й солов’ями, а тоді просто каже, що коли це правда, то лицар мусить піти. Саме після цих слів Микита погоджується.',
+  'Ще не вмерла правда в світі, вогник віри не погас...'],
+ ['Змій','ворог краю',
+  ['страшний','ненажерливий','сильний'],
+  'На сцені його майже не показують — тільки химерний замок на горі з освітленими вікнами й голоси юрби, які переказують, як він сипле іскри з рота й пускає пару. Він бере данину людьми, а тепер захотів Князівну. Гине від булави Микити.',
+  '(сипле іскри з вікна)'],
+ ['Юрба','мешканці міста',
+  ['цікаві','налякані','вдячні'],
+  'Дівчата, голоси з дерев, дід, парубок — усі вони переказують глядачеві те, чого не видно на сцені. Завдяки їм ми «бачимо» і булаву, і дим, і падіння Змія. Це дуже театральний прийом: бою немає, а напруження є.',
+  'Слава, слава Микиті!']
+];
+
+T('chars',{g:1,ic:'👥',t:'Дійові особи',s:'Хто вони і навіщо в п’єсі',html:`
+<p class="lead">У драматичному творі персонажів називають <b>дійовими особами</b>, і їхній список автор подає на самому початку — щоб читач або актор одразу уявляв, про кого йтиметься.</p>
+${PERS.map(p=>`<div class="per">
+  <h4>${p[0]}</h4><div class="role">${p[1]}</div>
+  <div class="tr">${p[2].map(t=>`<i>${t}</i>`).join('')}</div>
+  <p style="font-size:14.5px;margin:0 0 9px">${p[3]}</p>
+  <div class="said">«${p[4]}»</div></div>`).join('')}
+<div class="note">Найкорисніше протиставлення для відповіді: <b>воєводи й Микита</b>. Перші багато говорять і нічого не роблять; другий не говорить майже нічого — і робить усе.</div>
+${fin('chars')}`});
+
+/* ================= 6. ТЕМИ ================= */
+T('themes',{g:1,ic:'💡',t:'Теми й головна думка',s:'Про що це насправді',html:`
+<p class="lead">П’єса коротка, але думок у ній кілька — і головна з них зовсім не про Змія.</p>
+
+<div class="blk"><h3>Сила народу, а не влади</h3>
+<p>Ціла палата воєвод не дала жодного бійця. Рятує край простий кожум’яка з мужицької хати. І найважливіше, що це визнає сам Князь.</p>
+<div class="q">Але є ще в нас орли, та не тут, не в цій палаті, а в мужицькій простій хаті!</div></div>
+
+<div class="blk"><h3>Хто не бореться, той раб</h3>
+<p>Головна фраза твору. Данину платили роками й звикли; Князь каже, що неволі треба нарешті крикнути «доволі». Змій сильний рівно доти, доки ніхто не наважується вийти проти нього.</p></div>
+
+<div class="blk"><h3>Слова і вчинки</h3>
+<p>Воєводи промовляють по черзі красиві фрази — а на пряме питання відповідає тиша. Микита за всю картину каже кілька слів, і майже всі вони — «одчепіться». Олесь ставить ці дві мови поруч навмисно.</p></div>
+
+<div class="blk"><h3>Чому подіяли саме діти</h3>
+<p>Дід одразу попереджає: шли молодих, не послухає — старих, а не вийде, то дітей, бо наймиліша синові дитина. Так і сталося. Микиту не примусили ні князівський наказ, ні пошана — його переконало те, що просять діти й що йдеться про правду.</p></div>
+
+<div class="blk"><h3>Герой без нагороди</h3>
+<p>Йому обіцяють усе, чого схоче, і навіть серце Князівни. Він відповідає, що скарбів не хоче: що б він із ними робив. Батько так само відмовляється від золота. У цій родині допомагають не за плату.</p></div>
+
+<div class="blk"><h3>Мужність буває тиха</h3>
+<p>Князівна не плаче й не благає — вона заспокоює батька й матір, хоч черга йти до Змія саме її. Її сміливість не гучна, але це теж сміливість.</p></div>
+
+<div class="blk" style="border-color:var(--gold)"><h3>Головна думка одним реченням</h3>
+<p>Рятує країну не той, хто має владу й титул, а звичайна людина з праці й сумління — і доти, доки хтось наважується боротися, народ не раб.</p></div>
+${fin('themes')}`});
+
+/* ================= 7. СИМВОЛИ ================= */
+T('symbols',{g:1,ic:'⚒️',t:'Образи й деталі',s:'Що ховається за ними',html:`
+<p class="lead">Шість деталей, через які в п’єсі сказано більше, ніж прямим текстом.</p>
+${[
+['🪨','Дванадцять шкур','Микита мне їх одразу, тоді як брати по одній. Найпростіший спосіб показати силу — через звичайну щоденну роботу, а не через подвиг.'],
+['🔨','Залізна булава','Її кували всю ніч, і ковалі й стілечки не спали. Герой перемагає не сам по собі: за ним стоїть праця цілого міста.'],
+['🦅','Орли в мужицькій хаті','Слова Князя, після яких воєводи виходять із похиленими головами. Одна фраза, у якій уся ідея твору.'],
+['🏰','Замок Змія на горі','Химерна споруда з різнокольоровими освітленими вікнами. Зло тут не потворне, а показне й багате — і воно вивищується над містом.'],
+['🌸','Слова дівчинки про Князівну','Квітка, небо, корали, солов’ї — і тільки потім прохання. Дитина говорить так, як не вміють ані парубки, ані діди.'],
+['🎭','Завіса','П’єса закінчується цим словом. Нагадування, що твір написано не для читання, а для сцени.']
+].map(s=>`<div class="blk"><h3>${s[0]} ${s[1]}</h3><p>${s[2]}</p></div>`).join('')}
+${fin('symbols')}`});
+
+/* ================= 8. ЯК ЦЕ ЗРОБЛЕНО ================= */
+T('craft',{g:1,ic:'🎭',t:'Як це зроблено',s:'Терміни драматичного твору',html:`
+<p class="lead">Це перший драматичний твір у програмі, тому терміни тут майже всі нові. Означення подані так, як їх дають підручники.</p>
+${[
+['Драматичний твір','Твір, написаний для постановки на сцені.','Тому в кінці й стоїть слово «Завіса».'],
+['Дійові особи','Так називають персонажів драматичного твору. Їхній список автор подає на початку.','Микита Кожум’яка, Батько, Князь, Княгиня, Князівна, воєводи, джура, юрба.'],
+['Немає мови автора','У драматичному творі автор не розповідає про події: увесь сюжет розкривається через діалоги дійових осіб.','Ми не читаємо «Микита розсердився» — ми чуємо його «Одчепіться!».'],
+['Репліка','Слова однієї дійової особи, з якими вона звертається до інших або до глядачів.','«Хто не бореться, той раб!» — репліка Князя.'],
+['Ремарка','Авторські зауваження й пояснення для читачів та акторів: інтонація, рухи, міміка, місце дії, опис сцени. Ремарки друкують іншим шрифтом.','«(Парубки з похиленими головами виходять.)» — ремарка.'],
+['Картина або дія','Частина драматичного твору; кожна відбувається в іншому місці.','Тут чотири картини: палати, світлиця, подвір’я, майдан.'],
+['Казка-п’єса','Різновид драматичного твору, створений на казковому сюжеті й теж призначений для сцени.','«Микита Кожум’яка» написаний за мотивами народної казки.'],
+['Гіпербола','Надмірне перебільшення можливостей людини, властивостей предметів чи явищ. Посилює враження й загострює образ.','«Не з заліза — з криці лита!» про руку Микити; з трьох літ боров батька; перекинув коня через тин.'],
+['Триразовий повтор','Ознака народної казки: подія повторюється тричі, і лише третій раз дає результат.','Парубки — діди — діти. І скрізь число дванадцять.']
+].map(t=>`<div class="blk"><h3>${t[0]}</h3><p>${t[1]}</p><div class="note">${t[2]}</div></div>`).join('')}
+${fin('craft')}`});
+
+/* ================= 9. ЦИТАТИ ================= */
+T('quotes',{g:1,ic:'💬',t:'Цитати',s:'Хто, коли і що це означає',html:`
+<p class="lead">П’єса віршована, тому цитати короткі й легко запам’ятовуються. Ці варто знати дослівно.</p>
+${[
+['Хто не бореться, той раб!','Князь','нарада з воєводами','Головна фраза твору. Її часто дають як тему для роздуму на уроці.'],
+['Але є ще в нас орли, та не тут, не в цій палаті, а в мужицькій простій хаті!','Князь','коли воєводи змовчали','Правитель сам визнає, де справжня сила його краю.'],
+['Мусим ми скоритись долі — вітром гнеться й дуб у полі.','Перший воєвода','на нараді','Красива відмовка. Далі інші воєводи говорять сміливо — і теж нікуди не йдуть.'],
+['Не з заліза — з криці лита!','Четвертий син','про руку Микити','Приклад гіперболи: саме про цей рядок питають у тестах.'],
+['Одчепіться!','Микита','посланцям Князя','Три відмови поспіль. Герой не рветься до слави — його ще треба переконати.'],
+['Скарбів, діти, я не хочу!','Микита','відповідаючи дітям','Мить, коли стає зрозуміло, заради чого він іде.'],
+['Ще не вмерла правда в світі, вогник віри не погас...','Дівчинка','подякувавши Микиті','Найсвітліші слова п’єси — і сказані вони дитиною.'],
+['Слава, слава Микиті!','юрба','після перемоги','Славлять не Князя й не воєвод, а простого кожум’яку.']
+].map(q=>`<div class="blk"><div class="q" style="margin-top:0">${q[0]}</div>
+<p style="font-size:13px;color:var(--dim);margin:6px 0">${q[1]} · ${q[2]}</p>
+<p style="font-size:14.5px">${q[3]}</p></div>`).join('')}
+${fin('quotes')}`});
+
+/* ================= 10. ВПЛИВ ================= */
+T('legacy',{g:1,ic:'🌍',t:'Слід у культурі',s:'Герой, старший за п’єсу',html:`
+<div class="blk"><h3>З літопису в казку</h3>
+<p>Кожум’яка існував задовго до Олеся: уперше його згадано в «Повісті минулих літ». За переказом, він жив у Києві на Подолі, там і переміг Змія, а на місці бою збудували Кирилівську церкву. Народна казка про нього переказувалася століттями, і Олесь просто дав їй сценічну форму.</p></div>
+
+<div class="blk"><h3>Живопис</h3>
+<p>Образ Кожум’яки малювали українські художники. Петро Андрусів створив і картину «Кожум’яка (Бій зі змієм)», і ілюстрації до самої казки Олеся.</p></div>
+
+<div class="blk"><h3>Сцена</h3>
+<p>П’єсу ставили й ставлять у шкільних та дитячих театрах — власне, заради цього її й написано. Її зручно грати класом: багато дійових осіб, короткі репліки, чотири прості декорації.</p></div>
+
+<div class="blk"><h3>Мультфільм 2016 року</h3>
+<p>Український анімаційний фільм «Микита Кожум’яка» режисера Манука Депояна знято за мотивами книжки Антона Сіяніки. Це вже самостійна історія, і герой перемагає там дещо іншими якостями — тому порівняти мультфільм із п’єсою Олеся часто просять просто на уроці.</p></div>
+
+<div class="blk"><h3>Чому сюжет не старіє</h3>
+<p>Бо йдеться не про Змія. Історія про край, який роками платить данину й звик до цього, доки не знаходиться одна людина, готова вийти на двобій, повторюється в кожному столітті.</p></div>
+${fin('legacy')}`});
+
+/* ================= 11. ТРЕНАЖЕРИ ================= */
+T('train',{g:2,ic:'🐉',t:'Тренажери',s:'Чотири вправи на пам’ять і розуміння',html:`
+<p class="lead">Помилятися можна скільки завгодно — саме так і запам’ятовується.</p>
+
+<div class="blk"><h3>Хто це сказав?</h3>
+<div class="prog" id="wsp"></div>
+<div id="ws"></div><div class="say" id="wss"></div></div>
+
+<div class="blk"><h3>Постав події по порядку</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Натискай події від першої до останньої.</p>
+<div class="slot" id="oslot">поки порожньо</div>
+<div class="row" id="ord"></div><div class="say" id="os"></div></div>
+
+<div class="blk"><h3>Репліка чи ремарка?</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Головна вправа на будову драматичного твору.</p>
+<div id="rr"></div><div class="say" id="rrs"></div></div>
+
+<div class="blk"><h3>Чи є тут гіпербола?</h3>
+<p style="font-size:14px;color:var(--dim);margin-top:0">Рядки з п’єси. Де перебільшення, а де звичайний опис?</p>
+<div id="hp"></div><div class="say" id="hps"></div></div>
+${fin('train')}`,
+init(){initWho();initOrder();initRr();initHp()}});
+
+const WHO=[
+ ['Хто не бореться, той раб!','Князь',['Князь','Микита','Дід']],
+ ['Мусим ми скоритись долі.','Перший воєвода',['Перший воєвода','Княгиня','Дід']],
+ ['Змія б син мій поборов.','Дід',['Дід','Князь','Перший син']],
+ ['Одчепіться!','Микита',['Микита','Парубок','Джура']],
+ ['Скарбів, діти, я не хочу!','Микита',['Микита','Дід','Князівна']],
+ ['Ще не вмерла правда в світі...','Дівчинка',['Дівчинка','Княгиня','Князівна']],
+ ['Люди добрі! Лихо в нас! Прилетів на крилах гад!','Гонець',['Гонець','Джура','Старий дід']],
+ ['Не з заліза — з криці лита!','Четвертий син',['Четвертий син','Батько','Князь']]
+];
+let wi=0,wok=0;
+function initWho(){wi=0;wok=0;drawWho()}
+function drawWho(){
+  const b=$('#ws');if(!b)return;
+  if(wi>=WHO.length){
+    b.innerHTML='';$('#wsp').textContent='';
+    say('#wss',`Правильних: ${wok} з ${WHO.length}. <button class="btn g" style="margin-top:8px" onclick="initWho();hide('#wss')">Ще раз</button>`,wok>=6);
+    return;
+  }
+  hide('#wss');
+  $('#wsp').textContent=`Репліка ${wi+1} з ${WHO.length}`;
+  const w=WHO[wi];
+  b.innerHTML=`<div class="q">${w[0]}</div>`+
+    w[2].map(o=>`<button class="opt" onclick="ansWho(this,'${o.replace(/'/g,"\\'")}')">${o}</button>`).join('');
+}
+function ansWho(el,o){
+  const w=WHO[wi];const ok=(o===w[1]);
+  $$('#ws .opt').forEach(b=>{b.disabled=true;if(b.textContent===w[1])b.classList.add('ok')});
+  if(!ok)el.classList.add('no');else wok++;
+  buzz(ok?'success':'error');
+  setTimeout(()=>{wi++;drawWho()},900);
+}
+
+const ORD=[
+ 'Князь сумує: черга Князівни йти до Змія',
+ 'Нарада воєвод, які так і не викликалися на двобій',
+ 'Дід розповідає Князеві про свого найменшого сина',
+ 'До Микити приходять дванадцять парубків',
+ 'До Микити приходять дванадцять дідів',
+ 'Дівчинка від дітей умовляє його, і він погоджується',
+ 'Гонець сповіщає, що Змій украв Князівну',
+ 'Двобій на горі й перемога Микити'
+];
+let opick=[];
+function initOrder(){
+  opick=[];
+  const box=$('#ord');if(!box)return;
+  const sh=ORD.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+  box.innerHTML=sh.map(o=>`<button class="chip" data-i="${o.i}" onclick="pickOrd(this)">${o.t}</button>`).join('');
+  $('#oslot').textContent='поки порожньо';hide('#os');
+}
+function pickOrd(el){
+  const i=+el.dataset.i,ok=(i===opick.length);
+  if(ok){
+    opick.push(i);el.classList.add('used');
+    $('#oslot').innerHTML=opick.map((n,k)=>`${k+1}. ${ORD[n]}`).join('<br>');
+    buzz('success');
+    if(opick.length===ORD.length)say('#os','Три посланці поспіль — це той самий триразовий повтор, що й у народних казках.',true);
+  }else{
+    el.classList.add('no');buzz('error');
+    say('#os','Не поспішай — це буде пізніше.',false);
+    setTimeout(()=>{el.classList.remove('no');hide('#os')},900);
+  }
+}
+
+const RR=[
+ ['Князю! Треба вбити гада!',1,'Слова дійової особи, звернені до іншої, — це репліка.'],
+ ['(Парубки з похиленими головами виходять.)',0,'Авторське пояснення про рухи дійових осіб — ремарка. Такі рядки беруть у дужки й друкують іншим шрифтом.'],
+ ['Велика світлиця в палатах Князя. За столами сидять воєводи.',0,'Опис місця дії й того, що на сцені, — теж ремарка.'],
+ ['Скарбів, діти, я не хочу!',1,'Микита звертається до дітей — репліка.'],
+ ['М и к и т а (рве дванадцять шкур)',0,'У дужках — вказівка, що робить актор під час слів. Це ремарка всередині репліки.'],
+ ['Бачу, слухаю, радію.',1,'Князь відповідає воєводам — репліка.'],
+ ['(Гук від удару.)',0,'Звук, який має пролунати на сцені, — ремарка.'],
+ ['Ще не вмерла правда в світі, вогник віри не погас...',1,'Слова дівчинки — репліка.']
+];
+function initRr(){
+  const b=$('#rr');if(!b)return;
+  b.innerHTML=RR.map((r,i)=>`<div style="margin-bottom:14px">
+    <div class="${r[1]===1?'q':'rem'}" style="margin-top:0">${r[0]}</div>
+    <div class="row" id="rr${i}">
+      <button class="chip" onclick="ansRr(${i},1,this)">репліка</button>
+      <button class="chip" onclick="ansRr(${i},0,this)">ремарка</button>
+    </div><div class="say" id="rre${i}"></div></div>`).join('');
+}
+function ansRr(i,v,el){
+  const ok=(RR[i][1]===v);
+  $$('#rr'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  say('#rre'+i,RR[i][2],ok);
+  buzz(ok?'success':'error');
+  if($$('#rr .chip.ok').length+$$('#rr .chip.no').length>=RR.length)
+    say('#rrs','Найпростіша прикмета: якщо це в дужках і про рух, звук чи місце — ремарка. Якщо хтось до когось говорить — репліка.',true);
+}
+
+const HP=[
+ ['Не з заліза — з криці лита!',1,'Гіпербола: рука не може бути «з криці». Саме цей рядок найчастіше дають у тестах.'],
+ ['Вже з трьох літ боров мене!',1,'Гіпербола: трирічна дитина не може побороти дорослого.'],
+ ['Раз колись коня мій син перекинув через тин.',1,'Гіпербола: перебільшена сила героя.'],
+ ['Сумний наш Князь, сумний наш Князь.',0,'Звичайний опис настрою, без перебільшення. Це повтор, а не гіпербола.'],
+ ['Цей відразу по дванадцять шкур бере...',1,'Гіпербола: дванадцять шкур одразу — неможливо, зате одразу видно силу.'],
+ ['Залізну булаву всю ніч йому кували.',0,'Це цілком можлива річ. Перебільшення тут немає — є просто підготовка до бою.']
+];
+function initHp(){
+  const b=$('#hp');if(!b)return;
+  b.innerHTML=HP.map((h,i)=>`<div style="margin-bottom:14px">
+    <div class="q" style="margin-top:0">${h[0]}</div>
+    <div class="row" id="hp${i}">
+      <button class="chip" onclick="ansHp(${i},1,this)">гіпербола</button>
+      <button class="chip" onclick="ansHp(${i},0,this)">без перебільшення</button>
+    </div><div class="say" id="hpe${i}"></div></div>`).join('');
+}
+function ansHp(i,v,el){
+  const ok=(HP[i][1]===v);
+  $$('#hp'+i+' .chip').forEach(b=>b.disabled=true);
+  el.classList.add(ok?'ok':'no');
+  say('#hpe'+i,HP[i][2],ok);
+  buzz(ok?'success':'error');
+  if($$('#hp .chip.ok').length+$$('#hp .chip.no').length>=HP.length)
+    say('#hps','Гіпербола потрібна не для краси: завдяки їй ми одразу уявляємо, який Микита насправді дужий.',true);
+}
+
+/* ================= 12. ТЕСТИ ================= */
+const Q1=[
+ ['Хто автор казки-п’єси «Микита Кожум’яка»?','choice',['Олександр Олесь','Іван Франко','Василь Симоненко','Леся Українка'],0,'Справжнє ім’я — Олександр Іванович Кандиба.'],
+ ['Який жанр цього твору?','choice',['Оповідання','Казка-п’єса, різновид драматичного твору','Вірш','Повість'],1,'Написана для постановки на сцені.'],
+ ['На скільки частин поділено твір?','choice',['Дві дії','Три картини','Чотири картини','П’ять актів'],2,'І кожна відбувається в іншому місці.'],
+ ['Чому Князь скликав воєвод?','choice',['Щоб зібрати данину','Щоб знайти охочого на двобій зі Змієм','Щоб святкувати','Щоб судити Микиту'],1,'Але жоден із них не викликався.'],
+ ['Ким працює Микита?','choice',['Ковалем','Мне шкіри — кожум’яка','Воїном','Пастухом'],1,'Звідси й прізвисько.'],
+ ['Хто перший сказав Князеві про Микиту?','choice',['Воєвода','Батько Микити, Дід','Джура','Княгиня'],1,'І нагороди за це не просив.'],
+ ['Хто зумів умовити Микиту піти на двобій?','choice',['Парубки','Діди','Дівчинка від дітей','Сам Князь'],2,'Дід і радив посилати дітей останніми.'],
+ ['Що просив Микита в нагороду?','choice',['Золото','Нічого — скарбів він не хотів','Половину князівства','Коня'],1,'«Скарбів, діти, я не хочу!»'],
+ ['Чим Микита бився зі Змієм?','choice',['Мечем','Залізною булавою','Списом','Голими руками'],1,'Її кували всю ніч.'],
+ ['Чим закінчується п’єса?','choice',['Змій утік','Микита переміг і виніс Князівну на руках','Князь віддав данину','Микита загинув'],1,'І юрба кричить славу Микиті.'],
+ ['У драматичному творі немає мови автора.','tf',null,true,'Сюжет розкривається через репліки дійових осіб.'],
+ ['Твір написаний за мотивами народної казки.','tf',null,true,'Кожум’яку вперше згадано ще в «Повісті минулих літ».']
+];
+const Q2=[
+ ['Чому воєводи вийшли з ніяково похиленими головами?','choice',['Їх покарали','Вони гучно говорили, але жоден не викликався на двобій','Вони програли бій','Князь їх прогнав'],1,'Слова виявилися порожніми.'],
+ ['Що означають слова Князя про орлів у мужицькій хаті?','choice',['Він хвалить своїх воєвод','Він визнає, що справжня сила краю — у простого народу','Він шукає птахів','Він жартує'],1,'І це головна ідея твору.'],
+ ['Чому саме діти переконали Микиту?','choice',['Вони кричали найгучніше','Наймиліша йому дитина, і говорили вони не про нагороду, а про правду','Їх було більше','Так наказав Князь'],1,'Дід і радив послати їх останніми.'],
+ ['Що показує триразовий повтор із посланцями?','choice',['Що Микита ледачий','Що п’єса спирається на будову народної казки','Що Князь нерішучий','Що часу було багато'],1,'Парубки, діди, діти — і лише третій раз спрацював.'],
+ ['Чому Микита спершу відмовляв усім?','choice',['Боявся Змія','Не любив, коли відривають від роботи, і не хотів нагород','Не вірив у перемогу','Був сердитий на Князя'],1,'Він відповідав коротко: «Одчепіться!».'],
+ ['Навіщо в п’єсі юрба переказує бій замість того, щоб його показати?','choice',['Автор полінувався','Бо на сцені бій зі Змієм показати неможливо, а через голоси напруження навіть більше','Бою не було','Так вимагав Князь'],1,'Це театральний прийом.'],
+ ['Чим Князівна виявляє мужність?','choice',['Б’ється зі Змієм','Не плаче й не благає, а заспокоює батька й матір','Тікає з палацу','Кличе Микиту'],1,'Її сміливість тиха, але справжня.'],
+ ['Що означає фраза «Хто не бореться, той раб»?','choice',['Треба воювати завжди','Поки ніхто не наважується опиратися, край так і платитиме данину','Раби мусять боротися','Князь мусить битися сам'],1,'Головна фраза твору.'],
+ ['Навіщо в тексті гіперболи про Микиту?','choice',['Щоб посмішити','Щоб читач одразу уявив, наскільки він дужий','Щоб подовжити п’єсу','Щоб показати вік героя'],1,'Гіпербола посилює враження й загострює образ.'],
+ ['Чому Батько відмовився від нагороди?','choice',['Боявся Князя','Він хотів лише помогти в тяжкій журбі, а не заробити','Нагорода була мала','Він її не почув'],1,'У цій родині допомагають не за плату.'],
+ ['Микита пішов на двобій заради золота.','tf',null,false,'Він прямо сказав, що скарбів не хоче.'],
+ ['Воєводи в п’єсі показані сміливими людьми.','tf',null,false,'Вони сміливі лише на словах.']
+];
+const Q3=[
+ ['Що таке драматичний твір?','choice',['Твір про сумні події','Твір, написаний для постановки на сцені','Твір у віршах','Твір без сюжету'],1,'Тому в кінці й стоїть «Завіса».'],
+ ['Як називають персонажів драматичного твору?','choice',['Герої','Дійові особи','Оповідачі','Актори'],1,'Їхній список автор подає на початку.'],
+ ['Що таке ремарка?','choice',['Слова дійової особи','Авторські зауваження про рухи, інтонацію, місце дії, які друкують іншим шрифтом','Назва картини','Пісня в п’єсі'],1,'Наприклад: «(Парубки з похиленими головами виходять.)»'],
+ ['Що таке репліка?','choice',['Опис декорацій','Слова однієї дійової особи, звернені до інших або до глядачів','Назва дії','Авторська примітка'],1,'«Хто не бореться, той раб!» — репліка Князя.'],
+ ['Чим відрізняється драматичний твір від оповідання?','choice',['Довжиною','У драматичному творі немає мови автора: усе розкривають діалоги','Наявністю героїв','Наявністю сюжету'],1,'Ми не читаємо про почуття — ми чуємо слова.'],
+ ['Що таке гіпербола?','choice',['Порівняння','Надмірне перебільшення можливостей або властивостей','Прихована насмішка','Опис зовнішності'],1,'«Не з заліза — з криці лита!»'],
+ ['Що є кульмінацією твору?','choice',['Нарада воєвод','Прихід дітей','Двобій зі Змієм','Викрадення Князівни'],2,'Хоч глядач його й не бачить безпосередньо.'],
+ ['Яка роль числа дванадцять у п’єсі?','choice',['Випадковість','Казковий повтор: дванадцять шкур, парубків, дідів, дітей','Це вік Микити','Це кількість воєвод'],1,'Ознака народної основи твору.'],
+ ['Кого прославляє Олесь в образі Микити?','choice',['Князівську владу','Простий народ, його силу, скромність і сумління','Воєвод','Ремісничий цех'],1,'Це прямо сказано словами самого Князя.'],
+ ['Яке твердження про головну думку найточніше?','choice',['Змія можна перемогти булавою','Рятує країну не влада й титул, а звичайна людина праці, доки хтось наважується боротися','Дітей треба слухати','Князь мусить бути мудрим'],1,'Обидві частини фрази однаково важливі.']
+];
+const LV=[
+ ['quiz','🙂','Легкий','Хто, що, де — факти твору',Q1],
+ ['quiz2','🔥','Складний','Чому саме так — розуміння',Q2],
+ ['quiz3','💀','Дуже складний','Терміни, композиція, задум',Q3]
+];
+
+T('test',{g:2,ic:'🧠',t:'Тести',s:'Три рівні складності',html:`
+<p class="lead">Легкий пояснює після кожної відповіді. Дуже складний мовчить до кінця, а тоді показує розбір помилок.</p>
+<div id="lvls"></div>`,
+init(){drawLv()}});
+
+function drawLv(){
+  const b=$('#lvls');if(!b)return;
+  b.innerHTML=LV.map((l,i)=>{
+    const s=PR.best[l[0]];
+    return `<button class="lvl" onclick="startQ(${i})">
+      <span class="ic">${l[1]}</span>
+      <span><b>${l[2]}</b><small>${l[3]} · ${l[4].length} питань</small></span>
+      <span class="sc">${s!=null?s+'%':''}</span></button>`;
+  }).join('');
+}
+let QL=0,QI=0,QOK=0,QW=[];
+function startQ(l){QL=l;QI=0;QOK=0;QW=[];drawQ()}
+function drawQ(){
+  const L=LV[QL],qs=L[4],b=$('#t-body');
+  if(QI>=qs.length)return resQ();
+  const q=qs[QI];
+  const opts=(q[1]==='tf')
+    ? ['Так','Ні'].map((o,i)=>`<button class="opt" onclick="ansQ(${i===0?1:0})">${o}</button>`).join('')
+    : q[2].map((o,i)=>`<button class="opt" onclick="ansQ(${i})">${o}</button>`).join('');
+  b.innerHTML=`<div class="prog">${L[1]} ${L[2]} · питання ${QI+1} з ${qs.length}</div>
+    <div class="blk"><p style="font-size:16px;margin:0">${q[0]}</p></div>
+    <div id="qo">${opts}</div><div class="say" id="qs"></div>`;
+  window.scrollTo(0,0);
+}
+function ansQ(v){
+  const q=LV[QL][4][QI];
+  const right=q[3];
+  const ok=(q[1]==='tf')?((v===1)===right):(v===right);
+  const btns=$$('#qo .opt');
+  btns.forEach(b=>b.disabled=true);
+  if(q[1]==='tf'){
+    btns[right?0:1].classList.add('ok');
+    if(!ok)btns[v===1?0:1].classList.add('no');
+  }else{
+    btns[right].classList.add('ok');
+    if(!ok)btns[v].classList.add('no');
+  }
+  if(ok)QOK++;else QW.push(q);
+  buzz(ok?'success':'error');
+  const last=QL===2;
+  if(!last)say('#qs',(ok?'✔ ':'✘ ')+q[4],ok);
+  setTimeout(()=>{QI++;drawQ()},last?450:1500);
+}
+function resQ(){
+  const L=LV[QL],n=L[4].length;
+  const pc=Math.round(QOK/n*100);
+  const st=pc>=95?3:pc>=75?2:pc>=50?1:0;
+  if(PR.best[L[0]]==null||pc>PR.best[L[0]]){PR.best[L[0]]=pc;save()}
+  if(pc>=75)mark('test');
+  let w='';
+  if(QW.length&&QL===2){
+    w='<div class="wrongs"><h3 style="font-family:Georgia,serif;color:var(--gold)">Розбір помилок</h3>'+
+      QW.map(q=>{const cor=(q[1]==='tf')?(q[3]?'Так':'Ні'):q[2][q[3]];
+      return `<div class="w"><s>${q[0]}</s><br><em>Правильно: ${cor}</em><br>${q[4]}</div>`}).join('')+'</div>';
+  }
+  $('#t-body').innerHTML=`<div class="res">
+    <div class="big">${pc}%</div>
+    <div class="st">${'★'.repeat(st)}${'☆'.repeat(3-st)}</div>
+    <div style="color:var(--dim)">Правильних ${QOK} з ${n}</div>
+    <div style="margin-top:18px" class="row">
+      <button class="btn" onclick="startQ(${QL})">Ще раз</button>
+      <button class="btn g" onclick="open_('test')">До рівнів</button>
+    </div>${w}</div>`;
+  window.scrollTo(0,0);
+  buzz(pc>=75?'success':'warning');
+}
+
+/* ================= 13. УСНІ ПИТАННЯ ================= */
+T('oral',{g:2,ic:'🗣️',t:'Як на уроці',s:'Відкриті питання зі зразком відповіді',html:`
+<p class="lead">Спершу спробуй відповісти вголос сам, цілими реченнями. Потім подивись зразок і порівняй, чого бракувало.</p>
+${[
+['Розкажи про автора твору.',
+ 'Олександр Олесь — це псевдонім, справжнє ім’я письменника Олександр Іванович Кандиба, жив він із 1878 до 1944 року. У літературі він відомий передусім як тонкий лірик: наступного дня після виходу першої збірки віршів «З журбою радість обнялась» він прокинувся знаменитим, а Леся Українка навіть сказала, що він її випередив. Для дітей Олесь написав книжку віршованих оповідей «Княжа Україна», сюжети якої постали з літописних даних, і дуже піклувався про розвиток дитячого театру. Саме для сцени він і створив казку-п’єсу «Микита Кожум’яка» за мотивами народної казки.'],
+['Визнач жанр твору й доведи.',
+ 'Це казка-п’єса, тобто різновид драматичного твору, написаного для постановки на сцені. Доводять це кілька ознак. По-перше, на початку подано список дійових осіб. По-друге, тут немає мови автора: увесь сюжет розкривається через репліки дійових осіб і ремарки. По-третє, твір поділено на чотири картини, і кожна відбувається в іншому місці — палати Князя, велика світлиця, подвір’я Кожум’яки, майдан за містом. І нарешті, закінчується він словом «Завіса». А казкою його робить сюжет: народна історія про богатиря, який переміг Змія.'],
+['Що таке репліка й ремарка? Наведи приклади.',
+ 'Репліка — це слова однієї дійової особи, з якими вона звертається до інших дійових осіб або до глядачів. Наприклад: «Хто не бореться, той раб!» — репліка Князя. Ремарка — це авторські зауваження й пояснення для читачів та акторів: інтонація, рухи, міміка, місце розгортання дії, опис сцени. Ремарки пишуть іншим шрифтом і зазвичай беруть у дужки. Наприклад: «(Парубки з похиленими головами виходять.)» або опис на початку другої картини — «Велика світлиця в палатах Князя. За столами сидять воєводи».'],
+['Із якою метою Князь скликав воєвод і чи виправдали вони сподівання?',
+ 'Князь скликав воєвод, щоб знайти охочого вийти на двобій зі Змієм, бо данина стала нестерпною і черга дійшла вже до його власної дочки. Воєводи відповідали дуже гучно: другий сказав, що досить гнутись і час до вітру обернутись, третій — що час підставити груди, четвертий і п’ятий побажали Змієві загину. Але щойно Князь запитав, хто саме вкриє себе славою, настала тиша. Сподівань вони не виправдали, і з палати вийшли з ніяково похиленими головами.'],
+['Як ти розумієш слова Князя про орлів у мужицькій хаті?',
+ 'Князь каже: «Але є ще в нас орли, та не тут, не в цій палаті, а в мужицькій простій хаті!» Орли тут означають справжніх сміливців. Правитель прямо визнає, що серед його воєвод, людей знатних і озброєних, героя не знайшлося, зате він є у звичайній селянській хаті — це Микита Кожум’яка, простий ремісник, який мне шкіри. У цих словах і полягає головна ідея твору: сила народу більша за силу влади.'],
+['Чому саме дівчинка зуміла впросити Микиту?',
+ 'Батько заздалегідь підказав Князеві порядок: слати спершу молодих, як не послухає — старих, а якщо й це не поможе, то дітей, бо наймиліша синові дитина. Так і вийшло: парубків і дідів Микита прогнав словом «Одчепіться!», бо не любив, коли відривають від роботи. А дівчинка заговорила зовсім інакше: спершу сказала про Князівну — що немає квітки, кращої за неї, немає в морі коралів, червоніших за її уста, — а тоді просто попросила лицаря піти на двобій, якщо це правда. Микита відповів, що скарбів не хоче, і погодився.'],
+['Знайди в тексті гіперболи і поясни, навіщо вони.',
+ 'Гіпербола — це надмірне перебільшення можливостей людини або властивостей предметів. У п’єсі їх кілька, і всі про Микиту: батько каже, що син боров його вже з трьох літ і колись перекинув коня через тин, а ще що бере по дванадцять шкур одразу; брат каже про його руку — «не з заліза, з криці лита». Насправді такого бути не може, але завдяки цим перебільшенням ми одразу уявляємо, який герой дужий, ще до того, як він виходить на бій. Гіпербола посилює враження й загострює образ.'],
+['Яка головна думка твору?',
+ 'Рятує країну не той, хто має владу й титул, а звичайна людина праці й сумління. Це доводиться усім ходом п’єси: ціла палата воєвод не дала жодного бійця, а Змія подолав простий кожум’яка, який не просив за це нічого. Другу частину думки формулює сам Князь: «Хто не бореться, той раб» — тобто данину платили роками саме тому, що ніхто не наважувався вийти на двобій.']
+].map((s,i)=>`<div class="sp"><b>${i+1}. ${s[0]}</b>
+  <button onclick="this.parentNode.classList.toggle('open')">Показати зразок відповіді</button>
+  <div class="ans">${s[1]}</div></div>`).join('')}
+${fin('oral')}`});
+
+load(()=>paint());
+</script>
+</body>
+</html>
