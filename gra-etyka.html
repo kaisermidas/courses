@@ -131,6 +131,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 const shuffle=a=>[...a].sort(()=>Math.random()-.5);
@@ -387,6 +421,7 @@ function checkItem(){
     if(KIND==='emp'){ if(sel===null) return; ok = sel===it.a; }
     if(KIND==='intent'){ if(sel===null) return; ok = sel===it.ans; }
     LOG[I]=ok; if(ok) RIGHT++; buzz(ok);
+    srsEth(it, ok);
     const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
     if(KIND==='fact'){
       $$('.opt').forEach(el=>{ el.disabled=true; const yes=el.dataset.v==='1';
@@ -420,6 +455,27 @@ function checkItem(){
   $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
   $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
 }
+function srsEth(it, ok){
+  const S='🤝 Етика';
+  let id=null, card=null;
+  if(KIND==='fact'){ id='eth:fact:'+it.q.slice(0,40);
+    card={sub:S,tag:'Факт чи думка',type:'choice',q:'«'+it.q+'»<br><br>Це факт чи думка?',
+      o:['Факт — можна перевірити','Думка — це оцінка'],a: it.a?0:1,
+      hint:'Спитай себе, чи є спосіб це виміряти.', why:it.r, term:'факт і оцінка'}; }
+  if(KIND==='emp'){ id='eth:emp:'+it.q.slice(0,40);
+    card={sub:S,tag:'Очима іншого',type:'choice',q:it.q+'<br><br>Що найімовірніше з ним відбувається?',
+      o:it.o,a:it.a,hint:'Найпростіше пояснення рідко буває про тебе.', why:it.r, term:'емпатія'}; }
+  if(KIND==='conseq'){ id='eth:conseq:'+it.t;
+    card={sub:S,tag:'Наслідки',type:'order',q:'<b>'+it.t+'</b> — постав наслідки від найближчого до найдальшого.',
+      items:it.s,a:it.s.map((_,i)=>i),hint:'Перший наслідок майже завжди найприємніший.', why:it.r, term:'наслідки вчинку'}; }
+  if(KIND==='intent'){ id='eth:intent:'+it.a.slice(0,30);
+    card={sub:S,tag:'Намір чи наслідок',type:'choice',
+      q:'Хто вчинив <b>гірше</b>?<br><br><b>Перший:</b> '+it.a+'<br><b>Другий:</b> '+it.b,
+      o:['Перший','Другий'],a:it.ans,hint:'Порівняй не розмір шкоди, а намір.', why:it.r, term:'намір і наслідок'}; }
+  if(!id) return;
+  if(ok) srsHit(id); else srsMiss(id,'Вибір',card);
+}
+
 function endRun(){
   const g=GAMES.find(x=>x.id===KIND);
   $('#e-h').textContent=g.t;
