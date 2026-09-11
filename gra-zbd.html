@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ситуація</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:64px;text-align:right}
+  .tmr.hot{color:var(--bad)}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .steps{display:grid;gap:8px}
+  .step{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;
+    display:flex;gap:11px;align-items:flex-start;font-size:16px}
+  .step .n{width:26px;height:26px;flex:none;border-radius:50%;background:#F4F2EC;color:var(--ink-2);
+    display:grid;place-items:center;font-size:14px;font-weight:600}
+  .step.on .n{background:var(--accent);color:#fff}
+  .step.good{border-color:var(--ok);background:var(--ok-soft)}
+  .step.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .sl label{display:flex;justify-content:space-between;font-size:15px;margin:10px 0 2px}
+  .sl input{width:100%}
+  .road{margin:14px 0 6px}
+  .roadbar{height:26px;border-radius:8px;background:#EDEAE1;overflow:hidden;display:flex}
+  .roadbar i{display:block;height:100%}
+  .roadbar .react{background:var(--volt)}
+  .roadbar .brake{background:var(--bad)}
+  .roadlbl{display:flex;justify-content:space-between;color:var(--ink-2);font-size:13px;margin-top:5px}
+  .marker{position:relative;height:18px;margin-top:-2px}
+  .marker span{position:absolute;transform:translateX(-50%);font-size:13px;color:var(--accent);font-weight:600}
+  .card{border:2px solid var(--volt);background:var(--volt-soft);border-radius:14px;padding:15px;
+    text-align:center;font-size:20px;font-weight:600;margin-bottom:12px}
+  .groups{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .groups button{border:1px solid var(--line);border-radius:12px;padding:14px 10px;background:#fff;font-size:16px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Ситуація</h1>
+    <p>П'ять ігор про безпеку. Не «вивчи правило», а виріши за десять секунд — бо в житті часу на роздуми зазвичай стільки й буває.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="quitRun()">‹ Ігри</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-tmr"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Перевірити</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-zbd-v1';
+let PR = {best:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+/* ================= СИТУАЦІЇ ================= */
+const SIT=[
+ {q:'Біля школи зупиняється автівка. Водій каже, що він знайомий тата, і кличе подивитися цуценят у багажнику.',
+  o:['Підійти й глянути одним оком','Сказати «ні», відійти до людей і одразу подзвонити батькам',
+     'Спитати, як звати тата, і за відповіддю вирішити','Попросити показати цуценят звідти, де стоїш'],
+  a:1, r:'Доросла людина ніколи не просить допомоги в дитини — це головна прикмета небезпеки. Правильна дія одна: не наближатися, йти туди, де люди, і телефонувати батькам. Перевірка «як звати тата» не працює: цю інформацію легко дізнатися.'},
+ {q:'У грі незнайомець пише, що ти виграв приз, і просить фото, адресу школи й номер телефону.',
+  o:['Надіслати лише школу — це ж не адреса дому','Нічого не надсилати, показати листування батькам',
+     'Надіслати фото, але без номера','Заблокувати й нікому не казати'],
+  a:1, r:'Жоден справжній приз не потребує адреси чи фото. Блокування — правильно, але замовчування ні: дорослі мають бачити такі спроби, бо після одного невдалого часто йде другий.'},
+ {q:'У полі біля дороги лежить дивний предмет, схожий на іграшку або банку.',
+  o:['Обережно віднести дорослим','Не торкатися, відійти тим самим шляхом, запам\'ятати місце й подзвонити 101',
+     'Кинути камінь здалеку, щоб перевірити','Сфотографувати впритул і піти далі'],
+  a:1, r:'Вибухонебезпечні предмети часто виглядають як звичайні речі. Правило: не торкатися, не кидати нічого, відходити тим самим шляхом, яким прийшов, запам\'ятати орієнтир і викликати 101. Перенести — найнебезпечніше з усього переліченого.'},
+ {q:'Удома чути запах газу.',
+  o:['Увімкнути світло, щоб роздивитися','Не вмикати нічого електричного, відчинити вікна, вийти й подзвонити 104 з вулиці',
+     'Запалити сірник, щоб знайти витік','Зачинити вікна, щоб газ не розходився'],
+  a:1, r:'Найменша іскра — від вимикача, дзвінка чи ліфта — може підпалити газоповітряну суміш. Тому вмикати нічого не можна, дзвонити треба вже з вулиці. Аварійна газова служба — 104.'},
+ {q:'На перерві двоє хлопців штовхають однокласника й знімають це на телефон.',
+  o:['Пройти повз — не твоя справа','Зняти теж, щоб був доказ',
+     'Не встрягати в бійку, покликати вчителя й потім підтримати того, кого штовхали','Крикнути на них і втрутитися фізично'],
+  a:2, r:'Лізти в бійку небезпечно, а мовчання дає нападникам відчуття безкарності. Найдієвіше — швидко покликати дорослого й не лишати того, кого цькують, на самоті: підтримка свідка зменшує шкоду більше, ніж будь-яка відповідь кривдникам.'},
+ {q:'Друзі кличуть на річку — лід уже кілька днів тримається.',
+  o:['Піти, але йти по одному','Перевірити лід ногою біля берега','Не йти на лід і покликати друзів у інше місце',
+     'Піти, якщо взяти мотузку'],
+  a:2, r:'Міцність льоду на око не визначається, а восени й навесні він буває тонким саме там, де течія. Жоден із «обережних» варіантів не рятує, якщо лід проламується під першим же кроком.'},
+ {q:'На кухні спалахнула олія на сковороді.',
+  o:['Залити водою','Накрити кришкою або мокрим рушником і вимкнути плиту',
+     'Винести сковороду на вулицю','Дмухати, щоб збити полум\'я'],
+  a:1, r:'Вода в розпеченій олії миттєво перетворюється на пару й викидає палаючі бризки — полум\'я спалахує вгору. Треба перекрити доступ повітря: кришка або щільна мокра тканина.'},
+ {q:'У під\'їзді задимлення, дим іде знизу.',
+  o:['Бігти вниз крізь дим','Викликати ліфт','Лишитися у квартирі: зачинити двері, щілини — мокрою тканиною, подзвонити 101 і подати знак у вікно',
+     'Відчинити всі вікна навстіж'],
+  a:2, r:'Дим підіймається вгору і вбиває швидше за вогонь. Якщо шлях униз у димі — безпечніше лишитися за зачиненими дверима, ущільнити щілини й чекати рятувальників. Ліфт при пожежі відключають, а протяг лише роздмухує вогонь.'}
+];
+/* ================= ПЕРША ДОПОМОГА ================= */
+const AID=[
+ {t:'Опік окропом', s:['Підставити місце опіку під прохолодну проточну воду на 10–20 хвилин',
+   'Обережно зняти прикраси й тісний одяг поруч, доки не набрякло','Накрити чистою неворсистою тканиною',
+   'Показати дорослому; якщо пухир великий або опік на обличчі — до лікаря'],
+  r:'Опік продовжує пошкоджувати шкіру зсередини, тому головне — швидко забрати тепло. Олія, крем і лід тільки шкодять, а проколотий пухир відкриває шлях інфекції.'},
+ {t:'Кров з носа', s:['Сісти й трохи нахилити голову вперед','Затиснути пальцями м\'які крила носа й тримати 10 хвилин, не відпускаючи',
+   'Прикласти холод через тканину до перенісся','Якщо за 20 хвилин не спинилося — до лікаря'],
+  r:'Голову назад закидати не можна: кров стікає в горло, і стає незрозуміло, спинилася вона чи ні. Відпускати ніс «подивитися» щохвилини теж не варто — згусток не встигає утворитися.'},
+ {t:'Поріз пальця', s:['Промити рану чистою водою','Притиснути чистою серветкою, доки кров не спиниться',
+   'Заклеїти пластиром або накласти пов\'язку','Сказати дорослому, особливо якщо рана глибока чи брудна'],
+  r:'Спирт і йод лити всередину рани не треба — вони пошкоджують тканину; ними обробляють шкіру навколо. Глибокий поріз і будь-яка рана від іржавого предмета — привід звернутися до лікаря.'},
+ {t:'Підвернув ногу', s:['Припинити рух і сісти','Прикласти холод через тканину на 15 хвилин',
+   'Підняти ногу трохи вище','Якщо набрякло або боляче ступати — до лікаря'],
+  r:'Гріти й розтирати в перші години не можна: набряк тільки збільшиться. Холод прикладають через тканину, не на голу шкіру.'},
+ {t:'Людина знепритомніла', s:['Голосно покликати дорослого','Покласти на спину й підняти ноги трохи вище',
+   'Розстебнути комір, забезпечити приплив повітря','Якщо не приходить до тями за хвилину — 103'],
+  r:'Найчастіша причина в дітей — різкий відтік крові від голови. Підняті ноги повертають її назад. Воду в рот непритомній людині не дають — вона може захлинутися.'},
+ {t:'Укус бджоли', s:['Прибрати жало, зіскобнувши його краєм картки','Промити місце водою з милом',
+   'Прикласти холод через тканину','Стежити за диханням і набряком; за перших ознак задухи — 103'],
+  r:'Жало не можна витягати пальцями: у ньому лишається мішечок з отрутою, і стискання видавлює решту всередину.'}
+];
+/* ================= ДОРОГА ================= */
+const ROAD=[
+ {v:30, d:20}, {v:50, d:25}, {v:60, d:30}, {v:40, d:40}, {v:70, d:45}, {v:90, d:60}
+];
+function stopDist(v){                  // метри: шлях реакції + гальмівний
+  const ms = v/3.6, react = ms*1.0, brake = (ms*ms)/(2*6.5);
+  return {react, brake, total: react+brake};
+}
+/* ================= ТАРІЛКА ================= */
+const FGROUPS=['Овочі та фрукти','Злаки й крупи','Білкові','Молочні'];
+const FOOD=[
+ {n:'🥦 броколі', g:0}, {n:'🍎 яблуко', g:0}, {n:'🥕 морква', g:0}, {n:'🫐 чорниця', g:0},
+ {n:'🍞 хліб', g:1}, {n:'🍚 гречка', g:1}, {n:'🍝 макарони', g:1}, {n:'🥣 вівсянка', g:1},
+ {n:'🥚 яйце', g:2}, {n:'🐟 риба', g:2}, {n:'🫘 квасоля', g:2}, {n:'🍗 курка', g:2},
+ {n:'🥛 молоко', g:3}, {n:'🧀 сир', g:3}, {n:'🍶 кефір', g:3}, {n:'🥄 йогурт', g:3}
+];
+/* ================= МІФИ ================= */
+const MYTH=[
+ {q:'Застуджуються від холоду.', a:false,
+  r:'Застуду спричиняють віруси, а не сама температура. Але переохолодження ослаблює захист, тож одягатися по погоді все одно варто.'},
+ {q:'При кровотечі з носа треба закинути голову назад.', a:false,
+  r:'Навпаки — трохи нахилити вперед. Інакше кров стікає в горло, і її легко ковтнути.'},
+ {q:'Рану треба залити спиртом або йодом усередину.', a:false,
+  r:'Ці засоби пошкоджують живу тканину й уповільнюють загоєння. Рану промивають водою, а шкіру навколо обробляють.'},
+ {q:'Читати при тьмяному світлі шкідливо для очей назавжди.', a:false,
+  r:'Очі втомлюються й починають боліти, але незворотної шкоди від цього не буває. Правило двадцяти хвилин — дивитися вдалину — знімає втому.'},
+ {q:'Пасок безпеки потрібен і на задньому сидінні.', a:true,
+  r:'При ударі на 50 км/год непристебнутий пасажир ззаду летить уперед із силою, здатною травмувати того, хто сидить попереду.'},
+ {q:'Мити руки треба близько двадцяти секунд і з милом.', a:true,
+  r:'Мило руйнує жирову оболонку мікробів, але на це потрібен час. Коротке ополіскування водою прибирає значно менше.'},
+ {q:'Людина, яка тоне, завжди кричить і махає руками.', a:false,
+  r:'Найчастіше навпаки — тихо. На крик не вистачає повітря, руки інстинктивно тиснуть на воду. Тому в воді треба дивитися, а не слухати.'},
+ {q:'Шолом на велосипеді потрібен тільки на великій швидкості.', a:false,
+  r:'Більшість травм голови трапляється при падінні з місця або на малій швидкості — просто тому, що падають раптово й не встигають підставити руки.'},
+ {q:'Якщо загорівся одяг, треба бігти по допомогу.', a:false,
+  r:'Біг роздмухує полум\'я. Правило: зупинитися, впасти, перекочуватися — і збивати вогонь щільною тканиною.'},
+ {q:'Спати потрібно більше, ніж дорослим — у школярів мозок росте.', a:true,
+  r:'Дітям і підліткам справді потрібно більше сну, ніж дорослим: під час сну закріплюється вивчене за день.'}
+];
+
+/* ================= ГОЛОВНА ================= */
+const GAMES=[
+ {id:'sit',  ic:'⚠️', t:'Рішення за 10 секунд', s:'Сценарії, де треба діяти швидко', n:6},
+ {id:'aid',  ic:'🩹', t:'Перша допомога', s:'Постав дії в правильному порядку', n:5},
+ {id:'road', ic:'🚗', t:'Чи встигне зупинитися', s:'Модель гальмівного шляху', n:6},
+ {id:'food', ic:'🍽', t:'Тарілка', s:'Розклади продукти по групах', n:10},
+ {id:'myth', ic:'🧐', t:'Правда чи міф', s:'Те, що «всі знають» про здоров\'я', n:6}
+];
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const B=PR.best||{};
+    const b=document.createElement('button'); b.className='item';
+    const sc = B[g.id]!==undefined ? B[g.id]+'/'+g.n : '';
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.onclick=()=>startRun(g.id); box.appendChild(b);
+  });
+}
+
+/* ================= РУШІЙ ================= */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[], order=[], sel=null, T=null, LEFT=0;
+
+function stopT(){ if(T){ clearInterval(T); T=null; } const e=$('#p-tmr'); if(e) e.textContent=''; }
+function startT(sec){
+  stopT();
+  LEFT=sec; const el=$('#p-tmr'); el.textContent=LEFT+'с'; el.classList.remove('hot');
+  T=setInterval(()=>{ if(!document.querySelector('#p-tmr')) return stopT();
+    LEFT--; el.textContent=LEFT+'с'; el.classList.toggle('hot',LEFT<=4);
+    if(LEFT<=0){ stopT(); if(LOG[I]===undefined) checkItem(true); } },1000);
+}
+function quitRun(){ stopT(); go('s-home'); }
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const g=GAMES.find(x=>x.id===kind);
+  const src = kind==='sit'?SIT : kind==='aid'?AID : kind==='road'?ROAD : kind==='food'?FOOD : MYTH;
+  ITEMS=shuffle(src).slice(0,g.n);
+  go('s-play'); renderItem();
+}
+function dots(){
+  $('#p-dots').innerHTML=ITEMS.map((_,i)=>{
+    const l=LOG[i]; return '<span class="dot '+(l===undefined?(i===I?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+}
+function renderItem(){
+  const it=ITEMS[I]; order=[]; sel=null; dots(); stopT();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').style.display='inline-block';
+  $('#p-act').textContent='Перевірити'; $('#p-act').onclick=()=>checkItem(false);
+  const b=$('#p-body');
+  if(KIND==='sit'){
+    $('#p-task').innerHTML=it.q;
+    b.innerHTML='<div class="opts">'+shuffle([...it.o.keys()]).map(i=>
+      '<button class="opt" data-i="'+i+'">'+it.o[i]+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(false); });
+    $('#p-act').style.display='none';
+    startT(10);
+  }
+  if(KIND==='aid'){
+    $('#p-task').innerHTML='<b>'+it.t+'</b><br>Постав дії в правильному порядку — тисни по черзі.';
+    b.innerHTML='<div class="steps">'+shuffle([...it.s.keys()]).map(i=>
+      '<button class="step" data-i="'+i+'"><span class="n">·</span><span>'+it.s[i]+'</span></button>').join('')+'</div>';
+    $$('.step',b).forEach(el=>el.onclick=()=>{
+      const i=+el.dataset.i;
+      if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+      $$('.step',b).forEach(x=>{ const p=order.indexOf(+x.dataset.i);
+        x.classList.toggle('on',p>=0); $('.n',x).textContent = p>=0?(p+1):'·'; });
+    });
+  }
+  if(KIND==='road'){
+    $('#p-task').innerHTML='Автівка їде <b>'+it.v+' км/год</b>. Ти виходиш на дорогу за <b>'+it.d+
+      ' метрів</b> перед нею, водій тебе бачить. Він устигне зупинитися?';
+    b.innerHTML='<div class="opts"><button class="opt" data-v="1">Так, устигне</button>'+
+      '<button class="opt" data-v="0">Ні, не встигне</button></div><div class="road" id="p-road"></div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=el.dataset.v==='1'; checkItem(false); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='food'){
+    $('#p-task').innerHTML='До якої групи належить цей продукт?';
+    b.innerHTML='<div class="card">'+it.n+'</div><div class="groups">'+
+      FGROUPS.map((g,i)=>'<button data-i="'+i+'">'+g+'</button>').join('')+'</div>';
+    $$('.groups button',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(false); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='myth'){
+    $('#p-task').innerHTML=it.q;
+    b.innerHTML='<div class="opts"><button class="opt" data-v="1">Правда</button>'+
+      '<button class="opt" data-v="0">Міф</button></div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=el.dataset.v==='1'; checkItem(false); });
+    $('#p-act').style.display='none';
+  }
+}
+function drawRoad(it){
+  const s=stopDist(it.v);
+  const scale=Math.max(s.total, it.d)*1.1;
+  const box=$('#p-road');
+  box.innerHTML='<div class="roadbar"><i class="react" style="width:'+(s.react/scale*100)+'%"></i>'+
+    '<i class="brake" style="width:'+(s.brake/scale*100)+'%"></i></div>'+
+    '<div class="marker"><span style="left:'+(it.d/scale*100)+'%">▲ ти</span></div>'+
+    '<div class="roadlbl"><span>реакція '+s.react.toFixed(0)+' м</span><span>гальмування '+s.brake.toFixed(0)+
+    ' м</span><span>разом '+s.total.toFixed(0)+' м</span></div>';
+}
+function checkItem(timeout){
+  const it=ITEMS[I]; let ok=false;
+  if(KIND==='sit'){ if(!timeout && sel===null) return; ok = !timeout && sel===it.a; }
+  if(KIND==='aid'){ if(order.length<it.s.length) return; ok=order.every((v,i)=>v===i); }
+  if(KIND==='road'){ if(sel===null) return; ok = sel===(stopDist(it.v).total<=it.d); }
+  if(KIND==='food'){ if(sel===null) return; ok = sel===it.g; }
+  if(KIND==='myth'){ if(sel===null) return; ok = sel===it.a; }
+  stopT();
+  LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+
+  if(KIND==='sit'){
+    $$('.opt').forEach(el=>{ el.disabled=true; const i=+el.dataset.i;
+      if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.textContent = timeout ? 'Час вийшов — у справжній ситуації це теж відповідь.' : (ok?'Саме так.':'Ні. Правильне позначено зеленим.');
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому так</b>'+it.r;
+  }
+  if(KIND==='aid'){
+    $$('.step').forEach(el=>{ el.disabled=true; el.classList.add(ok?'good':'bad');
+      $('.n',el).textContent=(+el.dataset.i)+1; });
+    const box=$('#p-body .steps');
+    [...box.children].sort((a,b)=>(+a.dataset.i)-(+b.dataset.i)).forEach(el=>box.appendChild(el));
+    v.textContent = ok?'Порядок правильний.':'Ні — правильний порядок показано.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Головне</b>'+it.r;
+  }
+  if(KIND==='road'){
+    const s=stopDist(it.v), fits=s.total<=it.d;
+    $$('.opt').forEach(el=>{ el.disabled=true; const yes=el.dataset.v==='1';
+      if(yes===fits) el.classList.add('good'); else if(!ok) el.classList.add('bad'); });
+    drawRoad(it);
+    v.innerHTML = (ok?'Так. ':'Ні. ')+'Повний шлях — <b>'+s.total.toFixed(0)+' м</b>, а до тебе '+it.d+' м.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>З чого складається шлях</b>Поки водій усвідомлює й переносить ногу, минає близько секунди — на '+
+      it.v+' км/год це вже '+s.react.toFixed(0)+' метрів. І лише потім починається гальмування ще на '+s.brake.toFixed(0)+
+      ' метрів. Гальмівний шлях росте не вдвічі від подвоєння швидкості, а вчетверо — тому на мокрій дорозі ці числа ще більші.';
+  }
+  if(KIND==='food'){
+    $$('.groups button').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.g) el.style.cssText='border-color:var(--ok);background:var(--ok-soft)';
+      else if(!ok && i===sel) el.style.cssText='border-color:var(--bad);background:var(--bad-soft)'; });
+    v.innerHTML = (ok?'Так. ':'Ні. ')+'Це <b>'+FGROUPS[it.g].toLowerCase()+'</b>.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>Про тарілку</b>Найпростіше правило: приблизно половину тарілки займають овочі та фрукти, по чверті — злаки й білкові страви, а молочне йде додатком. Рахувати нічого не треба — досить дивитися на пропорції.';
+  }
+  if(KIND==='myth'){
+    $$('.opt').forEach(el=>{ el.disabled=true; const yes=el.dataset.v==='1';
+      if(yes===it.a) el.classList.add('good'); else if(!ok) el.classList.add('bad'); });
+    v.textContent = ok ? (it.a?'Так, це правда.':'Так, це міф.') : (it.a?'Насправді це правда.':'Насправді це міф.');
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Як воно є</b>'+it.r;
+  }
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+function endRun(){
+  stopT();
+  const g=GAMES.find(x=>x.id===KIND);
+  PR.best=PR.best||{}; if(RIGHT>(PR.best[KIND]||0)) PR.best[KIND]=RIGHT;
+  saveP();
+  $('#e-h').textContent=g.t;
+  $('#e-title').textContent = RIGHT===ITEMS.length?'Усе правильно.' : RIGHT>=ITEMS.length*0.6?'Непогано.' : 'Розбір унизу — його тут і варто перечитати.';
+  $('#e-now').textContent=RIGHT+'/'+ITEMS.length; $('#e-best').textContent=PR.best[KIND];
+  $('#e-again').onclick=()=>startRun(KIND);
+  let log='';
+  if(KIND==='sit')  log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.o[it.a]+'</span></div>').join('');
+  if(KIND==='aid')  log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.t+'</span></div>').join('');
+  if(KIND==='road') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.v+' км/год — повний шлях '+stopDist(it.v).total.toFixed(0)+' м</span></div>').join('');
+  if(KIND==='food') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.n+' — '+FGROUPS[it.g].toLowerCase()+'</span></div>').join('');
+  if(KIND==='myth') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.q+' — <b>'+(it.a?'правда':'міф')+'</b></span></div>').join('');
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що було</b>'+log;
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
