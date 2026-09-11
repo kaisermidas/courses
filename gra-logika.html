@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Бобер — логіка й алгоритми</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 18px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opt.off{opacity:.45}
+  input[type=text]{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .why{margin-top:14px;padding:14px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .why .term{display:inline-block;background:#F4F2EC;border-radius:999px;padding:3px 11px;font-size:13px;color:var(--ink-2);margin-top:9px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+  .chip.p{background:var(--volt-soft);color:#6B4B00}
+  .meta{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:8px}
+  .item .ic{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:19px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .tick{color:var(--ok);font-weight:700;font-size:17px;opacity:0}
+  .item.done .tick{opacity:1}
+  .grp{color:var(--ink-2);font-size:14px;margin:22px 0 8px}
+  .stat{display:flex;gap:10px;margin:14px 0 0}
+  .stat div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .stat b{display:block;font-size:23px;line-height:1.2}
+  .stat span{color:var(--ink-2);font-size:13px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:56px;text-align:right}
+  .tmr.hot{color:var(--bad)}
+  .ord{display:grid;gap:8px;margin-top:2px}
+  .ord .it{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;display:flex;gap:11px;align-items:center}
+  .ord .it .n{width:26px;height:26px;flex:none;border-radius:50%;background:#F4F2EC;color:var(--ink-2);display:grid;place-items:center;font-size:14px;font-weight:600}
+  .ord .it.on .n{background:var(--accent);color:#fff}
+  .ord .it.good{border-color:var(--ok);background:var(--ok-soft)}
+  .ord .it.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .gr{display:grid;justify-content:center;gap:3px;margin:10px 0}
+  .gr i{width:30px;height:30px;border:1px solid var(--line);background:#fff;border-radius:5px;display:grid;place-items:center;font-size:15px;font-style:normal}
+  .gr i.b{background:#2F3B4E}
+  .gr i.s{background:var(--volt-soft);border-color:var(--volt)}
+  .lamps{display:flex;gap:7px;justify-content:center;margin:10px 0}
+  .lamps i{width:34px;height:34px;border-radius:50%;border:2px solid #C9C6BB;background:#EFEDE6;font-style:normal;
+    display:grid;place-items:center;font-size:12px;color:var(--ink-2)}
+  .lamps i.on{background:#FFD84D;border-color:var(--volt);color:#6B4B00}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:16px;background:#F4F2EC;border-radius:10px;
+    padding:10px 12px;margin:10px 0;letter-spacing:.08em;text-align:center;word-break:break-word}
+  .pic{font-size:26px;text-align:center;letter-spacing:.1em;margin:10px 0}
+  .rev-line{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px;align-items:flex-start}
+  .rev-line .ex{color:var(--ink-2);font-size:14px}
+  svg{display:block;max-width:100%;margin:8px auto}
+  .medal{text-align:center;font-size:44px;margin:4px 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Бобер</h1>
+    <p>Задачі, де не треба нічого знати — треба думати. Формат міжнародного конкурсу з інформатики: три хвилини на задачу, жодного програмування.</p>
+  </header>
+  <div class="panel">
+    <div class="meta"><span class="chip">12 задач</span><span class="chip">30 хвилин</span><span class="chip p">бали 3 · 4 · 5</span></div>
+    <p style="margin:0 0 13px;color:var(--ink-2);font-size:15px">Контест іде без пояснень: розбір усього — у кінці, як на справжньому конкурсі.</p>
+    <button class="btn" onclick="startContest()">Почати контест</button>
+    <div class="stat">
+      <div><b id="st-best">—</b><span>найкращий бал</span></div>
+      <div><b id="st-solved">0</b><span>задач освоєно</span></div>
+      <div><b id="st-medal">—</b><span>нагорода</span></div>
+    </div>
+  </div>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-q" class="screen">
+  <div class="bar">
+    <button class="back" id="q-back">‹ Назад</button>
+    <div class="dots" id="dots"></div>
+    <span class="tmr" id="tmr"></span>
+  </div>
+  <div class="panel">
+    <div class="meta"><span class="chip" id="q-th"></span><span class="chip p" id="q-pts"></span></div>
+    <h2 style="font-size:20px;margin-bottom:10px" id="q-name"></h2>
+    <div class="task" id="q-task"></div>
+    <div id="q-body"></div>
+    <div class="verdict" id="q-verdict"></div>
+    <div class="why" id="q-why"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="q-act">Перевірити</button>
+      <button class="btn ghost" id="q-hint">Підказка</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ На головну</button><div class="dots"></div><span class="tmr"></span></div>
+  <div class="panel">
+    <div class="medal" id="e-medal"></div>
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div style="text-align:center;color:var(--ink-2);font-size:15px;margin-top:4px" id="e-line"></div>
+    <div class="stat">
+      <div><b id="e-pts">0</b><span>балів</span></div>
+      <div><b id="e-right">0</b><span>з 12</span></div>
+      <div><b id="e-time">—</b><span>часу пішло</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" onclick="startContest()">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До задач</button>
+    </div>
+  </div>
+  <div class="panel" id="e-review"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-bober-v1';
+let PR = {solved:{}, best:0, medal:''};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+
+const THEMES=['Алгоритми й виконавці','Кодування і стиснення','Графи й маршрути',
+              'Логічні висновки','Дані: стеки, черги, пошук','Автомати й стратегії'];
+const TASKS=[];
+function T(id,o){ o.id=id; TASKS.push(o); }
+
+/* ===================== 0 · АЛГОРИТМИ Й ВИКОНАВЦІ ===================== */
+T('hanoi',{th:0,pts:4,ic:'🗼',t:'Вежа',
+ q:'Чотири диски різного розміру треба перенести на інший стрижень. За раз береш один диск, більший ніколи не можна класти на менший. Яка найменша кількість ходів?',
+ extra:'<div class="pic">🟥🟧🟨🟩</div>',
+ type:'input', a:['15'],
+ hint:'Для одного диска — 1 хід, для двох — 3, для трьох — 7. Бачиш правило?',
+ why:'Щоб перенести n дисків, треба спершу перенести n−1 убік (x ходів), потім найбільший (1 хід), потім знову n−1 зверху (ще x). Виходить 2x+1: 1, 3, 7, 15. Для 64 дисків це більше ніж 18 квінтильйонів ходів.',
+ term:'рекурсія'});
+
+T('vykonavets',{th:0,pts:3,ic:'🤖',t:'Виконавець на сітці',
+ q:'Робот стоїть у клітинці ⬛ і дивиться вгору. Програма: <b>вперед, вперед, направо, вперед, направо, вперед</b>. У якій клітинці він опиниться?',
+ extra:'<div class="gr" style="grid-template-columns:repeat(4,30px)"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i><i>10</i><i>11</i><i>12</i><i class="b" style="color:#fff">🤖</i><i>14</i><i>15</i><i>16</i></div>',
+ type:'choice', o:['Клітинка 6','Клітинка 7','Клітинка 10','Клітинка 11'], a:2,
+ hint:'«Направо» — це поворот на місці, а не крок убік. Після першого повороту «вперед» уже означає вправо.',
+ why:'13 → 9 → 5 (два кроки вгору). Поворот — тепер робот дивиться вправо, крок веде в 6. Ще поворот — дивиться вниз, крок веде в 10. Головна пастка в тому, що поворот не змінює клітинку, зате змінює зміст усіх наступних команд.',
+ term:'виконавець · система команд'});
+
+T('tost',{th:0,pts:5,ic:'🍞',t:'Сковорода',
+ q:'На сковороду вміщається два шматки хліба. Кожен треба підсмажити з обох боків, один бік смажиться 1 хвилину. Яка найменша кількість хвилин потрібна на <b>три</b> шматки?',
+ type:'input', a:['3'],
+ hint:'Не смаж перший шматок повністю: його можна зняти напівготовим і повернути пізніше.',
+ why:'1-ша хв: A і B лицем. 2-га: A другим боком, B прибрали, поклали C. 3-тя: B і C другими боками. Три хвилини. Ключ — не тримати сковороду напівпорожньою жодної хвилини.',
+ term:'планування · паралельність'});
+
+T('bulbashka',{th:0,pts:4,ic:'🔁',t:'Бульбашка',
+ q:'Сортування йде так: порівнюємо сусідів і міняємо місцями, якщо лівий більший. Проходимо ряд зліва направо. Скільки <b>обмінів</b> буде за один такий прохід?',
+ extra:'<div class="mono">4 · 1 · 3 · 2</div>',
+ type:'input', a:['3'],
+ hint:'Іди повільно: 4↔1, потім дивись, що стало на місці другої пари.',
+ why:'4·1→1·4 (обмін), далі 4·3→3·4 (обмін), далі 4·2→2·4 (обмін). Три обміни, ряд став 1·3·2·4: найбільше число «спливло» в кінець — саме тому метод і зветься бульбашкою.',
+ term:'сортування бульбашкою'});
+
+T('cykl',{th:0,pts:3,ic:'🔂',t:'Скільки разів',
+ q:'Програма: <b>поки число більше за 1 { поділити на 2, відкинути дробову частину }</b>. Починаємо зі 100. Скільки разів виконається тіло циклу?',
+ type:'input', a:['6'],
+ hint:'Запиши ланцюжок: 100, 50, 25, 12...',
+ why:'100→50→25→12→6→3→1. Шість ділень. Кожне ділення навпіл зменшує число дуже швидко — тому навіть для мільйона знадобилося б лише 20 кроків.',
+ term:'цикл з умовою · логарифм'});
+
+T('recept',{th:0,pts:4,ic:'📋',t:'Порядок дій',
+ q:'Постав кроки так, щоб чай був готовий найшвидше. Тисни по черзі.',
+ type:'order', items:['Поставити чайник','Дістати чашку й пакетик','Залити окріп','Дати настоятися'],
+ a:[0,1,2,3],
+ hint:'Поки щось гріється, руки вільні — цим і користуйся.',
+ why:'Спершу запускаємо найдовше — чайник, а поки він гріється, готуємо чашку. Правило будь-якого планування: найдовшу операцію починають першою, коротші вставляють у проміжок.',
+ term:'критичний шлях'});
+
+/* ===================== 1 · КОДУВАННЯ І СТИСНЕННЯ ===================== */
+T('dviykovi',{th:1,pts:3,ic:'💡',t:'Лампочки',
+ q:'П\'ять лампочок показують число: увімкнена лампочка додає своє значення. Яке число світиться?',
+ extra:'<div class="lamps"><i>16</i><i class="on">8</i><i>4</i><i class="on">2</i><i class="on">1</i></div>',
+ type:'input', a:['11'],
+ hint:'Склади значення лише тих лампочок, що горять.',
+ why:'8 + 2 + 1 = 11. Це двійковий запис 01011: кожна позиція вдвічі більша за сусідню справа. Так рахує будь-який комп\'ютер — у нього лише «є струм» і «немає».',
+ term:'двійкова система'});
+
+T('rle',{th:1,pts:4,ic:'🗜',t:'Стиснення',
+ q:'Малюнок кодують так: спершу кількість однакових клітинок поспіль, потім колір. Наприклад <b>3Ч2Б</b> — три чорні, дві білі. Скільки символів вийде для цього рядка?',
+ extra:'<div class="mono">ЧЧЧЧЧЧББББЧЧ</div>',
+ type:'input', a:['6'],
+ hint:'Порахуй серії: скільки груп однакових поспіль? Кожна дає два символи.',
+ why:'6Ч4Б2Ч — шість символів замість дванадцяти. Такий спосіб зветься кодуванням довжин серій; він чудово стискає однотонні малюнки й зовсім не працює там, де кольори чергуються по одному: ЧБЧБ перетвориться на 1Ч1Б1Ч1Б, тобто вдвічі довше.',
+ term:'RLE · стиснення без втрат'});
+
+T('kontrolna',{th:1,pts:4,ic:'🔢',t:'Контрольна цифра',
+ q:'До номера дописують останню цифру так, щоб сума всіх цифр ділилася на 10. Номер <b>7 3 8 5</b>. Яку цифру дописати?',
+ type:'input', a:['7'],
+ hint:'Спершу склади те, що є.',
+ why:'7+3+8+5 = 23, до 30 бракує 7. Так влаштовані штрихкоди й номери карток: якщо касир помилиться в одній цифрі, сума перестане ділитися — і система одразу побачить помилку.',
+ term:'контрольна сума'});
+
+T('prefiks',{th:1,pts:5,ic:'📡',t:'Без розділювачів',
+ q:'Літери передають крапками й тире, але без пауз між літерами. Який набір кодів можна прочитати <b>однозначно</b>?',
+ extra:'<div class="mono">А=0 Б=01 В=011<br>А=0 Б=10 В=110<br>А=1 Б=01 В=001</div>',
+ type:'choice',
+ o:['Перший','Другий','Третій','Другий і третій'], a:3,
+ hint:'Небезпечно, коли код однієї літери є початком коду іншої.',
+ why:'У першому наборі «0» — початок і «01», і «011», тому 011 можна прочитати і як В, і як АБ. У другому й третьому жоден код не є початком іншого — читання однозначне. Це і є префіксний код; на ньому тримається архіватор ZIP.',
+ term:'префіксний код'});
+
+T('parnist',{th:1,pts:5,ic:'🧮',t:'Зіпсований біт',
+ q:'У квадраті 4×4 останній стовпець і останній рядок — контрольні: у кожному рядку й кожному стовпці має бути <b>парна</b> кількість чорних клітинок. Одна клітинка перевернулась. Де вона?',
+ extra:'<div class="gr" style="grid-template-columns:repeat(4,30px)"><i class="b"></i><i></i><i class="b"></i><i></i><i></i><i class="b"></i><i class="b"></i><i></i><i class="b"></i><i class="b"></i><i></i><i></i><i></i><i></i><i class="b"></i><i></i></div>',
+ type:'choice',
+ o:['У другому рядку, другому стовпці','У третьому рядку, першому стовпці','У четвертому рядку, третьому стовпці','Помилки немає'], a:2,
+ hint:'Порахуй чорні окремо в кожному рядку, потім у кожному стовпці. Непарним виявиться рівно один рядок і один стовпець.',
+ why:'Непарними виходять четвертий рядок і третій стовпець — на їхньому перетині й сидить перевернута клітинка. Один контрольний біт на рядок і стовпець дозволяє не просто помітити помилку, а точно вказати, де вона.',
+ term:'контроль парності'});
+
+T('piksel',{th:1,pts:3,ic:'🖼',t:'Малюнок числами',
+ q:'Рядок описують числами: скільки білих, потім скільки чорних, і так далі, завжди починаючи з білих. Рядок <b>1 2 1</b> у смужці з чотирьох клітинок — це:',
+ extra:'<div class="gr" style="grid-template-columns:repeat(4,30px)"><i>?</i><i>?</i><i>?</i><i>?</i></div>',
+ type:'choice',
+ o:['⬜⬛⬛⬜','⬛⬜⬜⬛','⬜⬜⬛⬛','⬛⬛⬜⬜'], a:0,
+ hint:'Перше число — завжди білі, навіть якщо їх нуль.',
+ why:'Одна біла, дві чорні, одна біла. Так описують зображення у факсах і в японських кросвордах-нонограмах: числа коротші за сам малюнок, а отже, це вже стиснення.',
+ term:'кодування зображень'});
+
+/* ===================== 2 · ГРАФИ Й МАРШРУТИ ===================== */
+T('mosty',{th:2,pts:5,ic:'🌉',t:'Мости',
+ q:'Чи можна пройти всіма сімома мостами Кенігсберга рівно по одному разу і повернутися туди, звідки почав?',
+ extra:'<svg viewBox="0 0 300 150" height="150"><g stroke="#5B6779" stroke-width="3" fill="none">'+
+   '<path d="M60 40 Q100 15 150 40"/><path d="M60 60 Q100 85 150 60"/><path d="M150 40 Q200 15 245 50"/>'+
+   '<path d="M150 60 Q200 90 245 60"/><path d="M60 50 L150 50"/><path d="M150 50 L245 55"/><path d="M150 60 L150 110"/>'+
+   '</g><g fill="#2F6FE4"><circle cx="60" cy="50" r="11"/><circle cx="150" cy="50" r="11"/><circle cx="245" cy="53" r="11"/><circle cx="150" cy="110" r="11"/></g>'+
+   '<g fill="#fff" font-size="11" text-anchor="middle" font-family="sans-serif"><text x="60" y="54">A</text><text x="150" y="54">B</text><text x="245" y="57">C</text><text x="150" y="114">D</text></g></svg>',
+ type:'choice',
+ o:['Так, якщо почати з берега A','Так, якщо почати з острова B','Ні, це неможливо','Так, але лише проти годинникової стрілки'], a:2,
+ hint:'Порахуй, скільки мостів виходить із кожної точки. Що буде, якщо це число непарне?',
+ why:'Щоб замкнути маршрут, у кожну точку треба стільки ж разів увійти, скільки й вийти — тобто мостів має бути парна кількість. Тут непарні всі чотири точки. Саме цю задачу розв\'язав Ейлер 1736 року, і з неї народилася теорія графів.',
+ term:'ейлерів цикл'});
+
+T('novyna',{th:2,pts:4,ic:'📣',t:'Новина',
+ q:'Один учень знає новину. Щохвилини кожен, хто вже знає, розповідає її рівно одному новому. За скільки хвилин новину знатимуть усі 30 учнів класу?',
+ type:'input', a:['5'],
+ hint:'1, 2, 4, 8... Скільки знає після кожної хвилини?',
+ why:'1 → 2 → 4 → 8 → 16 → 32. Після п\'ятої хвилини знають більш ніж 30. Подвоєння росте так швидко, що за 20 хвилин так можна обійти все населення України.',
+ term:'експоненційне зростання'});
+
+T('shlyah',{th:2,pts:4,ic:'🗺',t:'Найкоротший шлях',
+ q:'Числа на дорогах — хвилини. Скільки хвилин займе найшвидший шлях із A до D?',
+ extra:'<svg viewBox="0 0 300 140" height="140"><g stroke="#C9C6BB" stroke-width="3">'+
+   '<line x1="40" y1="70" x2="150" y2="25"/><line x1="40" y1="70" x2="150" y2="115"/>'+
+   '<line x1="150" y1="25" x2="260" y2="70"/><line x1="150" y1="115" x2="260" y2="70"/><line x1="150" y1="25" x2="150" y2="115"/></g>'+
+   '<g fill="#2F6FE4"><circle cx="40" cy="70" r="13"/><circle cx="150" cy="25" r="13"/><circle cx="150" cy="115" r="13"/><circle cx="260" cy="70" r="13"/></g>'+
+   '<g fill="#fff" font-size="12" text-anchor="middle" font-family="sans-serif"><text x="40" y="74">A</text><text x="150" y="29">B</text><text x="150" y="119">C</text><text x="260" y="74">D</text></g>'+
+   '<g fill="#1E2A3A" font-size="13" text-anchor="middle" font-family="sans-serif"><text x="88" y="36">2</text><text x="88" y="108">6</text><text x="215" y="36">7</text><text x="215" y="108">1</text><text x="163" y="73">3</text></g></svg>',
+ type:'input', a:['6'],
+ hint:'Порівняй три маршрути. Найкоротший не завжди той, що з найменшого кроку починається.',
+ why:'A→B→C→D = 2+3+1 = 6, що менше за A→B→D (9) і A→C→D (7). Жадібний вибір найдешевшої дороги на кожному кроці тут дав би 9 — саме тому алгоритми шукають шлях цілком, а не крок за кроком.',
+ term:'найкоротший шлях'});
+
+T('farby',{th:2,pts:4,ic:'🎨',t:'Розфарбування карти',
+ q:'Треба розфарбувати чотири країни так, щоб сусіди (ті, що мають спільний кордон) були різних кольорів. Яка найменша кількість кольорів потрібна?',
+ extra:'<div class="gr" style="grid-template-columns:repeat(3,30px)"><i>А</i><i>Б</i><i>В</i><i style="grid-column:1/4;width:auto">Г — межує з усіма</i></div>',
+ type:'input', a:['3','три'],
+ hint:'Г межує з усіма, тому їй потрібен окремий колір. А чи мусять А, Б, В усі бути різними між собою?',
+ why:'А і В не сусіди — їм можна дати один колір. Виходить: А і В — перший, Б — другий, Г — третій. Будь-яку плоску карту можна розфарбувати чотирма кольорами; це відома теорема, доведена комп\'ютером 1976 року.',
+ term:'розфарбування графа'});
+
+T('most-kriz',{th:2,pts:5,ic:'🚧',t:'Дорога, яку не можна закрити',
+ q:'Сім селищ з\'єднані дорогами. Одну дорогу закривають на ремонт. Закриття якої дороги <b>розірве</b> село на дві частини, що більше не з\'єднані?',
+ extra:'<svg viewBox="0 0 300 120" height="120"><g stroke="#C9C6BB" stroke-width="3">'+
+   '<line x1="40" y1="30" x2="100" y2="60"/><line x1="40" y1="90" x2="100" y2="60"/><line x1="40" y1="30" x2="40" y2="90"/>'+
+   '<line x1="100" y1="60" x2="190" y2="60"/><line x1="190" y1="60" x2="255" y2="30"/><line x1="190" y1="60" x2="255" y2="90"/><line x1="255" y1="30" x2="255" y2="90"/></g>'+
+   '<g fill="#2F6FE4"><circle cx="40" cy="30" r="10"/><circle cx="40" cy="90" r="10"/><circle cx="100" cy="60" r="10"/><circle cx="190" cy="60" r="10"/><circle cx="255" cy="30" r="10"/><circle cx="255" cy="90" r="10"/></g>'+
+   '<text x="145" y="52" font-size="13" text-anchor="middle" fill="#1E2A3A" font-family="sans-serif">?</text></svg>',
+ type:'choice',
+ o:['Будь-яка з трикутника зліва','Середня, що з\'єднує два згустки','Будь-яка з трикутника справа','Таких доріг тут немає'], a:1,
+ hint:'У трикутнику завжди є обхідний шлях. А чи є він у середньої дороги?',
+ why:'Дороги в трикутниках дублюють одна одну — закриття будь-якої з них лишає обхід. Середня дорога єдина, тому вона й називається мостом: у мережах саме такі ланки резервують першими.',
+ term:'міст у графі'});
+
+T('prava-ruka',{th:2,pts:3,ic:'🧭',t:'Правило правої руки',
+ q:'У лабіринті можна йти так: весь час вести правою рукою по стіні. Що гарантує це правило?',
+ type:'choice',
+ o:['Найкоротший шлях до виходу','Вихід, якщо всі стіни лабіринту з\'єднані з зовнішньою','Вихід із будь-якого лабіринту','Що ти ніколи не пройдеш коридором двічі'], a:1,
+ hint:'Уяви кімнату з окремою колоною посередині, на якій висить вихід.',
+ why:'Правило працює, коли стіни утворюють одне ціле із зовнішньою стіною. Якщо ж усередині є «острів», не з\'єднаний із рештою, рука водитиме навколо нього нескінченно. Шлях при цьому майже ніколи не найкоротший — лише гарантовано скінченний.',
+ term:'обхід лабіринту'});
+
+/* ===================== 3 · ЛОГІЧНІ ВИСНОВКИ ===================== */
+T('lytsari',{th:3,pts:4,ic:'⚔️',t:'Лицарі й брехуни',
+ q:'На острові лицарі завжди кажуть правду, брехуни завжди брешуть. Зустрічаєш двох. Перший каже: «Ми обидва брехуни». Хто вони?',
+ type:'choice',
+ o:['Обидва брехуни','Перший брехун, другий лицар','Перший лицар, другий брехун','Обидва лицарі'], a:1,
+ hint:'Припусти, що перший сказав правду, і подивись, чи не виходить суперечність.',
+ why:'Якби перший був лицарем, він не міг би назвати себе брехуном. Отже, він брехун — а значить, його слова хибні, тобто «обидва брехуни» неправда. Оскільки перший точно брехун, брехуном не є другий.',
+ term:'доведення від супротивного'});
+
+T('demorgan',{th:3,pts:4,ic:'🚫',t:'Заперечення',
+ q:'Тато сказав: «Неправда, що <b>всі</b> вікна зачинені». Що звідси точно випливає?',
+ type:'choice',
+ o:['Усі вікна відчинені','Принаймні одне вікно відчинене','Рівно одне вікно відчинене','Нічого сказати не можна'], a:1,
+ hint:'Щоб спростувати «всі», досить одного винятку.',
+ why:'Заперечення «всі» — це «існує хоча б один, який ні», а не «жоден». Так само заперечення «хоч один прийшов» — це «не прийшов ніхто». Плутанина між цими двома формами — найчастіша логічна помилка в суперечках.',
+ term:'закони де Моргана'});
+
+T('wason',{th:3,pts:5,ic:'🃏',t:'Чотири картки',
+ q:'На кожній картці з одного боку літера, з іншого — число. Правило: <b>якщо з одного боку голосна, то з іншого парне число</b>. Які картки треба перевернути, щоб перевірити правило — і жодної зайвої?',
+ extra:'<div class="pic">А &nbsp; Б &nbsp; 4 &nbsp; 7</div>',
+ type:'choice',
+ o:['А і 4','А і 7','Б і 4','Усі чотири'], a:1,
+ hint:'Шукай не підтвердження правила, а те, що могло б його зламати.',
+ why:'А — бо там може бути непарне. 7 — бо з іншого боку може виявитися голосна. Картка 4 марна: правило нічого не обіцяє про парні числа, а Б взагалі не голосна. Цю задачу правильно розв\'язують менш ніж 10% дорослих — усі шукають підтвердження замість спростування.',
+ term:'задача Вейсона · фальсифікація'});
+
+T('shkarpetky',{th:3,pts:3,ic:'🧦',t:'У темряві',
+ q:'У шухляді 10 чорних і 10 синіх шкарпеток упереміш. У кімнаті темно. Скільки шкарпеток треба взяти, щоб <b>гарантовано</b> мати пару одного кольору?',
+ type:'input', a:['3','три'],
+ hint:'Уяви найгірший можливий збіг: перші дві виявились різними.',
+ why:'Дві можуть бути різні, але третя обов\'язково повторить один із двох кольорів. Це принцип Діріхле: якщо предметів більше, ніж «шухляд», у якійсь шухляді точно опиниться двоє.',
+ term:'принцип Діріхле'});
+
+T('rozsadka',{th:3,pts:5,ic:'🏠',t:'Хто де живе',
+ q:'Три будинки в ряд. Оля живе не з краю. Петро живе ліворуч від Олі. Хто живе в правому будинку?',
+ extra:'<div class="gr" style="grid-template-columns:repeat(3,46px)"><i style="width:46px">🏠</i><i style="width:46px">🏠</i><i style="width:46px">🏠</i></div>',
+ type:'choice', o:['Оля','Петро','Ніна','Визначити неможливо'], a:2,
+ hint:'Перша умова майже все вирішує: скільки місць лишається для Олі?',
+ why:'Оля не з краю, отже — посередині. Петро ліворуч від неї, отже — перший. Лишається Ніна справа. Такі задачі зручно розв\'язувати таблицею, а не в голові.',
+ term:'логічна сітка'});
+
+T('moneta12',{th:3,pts:5,ic:'⚖️',t:'Дванадцять монет',
+ q:'Дванадцять монет, одна фальшива — і невідомо, важча вона чи легша. Терези без гир. Чи можна гарантовано знайти її за <b>три</b> зважування?',
+ type:'choice',
+ o:['Ні, потрібно щонайменше чотири','Так, але лише якщо знати, важча вона чи легша','Так, у будь-якому разі','Так, але лише для 9 монет'], a:2,
+ hint:'Кожне зважування дає три різні відповіді. Скільки різних результатів дають три зважування?',
+ why:'Три зважування дають 3·3·3 = 27 різних результатів, а варіантів усього 24 (12 монет × важча/легша) — інформації вистачає. Схема існує: перше зважування 4 проти 4. Рахунок «скільки різних відповідей дає інструмент» — стандартний спосіб оцінити, чи задача взагалі розв\'язна.',
+ term:'оцінка знизу · інформація'});
+
+/* ===================== 4 · ДАНІ: СТЕКИ, ЧЕРГИ, ПОШУК ===================== */
+T('stek',{th:4,pts:3,ic:'🍽',t:'Стос тарілок',
+ q:'Тарілки ставлять у стос і беруть завжди зверху. Поставили 1, 2, 3, потім узяли одну, поставили 4, і забрали решту по черзі. У якому порядку тарілки пішли зі стосу?',
+ type:'choice', o:['3, 4, 2, 1','1, 2, 3, 4','3, 2, 4, 1','4, 3, 2, 1'], a:0,
+ hint:'Перша взята — та, що лежала зверху на той момент.',
+ why:'Узяли 3 (була зверху), поклали 4 — вона зверху, тож іде наступною, далі 2, потім 1. Хто зайшов останнім, виходить першим; так працює кнопка «назад» у браузері.',
+ term:'стек · LIFO'});
+
+T('cherga2',{th:4,pts:3,ic:'🎟',t:'Черга чи стос',
+ q:'Де правильно застосувати <b>чергу</b> (перший прийшов — перший вийшов), а не стос?',
+ type:'choice',
+ o:['Кнопка «назад» у браузері','Черга друку документів','Скасування останньої дії в редакторі','Перевірка, чи правильно розставлені дужки'], a:1,
+ hint:'Подумай, де важлива справедливість, а де — повернення назад по своїх слідах.',
+ why:'Документи друкують у порядку надходження — це черга. Решта прикладів вимагають повертатися до найсвіжішої дії, тобто це стек. Вибір структури даних визначає поведінку програми не менше, ніж сам алгоритм.',
+ term:'черга · FIFO'});
+
+T('duplikat',{th:4,pts:4,ic:'🔍',t:'Знайти повтор',
+ q:'У списку 1000 імен треба знайти, чи є серед них два однакові. Який спосіб потребує найменше роботи?',
+ type:'choice',
+ o:['Порівняти кожне ім\'я з кожним','Спершу відсортувати, потім перевірити лише сусідів','Проглянути список тричі','Перевірити лише перші й останні сто'], a:1,
+ hint:'Після сортування однакові імена неминуче опиняються поруч.',
+ why:'Порівняння кожного з кожним — це майже пів мільйона перевірок. Сортування коштує близько 10 тисяч кроків, а після нього досить одного проходу. Часто вигідно спершу впорядкувати дані, а вже потім шукати.',
+ term:'складність алгоритму'});
+
+T('koshyky',{th:4,pts:4,ic:'🗄',t:'Коробки за літерою',
+ q:'Картки з іменами розкладають по 33 коробках — за першою літерою імені. Що станеться, якщо в класі багато Олен, Олегів і Оксан?',
+ type:'choice',
+ o:['Пошук прискориться','Коробка «О» стане майже такою ж довгою, як увесь список','Картки загубляться','Знадобиться більше коробок, ніж літер'], a:1,
+ hint:'Швидкість такого пошуку залежить від того, наскільки рівномірно заповнені коробки.',
+ why:'Розкладання по коробках економить час, лише якщо картки розподілені рівномірно. Коли всі падають в одну, доводиться переглядати її цілком — і виграшу немає. Саме тому для хеш-таблиць придумують функції, що «розмазують» дані рівно.',
+ term:'хешування · колізії'});
+
+T('vstavka',{th:4,pts:4,ic:'🃏',t:'Сортування вставками',
+ q:'Ти впорядковуєш карти в руці: береш наступну й вставляєш її на місце серед уже впорядкованих. Скільки карт доведеться зсунути, щоб вставити <b>3</b>?',
+ extra:'<div class="mono">у руці: 2 · 5 · 7 · 9 &nbsp;|&nbsp; нова: 3</div>',
+ type:'input', a:['3','три'],
+ hint:'Зсунути треба всі карти, більші за 3.',
+ why:'5, 7 і 9 зсуваються на одну позицію вправо, 3 стає після 2. Метод найшвидший тоді, коли дані вже майже впорядковані — тоді зсувати майже нічого не треба.',
+ term:'сортування вставками'});
+
+T('derevo',{th:4,pts:5,ic:'🌳',t:'Дерево пошуку',
+ q:'Числа зберігають у дереві: ліворуч менші, праворуч більші. У дереві три рівні (корінь і ще два під ним). Скільки щонайбільше порівнянь потрібно, щоб знайти будь-яке число?',
+ extra:'<div class="pic">🔵<br>🔵 🔵<br>🔵 🔵 🔵 🔵</div>',
+ type:'input', a:['3','три'],
+ hint:'Кожне порівняння опускає тебе рівно на один рівень униз.',
+ why:'Три рівні — максимум три порівняння, хоч у дереві вже 7 чисел. Додавання ще одного рівня подвоює кількість чисел, але додає лише одне порівняння — тому мільйон записів шукається приблизно за 20 кроків.',
+ term:'двійкове дерево пошуку'});
+
+/* ===================== 5 · АВТОМАТИ Й СТРАТЕГІЇ ===================== */
+T('turniket',{th:5,pts:4,ic:'🚇',t:'Турнікет',
+ q:'Турнікет має два стани: <b>закрито</b> і <b>відкрито</b>. Жетон відкриває його, прохід знову закриває. Турнікет закритий. Послідовність: жетон, жетон, прохід. У якому він стані?',
+ type:'choice', o:['Закрито','Відкрито','Зламався','Залежить від того, чи повернувся жетон'], a:0,
+ hint:'Другий жетон у вже відкритому турнікеті нічого не змінює — стан той самий.',
+ why:'Жетон → відкрито. Другий жетон → усе ще відкрито (і монета пропала). Прохід → закрито. Такий опис називають скінченним автоматом: важливий лише поточний стан, а не вся історія подій.',
+ term:'скінченний автомат'});
+
+T('kavomashyna',{th:5,pts:4,ic:'☕',t:'Автомат із напоями',
+ q:'Напій коштує 15. Автомат приймає монети по 5 і 10 і не дає решти — щойно набралося 15 або більше, він наливає. Скільки різних послідовностей монет призводять до напою рівно з 15?',
+ type:'input', a:['3','три'],
+ hint:'Випиши: 5-5-5, 5-10, ... Порядок монет вважай важливим.',
+ why:'5-5-5, 5-10 і 10-5 — три послідовності. 10-10 дає 20, тобто перебір. Автомат пам\'ятає лише набрану суму (стани 0, 5, 10), а не те, якими монетами її набрали.',
+ term:'стани й переходи'});
+
+T('nim',{th:5,pts:5,ic:'🪵',t:'Сірники',
+ q:'На столі 7 сірників. Гравці по черзі беруть 1 або 2. Хто взяв останній — виграв. Ти ходиш першим. Скільки взяти, щоб гарантовано виграти?',
+ extra:'<div class="pic">🪵🪵🪵🪵🪵🪵🪵</div>',
+ type:'input', a:['1','один'],
+ hint:'Порахуй назад: скільки сірників мусить лишитись супернику перед його ходом, щоб він точно програв?',
+ why:'Програшні для суперника позиції — 3, 6, 9... тобто кратні трьом. Береш 1, лишається 6; далі щохода доповнюєш його взяте до трьох (він 1 — ти 2, він 2 — ти 1) і завжди приходиш до 0 останнім.',
+ term:'виграшна стратегія · інваріант'});
+
+T('perelyvannya',{th:5,pts:5,ic:'🪣',t:'Три і п\'ять',
+ q:'Є глеки на 3 і на 5 літрів, без поділок, і кран із водою. Треба відміряти рівно 4 літри. Яка найменша кількість дій (наповнити, вилити, перелити)?',
+ type:'input', a:['6'],
+ hint:'Почни з великого глека: наповни 5, перелий у 3 — скільки лишилось?',
+ why:'Наповнити 5 → перелити в 3 (лишилось 2) → вилити 3 → перелити 2 у трилітровий → наповнити 5 → долити в трилітровий 1 літр. У п\'ятилітровому 4. Шість дій; кожен стан тут — пара чисел, і задача зводиться до пошуку шляху між станами.',
+ term:'простір станів'});
+
+T('vovk',{th:5,pts:4,ic:'🛶',t:'Вовк, коза й капуста',
+ q:'Човен вміщає тільки тебе й одну річ. Вовка з козою і козу з капустою лишати наодинці не можна. Скільки переправ (в один бік) потрібно?',
+ type:'input', a:['7'],
+ hint:'Одну річ доведеться повезти назад — інакше не складеться.',
+ why:'Коза туди, назад порожнім, вовк туди, коза назад, капуста туди, назад порожнім, коза туди. Сім переправ. Хід «назад із козою» здається кроком у минуле, але саме він і розв\'язує задачу — не всі корисні кроки ведуть уперед.',
+ term:'пошук у просторі станів'});
+
+T('vahy-strategy',{th:5,pts:3,ic:'🎯',t:'Вгадати число',
+ q:'Загадано число від 1 до 100. Після кожної спроби кажуть «більше» або «менше». Скільки спроб потрібно в найгіршому випадку, якщо питати правильно?',
+ type:'input', a:['7'],
+ hint:'Щоразу питай середину проміжку: 100 → 50 → 25...',
+ why:'Кожне питання зменшує проміжок удвічі: 100 → 50 → 25 → 13 → 7 → 4 → 2 → 1, тобто 7 питань. Питати «1? 2? 3?» у найгіршому разі коштувало б 100 спроб.',
+ term:'двійковий пошук'});
+
+/* ---------- прогрес і головна ---------- */
+function homeDraw(){
+  $('#st-best').textContent = PR.best ? PR.best : '—';
+  $('#st-solved').textContent = Object.keys(PR.solved||{}).length + '/' + TASKS.length;
+  $('#st-medal').textContent = PR.medal || '—';
+  const box=$('#home-list'); box.innerHTML='';
+  THEMES.forEach((name,ti)=>{
+    const list=TASKS.filter(t=>t.th===ti); if(!list.length) return;
+    const h=document.createElement('div'); h.className='grp'; h.textContent=name+' · '+list.length; box.appendChild(h);
+    list.forEach(t=>{
+      const b=document.createElement('button');
+      b.className='item'+(PR.solved && PR.solved[t.id] ? ' done':'');
+      b.innerHTML='<span class="ic">'+t.ic+'</span><span class="tx"><b>'+t.t+'</b><span>'+t.pts+' бали</span></span><span class="tick">✓</span>';
+      b.onclick=()=>openTask(t.id); box.appendChild(b);
+    });
+  });
+}
+
+/* ---------- рушій задачі ---------- */
+let MODE='practice', SET=[], idx=0, tries=0, picked=null, order=[], answers=[], t0=0, timer=null, left=0;
+
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } const e=$('#tmr'); if(e) e.textContent=''; }
+function startTimer(sec){
+  left=sec; const el=$('#tmr'); paintTime();
+  timer=setInterval(()=>{ if(!document.querySelector('#tmr')) return stopTimer();
+    left--; paintTime(); if(left<=0){ stopTimer(); endContest(); } },1000);
+}
+function paintTime(){ const el=$('#tmr'); if(!el) return;
+  el.textContent = Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+  el.classList.toggle('hot', left<=60); }
+
+function openTask(id){
+  MODE='practice'; SET=[TASKS.find(t=>t.id===id)]; idx=0; answers=[];
+  stopTimer(); go('s-q'); renderQ();
+}
+function startContest(){
+  MODE='contest';
+  const easy=TASKS.filter(t=>t.pts===3), mid=TASKS.filter(t=>t.pts===4), hard=TASKS.filter(t=>t.pts===5);
+  const pick=(a,n)=>[...a].sort(()=>Math.random()-.5).slice(0,n);
+  SET=[...pick(easy,4),...pick(mid,4),...pick(hard,4)];
+  idx=0; answers=[]; t0=Date.now();
+  go('s-q'); startTimer(30*60); renderQ();
+}
+
+function drawDots(){
+  if(MODE!=='contest'){ $('#dots').innerHTML=''; return; }
+  $('#dots').innerHTML = SET.map((_,i)=>{
+    const a=answers[i];
+    const c = a===undefined ? (i===idx?'now':'') : (a.ok?'g':'r');
+    return '<span class="dot '+c+'"></span>';
+  }).join('');
+}
+
+function renderQ(){
+  const t=SET[idx]; tries=0; picked=null; order=[];
+  drawDots();
+  $('#q-th').textContent = THEMES[t.th];
+  $('#q-pts').textContent = t.pts+' бали';
+  $('#q-name').textContent = t.t;
+  $('#q-task').innerHTML = t.q + (t.extra||'');
+  $('#q-verdict').className='verdict'; $('#q-why').className='why';
+  $('#q-back').textContent = MODE==='contest' ? '‹ Зупинити' : '‹ Назад';
+  $('#q-back').onclick = ()=>{ if(MODE==='contest'){ if(!confirm('Зупинити контест? Результат зарахується за відповіді, які вже є.')) return; return endContest(); } stopTimer(); go('s-home'); };
+  $('#q-hint').style.display = MODE==='contest' ? 'none' : 'inline-block';
+  $('#q-hint').onclick = ()=>{ $('#q-verdict').className='verdict on'; $('#q-verdict').style.background='var(--volt-soft)';
+    $('#q-verdict').style.color='#6B4B00'; $('#q-verdict').textContent='Підказка: '+t.hint; };
+  $('#q-act').disabled=false; $('#q-act').textContent = MODE==='contest' ? (idx===SET.length-1?'Завершити':'Відповісти') : 'Перевірити';
+  $('#q-act').onclick=act;
+  const b=$('#q-body');
+  if(t.type==='choice'){
+    b.innerHTML='<div class="opts">'+t.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ $$('.opt',b).forEach(x=>x.classList.remove('pick')); el.classList.add('pick'); picked=+el.dataset.i; });
+  } else if(t.type==='input'){
+    b.innerHTML='<input type="text" id="q-inp" autocomplete="off" autocapitalize="off" placeholder="Відповідь">';
+    $('#q-inp').onkeydown=e=>{ if(e.key==='Enter') act(); };
+  } else {
+    b.innerHTML='<div class="ord">'+t.items.map((s,i)=>'<button class="it" data-i="'+i+'"><span class="n">·</span><span>'+s+'</span></button>').join('')+'</div>';
+    $$('.it',b).forEach(el=>el.onclick=()=>{ const i=+el.dataset.i;
+      if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+      $$('.it',b).forEach(x=>{ const p=order.indexOf(+x.dataset.i);
+        x.classList.toggle('on',p>=0); $('.n',x).textContent = p>=0 ? (p+1) : '·'; }); });
+  }
+}
+
+function norm(s){ return (s||'').toLowerCase().replace(/[’']/g,'').replace(/\s+/g,' ').trim(); }
+function judge(t){
+  if(t.type==='choice') return picked===null ? null : picked===t.a;
+  if(t.type==='input'){ const v=norm($('#q-inp').value); return v ? t.a.some(a=>norm(a)===v) : null; }
+  return order.length<t.items.length ? null : order.every((v,i)=>v===t.a[i]);
+}
+
+function act(){
+  const t=SET[idx], ok=judge(t);
+  if(ok===null) return;
+  if(MODE==='contest'){
+    answers[idx]={ok, pts: ok?t.pts:0};
+    idx++; if(idx>=SET.length) return endContest();
+    renderQ(); return;
+  }
+  tries++;
+  if(!ok && tries===1){
+    buzz(false);
+    $('#q-verdict').className='verdict on warn'; $('#q-verdict').style.background=''; $('#q-verdict').style.color='';
+    $('#q-verdict').innerHTML='Ні. Підказка: '+t.hint+'<br><span style="opacity:.8">Лишилась одна спроба.</span>';
+    if(t.type==='choice'){ const el=$('.opt.pick'); if(el){ el.classList.remove('pick'); el.classList.add('off'); } picked=null; }
+    if(t.type==='order'){ order=[]; $$('.it').forEach(x=>{x.classList.remove('on'); $('.n',x).textContent='·';}); }
+    return;
+  }
+  reveal(ok, tries===1);
+}
+
+function reveal(ok, firstTry){
+  const t=SET[idx]; buzz(ok);
+  if(t.type==='choice') $$('.opt').forEach((el,i)=>{ el.classList.remove('pick','off');
+    if(i===t.a) el.classList.add('good'); else if(!ok) el.classList.add('bad'); el.disabled=true; });
+  if(t.type==='order') $$('.it').forEach((el,i)=>{ el.classList.add(ok?'good':'bad'); el.disabled=true; $('.n',el).textContent=t.a.indexOf(i)+1; });
+  if(t.type==='input'){ const inp=$('#q-inp'); if(inp){ inp.disabled=true; if(!ok) inp.value=t.a[0]; } }
+  $('#q-verdict').className='verdict on '+(ok?'good':'warn');
+  $('#q-verdict').style.background=''; $('#q-verdict').style.color='';
+  $('#q-verdict').textContent = ok ? (firstTry?'Точно. З першого разу.':'Так — з другої спроби.') : 'Ні. Правильне позначено вище.';
+  $('#q-why').className='why on';
+  $('#q-why').innerHTML='<b>Чому так</b>'+t.why+'<span class="term">'+t.term+'</span>';
+  $('#q-hint').style.display='none';
+  if(ok){ PR.solved=PR.solved||{}; PR.solved[t.id]=firstTry?2:1; saveP(); }
+  $('#q-act').textContent='До списку'; $('#q-act').onclick=()=>{ homeDraw(); go('s-home'); };
+}
+
+function endContest(){
+  stopTimer();
+  const pts = answers.reduce((s,a)=>s+(a?a.pts:0),0);
+  const max = SET.reduce((s,t)=>s+t.pts,0);
+  const right = answers.filter(a=>a&&a.ok).length;
+  const secs = Math.round((Date.now()-t0)/1000);
+  const share = pts/max;
+  const medal = share>=0.85?'🥇 Золотий бобер' : share>=0.65?'🥈 Срібний бобер' : share>=0.4?'🥉 Бронзовий бобер' : '🦫 Учасник';
+  if(pts>(PR.best||0)){ PR.best=pts; PR.medal=medal; }
+  answers.forEach((a,i)=>{ if(a&&a.ok){ PR.solved=PR.solved||{}; if(!PR.solved[SET[i].id]) PR.solved[SET[i].id]=1; } });
+  saveP();
+  $('#e-medal').textContent = medal.split(' ')[0];
+  $('#e-title').textContent = medal.slice(medal.indexOf(' ')+1);
+  $('#e-line').textContent = pts+' балів із '+max+' можливих';
+  $('#e-pts').textContent=pts; $('#e-right').textContent=right;
+  $('#e-time').textContent = Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0');
+  $('#e-review').innerHTML = '<b style="display:block;margin-bottom:6px">Розбір</b>'+
+    SET.map((t,i)=>{ const a=answers[i];
+      return '<div class="rev-line"><span>'+(a? (a.ok?'🟩':'🟥') : '⬜')+'</span><span><b>'+t.t+'</b> · '+t.pts+' б · '+t.term+
+             '<div class="ex">'+t.why+'</div></span></div>'; }).join('');
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
