@@ -184,6 +184,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -410,6 +444,12 @@ function checkGap(){
   if(isNaN(v)) return;
   const ok = v===real;
   GLOG[GI]=ok; buzz(ok); gdots();
+  (function(){ const id='hist:gap:'+it.a+'-'+it.b;
+    const A=EV.find(e=>e.y===it.a), B=EV.find(e=>e.y===it.b);
+    if(ok) srsHit(id); else srsMiss(id,'Хронос',{sub:'🏛 Історія',tag:'Скільки минуло',type:'input',
+      q:'Скільки років минуло між подіями?<br><b>'+yr(it.a)+'</b> — '+A.t+'<br><b>'+yr(it.b)+'</b> — '+B.t,
+      a:[String(real)], hint:'Якщо одна подія до нашої ери, роки додають, а не віднімають.',
+      why:it.r, term:'хронологія'}); })();
   $('#p-inp').disabled=true;
   const ver=$('#p-verdict'); ver.className='verdict on '+(ok?'good':'warn');
   ver.innerHTML = ok ? 'Так — '+real+' років.' : 'Ні. Правильно '+real+' років.';
@@ -469,6 +509,10 @@ function renderMyth(){
 function checkMyth(val){
   const it=MSET[MI], ok = val===it.a;
   MLOG[MI]=ok; buzz(ok); mdots();
+  (function(){ const id='hist:myth:'+it.q.slice(0,40);
+    if(ok) srsHit(id); else srsMiss(id,'Хронос',{sub:'🏛 Історія',tag:'Правда чи міф',type:'choice',
+      q:it.q+'<br><br>Це правда чи міф?', o:['Правда','Міф'], a: it.a?0:1,
+      hint:'Подумай, звідки взялося це твердження.', why:it.r, term:'історичний міф'}); })();
   $$('.opt').forEach(el=>{ el.disabled=true;
     const isRight = (el.dataset.v==='1')===it.a;
     el.classList.add(isRight?'good':'bad'); });
