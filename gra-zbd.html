@@ -138,6 +138,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 const shuffle=a=>[...a].sort(()=>Math.random()-.5);
@@ -349,6 +383,7 @@ function checkItem(timeout){
   if(KIND==='myth'){ if(sel===null) return; ok = sel===it.a; }
   stopT();
   LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  srsSafe(it, ok);
   const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
 
   if(KIND==='sit'){
@@ -394,6 +429,26 @@ function checkItem(timeout){
   $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
   $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
 }
+function srsSafe(it, ok){
+  const S='💪 Безпека';
+  let id=null, card=null;
+  if(KIND==='sit'){ id='zbd:sit:'+it.q.slice(0,40);
+    card={sub:S,tag:'Ситуація',type:'choice',q:it.q,o:it.o,a:it.a,
+      hint:'Обери те, що найменше залежить від везіння.', why:it.r, term:'безпека'}; }
+  if(KIND==='aid'){ id='zbd:aid:'+it.t;
+    card={sub:S,tag:'Перша допомога',type:'order',q:'<b>'+it.t+'</b> — постав дії за порядком.',
+      items:it.s,a:it.s.map((_,i)=>i),hint:'Перше — те, що спиняє шкоду просто зараз.', why:it.r, term:'перша допомога'}; }
+  if(KIND==='food'){ id='zbd:food:'+it.n;
+    card={sub:S,tag:'Тарілка',type:'choice',q:'До якої групи належить <b>'+it.n+'</b>?',
+      o:FGROUPS,a:it.g,hint:'Думай не про смак, а про те, що це дає організму.',
+      why:'Половина тарілки — овочі й фрукти, по чверті — злаки й білкові.', term:'групи продуктів'}; }
+  if(KIND==='myth'){ id='zbd:myth:'+it.q.slice(0,40);
+    card={sub:S,tag:'Правда чи міф',type:'choice',q:it.q+'<br><br>Це правда чи міф?',
+      o:['Правда','Міф'],a: it.a?0:1, hint:'Перевір, чи можна це підтвердити дослідом.', why:it.r, term:'міфи про здоров\'я'}; }
+  if(!id) return;
+  if(ok) srsHit(id); else srsMiss(id,'Ситуація',card);
+}
+
 function endRun(){
   stopT();
   const g=GAMES.find(x=>x.id===KIND);
