@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Колосок</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:64px;text-align:right}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0}
+  .chip2{border:1px solid var(--line);border-radius:12px;padding:10px 13px;background:#fff;font-size:16px}
+  .chip2.on{border-color:var(--accent);background:var(--accent-soft)}
+  .chip2.used{opacity:.35}
+  .line{min-height:54px;border:2px dashed var(--line);border-radius:12px;padding:10px 12px;margin:6px 0 10px;
+    font-size:17px;text-align:center;color:var(--ink-2);line-height:1.7}
+  .line.full{border-style:solid;color:var(--ink)}
+  .line.good{border-color:var(--ok);background:var(--ok-soft);color:#14603E}
+  .line.bad{border-color:var(--bad);background:var(--bad-soft);color:#8F2018}
+  .card{border:2px solid var(--volt);background:var(--volt-soft);border-radius:14px;padding:16px;
+    text-align:center;font-size:20px;font-weight:600;margin-bottom:12px}
+  .groups{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .groups button{border:1px solid var(--line);border-radius:12px;padding:14px 10px;background:#fff;font-size:16px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  svg{display:block;margin:6px auto}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Колосок</h1>
+    <p>П'ять ігор про природу. Спершу передбач, потім перевір — так працює будь-який дослід.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-sc"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Перевірити</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-pryroda-v1';
+let PR = {best:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+/* ================= ДАНІ ================= */
+const PLANETS=[
+ {n:'Меркурій', e:'☿️', r:'Найближча до Сонця і найменша. Доба на ній триває майже два її роки.'},
+ {n:'Венера',   e:'♀️', r:'Найгарячіша планета — гарячіша за Меркурій, бо вкрита щільною ковдрою вуглекислого газу.'},
+ {n:'Земля',    e:'🌍', r:'Єдина відома планета з рідкою водою на поверхні.'},
+ {n:'Марс',     e:'🔴', r:'Червоний через іржу в ґрунті. Тут найвища гора Сонячної системи — Олімп, 22 км.'},
+ {n:'Юпітер',   e:'🪐', r:'Найбільший. У ньому помістилося б понад тисяча Земель, а буря Червона пляма триває століттями.'},
+ {n:'Сатурн',   e:'💍', r:'Його кільця — це мільярди крижинок, від піщинки до будинку завбільшки.'},
+ {n:'Уран',     e:'🔵', r:'Обертається «лежачи на боці», ніби його колись перекинуло ударом.'},
+ {n:'Нептун',   e:'🌊', r:'Найвітряніша планета: вітри до 2000 км/год. Його знайшли на кінчику пера — спершу обчислили, потім побачили.'}
+];
+const CHAINS=[
+ {c:['☀️ Сонце','🌾 трава','🐁 миша','🦉 сова'], r:'Сонце дає енергію, трава її вловлює і стає продуцентом, миша — рослиноїдний споживач, сова — хижак. Прибери сову — і мишей стане надто багато.'},
+ {c:['☀️ Сонце','🌿 листя','🐛 гусінь','🐦 синиця','🦅 яструб'], r:'Кожна ланка передає далі лише десяту частину енергії. Тому хижаків завжди набагато менше, ніж рослин.'},
+ {c:['☀️ Сонце','🦠 водорості','🦐 рачок','🐟 риба','🐦 чапля'], r:'У воді ланцюг починається з водоростей — саме вони, а не великі рослини, годують більшість океану.'},
+ {c:['☀️ Сонце','🌰 жолуді','🐿 білка','🦊 лисиця'], r:'Білка не лише їсть жолуді, а й закопує їх — і забуває. З цих забутих запасів виростають нові дуби.'},
+ {c:['☀️ Сонце','🌻 нектар','🐝 бджола','🕷 павук','🐦 ластівка'], r:'Бджола не просто споживач: переносячи пилок, вона допомагає рослині, з якої живиться.'},
+ {c:['☀️ Сонце','🥬 капуста','🐌 слимак','🦔 їжак','🦉 сова'], r:'Їжак усеїдний, але тут він хижак. Один організм може стояти в різних ланцюгах на різних місцях.'},
+ {c:['☀️ Сонце','🌱 паросток','🐇 заєць','🐺 вовк'], r:'Класичний ланцюг лугу. Вовк регулює кількість зайців, а зайці — кількість молодої трави.'},
+ {c:['🍂 опале листя','🪱 дощовий черв\'як','🐦 дрізд','🦅 шуліка'], r:'Цей ланцюг починається не з живої рослини, а з мертвої органіки. Черв\'яки й гриби — редуценти: вони повертають поживні речовини в ґрунт.'}
+];
+const PREDICT=[
+ {q:'Повітряну кульку надули й поклали в морозильник. Що з нею станеться?',
+  o:['Лусне','Зменшиться','Нічого не зміниться','Стане твердою'], a:1,
+  r:'На холоді повітря стискається, і кулька помітно здувається. У теплі вона знову набере колишнього розміру — газ розширюється від нагрівання.'},
+ {q:'Свічку накрили скляною банкою, поставленою в тарілку з водою. Що станеться?',
+  o:['Свічка горітиме далі','Свічка згасне, а вода підніметься в банку','Вода закипить','Банка трісне'], a:1,
+  r:'Кисень усередині вигорає, свічка гасне. Повітря в банці охолоджується й стискається — і вода піднімається всередину. Це показує, що кисню в повітрі приблизно п\'ята частина.'},
+ {q:'Сире яйце кладуть у склянку з дуже солоною водою. Що буде?',
+  o:['Потоне','Спливе','Розчиниться','Зміниться колір'], a:1,
+  r:'Солона вода важча за яйце, тому воно спливає. Саме тому в Мертвому морі людина не тоне навіть не рухаючись.'},
+ {q:'Пляшку з водою щільно закрили й поклали в морозилку. Що станеться?',
+  o:['Нічого','Пляшку розпирає, може трісне','Вода зникне','Лід займе менше місця'], a:1,
+  r:'Вода — рідкісний виняток: замерзаючи, вона розширюється приблизно на десяту частину. Тому лід плаває, а взимку тріскають труби.'},
+ {q:'Насіння квасолі пророщують у повній темряві. Що вийде?',
+  o:['Не проросте зовсім','Проросте, але буде бліде й витягнуте','Проросте так само, як на світлі','Проросте швидше'], a:1,
+  r:'На проростання світло не потрібне — запас їжі є в самому насінні. Але без світла не утворюється хлорофіл, тож паросток блідий і тягнеться вгору, шукаючи світло.'},
+ {q:'Мокрий одяг вивісили на сильний мороз. Він висохне?',
+  o:['Ні, замерзне назавжди','Так, лід поступово випарується','Тільки якщо буде сонце','Ні, вода не рухається на морозі'], a:1,
+  r:'Лід може випаровуватися, минаючи рідкий стан, — це називають сублімацією. Тому білизна на морозі спершу дубіє, а потім сохне.'},
+ {q:'Два однакові аркуші паперу: один рівний, другий зіжмаканий у кульку. Що впаде швидше?',
+  o:['Рівний','Зіжмаканий','Одночасно','Залежить від висоти'], a:1,
+  r:'Вага та сама — різний опір повітря. У вакуумі аркуш і кулька падали б однаково, як молоток і пір\'їна на Місяці в досліді 1971 року.'},
+ {q:'Залізний цвях поклали в склянку з кип\'яченою водою, повністю закритою олією. Він поржавіє?',
+  o:['Так, вода ж є','Ні, бо немає кисню','Так, але повільніше','Розчиниться'], a:1,
+  r:'Іржа — це сполука заліза з киснем. Потрібні обидва: вода і кисень. У кип\'яченій воді під олією кисню немає, тож цвях лишиться чистим.'},
+ {q:'Металеву й дерев\'яну ложки поставили в гарячий чай. Через хвилину:',
+  o:['Обидві однаково теплі','Металева гаряча, дерев\'яна ледь тепла','Дерев\'яна гарячіша','Обидві холодні'], a:1,
+  r:'Метал добре проводить тепло, дерево — погано. Тому ручки каструль роблять дерев\'яними або пластиковими.'},
+ {q:'Скибку яблука лишили на столі. Через годину вона потемніла. Чому?',
+  o:['Через бактерії','Через реакцію з киснем повітря','Через світло','Яблуко висохло'], a:1,
+  r:'Речовини в м\'якуші сполучаються з киснем — це окиснення. Лимонний сік його сповільнює, тому яблука в салаті збризкують соком.'}
+];
+const GROUPS=['Ссавці','Птахи','Комахи','Риби'];
+const CREATURES=[
+ {n:'🦇 кажан', g:0, r:'Єдиний ссавець, що по-справжньому літає. Вигодовує малят молоком — це і є головна ознака ссавців.'},
+ {n:'🐬 дельфін', g:0, r:'Живе у воді, але дихає легенями й народжує живих малят. Не риба.'},
+ {n:'🦔 їжак', g:0, r:'Голки — це видозмінена шерсть.'},
+ {n:'🐿 білка', g:0, r:'Класичний ссавець-гризун.'},
+ {n:'🐧 пінгвін', g:1, r:'Птах, який не літає, зате «літає» під водою крилами-ластами.'},
+ {n:'🦩 страус', g:1, r:'Найбільший птах. Не літає, але має пір\'я й відкладає яйця.'},
+ {n:'🦉 сова', g:1, r:'Пір\'я з м\'якою бахромою робить політ майже безшумним.'},
+ {n:'🪿 лелека', g:1, r:'Перелітний птах, який зимує в Африці.'},
+ {n:'🐝 бджола', g:2, r:'Шість ніг, три частини тіла, вусики — усе як у комахи.'},
+ {n:'🐜 мурашка', g:2, r:'Комаха, що живе колонією з чітким розподілом праці.'},
+ {n:'🦋 метелик', g:2, r:'Проходить повне перетворення: яйце → гусінь → лялечка → метелик.'},
+ {n:'🪲 жук', g:2, r:'Найбільша група комах у світі — понад 350 тисяч видів.'},
+ {n:'🐟 щука', g:3, r:'Хижа річкова риба, дихає зябрами.'},
+ {n:'🐠 окунь', g:3, r:'Має плавальний міхур, який тримає рибу на глибині без зусиль.'},
+ {n:'🦈 акула', g:3, r:'Риба, хоч і величезна: зябра, плавці, луска. Плавального міхура не має, тому мусить рухатися.'},
+ {n:'🐡 короп', g:3, r:'Прісноводна риба, яку розводять у ставках.'}
+];
+const MOON=['Новий місяць','Молодий серп','Перша чверть','Зростаючий опуклий',
+            'Повний місяць','Спадний опуклий','Остання чверть','Старий серп'];
+function moonSVG(k){
+  const R=58, cx=70, cy=70, LIGHT='#F4E7B8', DARK='#39445A';
+  const frac=k/8, a=frac*2*Math.PI, rx=Math.abs(R*Math.cos(a));
+  const waxing = frac<0.5;
+  const half = 'M '+cx+' '+(cy-R)+' A '+R+' '+R+' 0 0 '+(waxing?1:0)+' '+cx+' '+(cy+R)+' Z';
+  return '<svg viewBox="0 0 140 140" width="150" height="150">'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+DARK+'"/>'+
+    '<path d="'+half+'" fill="'+LIGHT+'"/>'+
+    '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+R+'" fill="'+(Math.cos(a)>0?DARK:LIGHT)+'"/>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#C9C6BB" stroke-width="2"/></svg>';
+}
+
+/* ================= ГОЛОВНА ================= */
+const GAMES=[
+ {id:'planets', ic:'🪐', t:'Сонячна система', s:'Постав планети за відстанню від Сонця', n:8},
+ {id:'chain',   ic:'🌾', t:'Ланцюг живлення', s:'Склади ланцюг від сонця до хижака', n:6},
+ {id:'predict', ic:'🔬', t:'Що станеться?', s:'Спершу передбач, потім дивись', n:6},
+ {id:'sort',    ic:'🐾', t:'Хто є хто', s:'Розклади тварин по групах', n:10},
+ {id:'moon',    ic:'🌙', t:'Фази Місяця', s:'Впізнай фазу і скажи, що буде далі', n:8}
+];
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const B=PR.best||{};
+    const b=document.createElement('button'); b.className='item';
+    const sc = B[g.id]!==undefined ? B[g.id]+'/'+g.n : '';
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.onclick=()=>startRun(g.id); box.appendChild(b);
+  });
+}
+
+/* ================= РУШІЙ ================= */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[], order=[], sel=null;
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const g=GAMES.find(x=>x.id===kind);
+  if(kind==='planets') ITEMS=[0];                                  // одна задача — уся система
+  if(kind==='chain')   ITEMS=shuffle(CHAINS).slice(0,g.n);
+  if(kind==='predict') ITEMS=shuffle(PREDICT).slice(0,g.n);
+  if(kind==='sort')    ITEMS=shuffle(CREATURES).slice(0,g.n);
+  if(kind==='moon')    ITEMS=shuffle([0,1,2,3,4,5,6,7]).map(k=>({k, next:Math.random()<0.4}));
+  go('s-play'); renderItem();
+}
+function dots(){
+  const total = KIND==='planets' ? PLANETS.length : ITEMS.length;
+  const done  = KIND==='planets' ? order.length : ITEMS.length;
+  $('#p-dots').innerHTML = KIND==='planets' ? '' : ITEMS.map((_,i)=>{
+    const l=LOG[i]; return '<span class="dot '+(l===undefined?(i===I?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-sc').textContent = KIND==='planets' ? order.length+'/8' : RIGHT+'/'+ITEMS.length;
+}
+function renderItem(){
+  order=[]; sel=null; dots();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').style.display='inline-block';
+  $('#p-act').textContent='Перевірити'; $('#p-act').onclick=checkItem;
+  const b=$('#p-body');
+
+  if(KIND==='planets'){
+    $('#p-task').innerHTML='Постав вісім планет за порядком — від найближчої до Сонця. Тисни по черзі.';
+    b.innerHTML='<div class="line" id="p-line">…</div><div class="chips">'+
+      shuffle([...PLANETS.keys()]).map(i=>'<button class="chip2" data-i="'+i+'">'+PLANETS[i].e+' '+PLANETS[i].n+'</button>').join('')+'</div>';
+    bindChips(b, PLANETS.map(p=>p.n));
+  }
+  if(KIND==='chain'){
+    const it=ITEMS[I];
+    $('#p-task').innerHTML='Склади ланцюг живлення: хто кого їсть. Починай із джерела енергії.';
+    b.innerHTML='<div class="line" id="p-line">…</div><div class="chips">'+
+      shuffle([...it.c.keys()]).map(i=>'<button class="chip2" data-i="'+i+'">'+it.c[i]+'</button>').join('')+'</div>';
+    bindChips(b, it.c);
+  }
+  if(KIND==='predict'){
+    const it=ITEMS[I];
+    $('#p-task').innerHTML=it.q;
+    b.innerHTML='<div class="opts">'+it.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='sort'){
+    const it=ITEMS[I];
+    $('#p-task').innerHTML='До якої групи належить ця тварина?';
+    b.innerHTML='<div class="card">'+it.n+'</div><div class="groups">'+
+      GROUPS.map((g,i)=>'<button data-i="'+i+'">'+g+'</button>').join('')+'</div>';
+    $$('.groups button',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='moon'){
+    const it=ITEMS[I];
+    $('#p-task').innerHTML = it.next
+      ? 'Ось фаза сьогодні. Яка фаза буде <b>приблизно через два тижні</b>?'
+      : 'Як називається ця фаза Місяця?';
+    const right = it.next ? (it.k+4)%8 : it.k;
+    const wrongs=shuffle([0,1,2,3,4,5,6,7].filter(x=>x!==right)).slice(0,3);
+    const opts=shuffle([right,...wrongs]);
+    b.innerHTML=moonSVG(it.k)+'<div class="opts">'+
+      opts.map(o=>'<button class="opt" data-i="'+o+'">'+MOON[o]+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+}
+function bindChips(b, labels){
+  $$('.chip2',b).forEach(el=>el.onclick=()=>{
+    const i=+el.dataset.i;
+    if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+    $$('.chip2',b).forEach(x=>x.classList.toggle('used',order.includes(+x.dataset.i)));
+    const L=$('#p-line'); L.textContent = order.length ? order.map(k=>labels[k]).join(' → ') : '…';
+    L.classList.toggle('full', order.length>0);
+    dots();
+  });
+}
+function checkItem(){
+  let ok=false;
+  if(KIND==='planets'){ if(order.length<PLANETS.length) return; ok=order.every((v,i)=>v===i); }
+  if(KIND==='chain'){ const it=ITEMS[I]; if(order.length<it.c.length) return; ok=order.every((v,i)=>v===i); }
+  if(KIND==='predict'){ if(sel===null) return; ok = sel===ITEMS[I].a; }
+  if(KIND==='sort'){ if(sel===null) return; ok = sel===ITEMS[I].g; }
+  if(KIND==='moon'){ const it=ITEMS[I]; const right = it.next?(it.k+4)%8:it.k; if(sel===null) return; ok = sel===right; }
+  LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+
+  if(KIND==='planets'){
+    const L=$('#p-line'); L.className='line full '+(ok?'good':'bad');
+    L.textContent=PLANETS.map(p=>p.n).join(' → ');
+    $$('.chip2').forEach(x=>x.disabled=true);
+    v.textContent = ok?'Порядок точний.':'Ні. Правильний порядок показано вище.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>Про кожну</b>'+PLANETS.map(p=>'<div style="margin:5px 0">'+p.e+' <b>'+p.n+'</b> — '+p.r+'</div>').join('');
+    $('#p-act').textContent='Підсумок'; $('#p-act').onclick=()=>{ RIGHT=ok?8:0; LOG=[ok]; ITEMS=[0]; endRun(8); };
+    return;
+  }
+  if(KIND==='chain'){
+    const it=ITEMS[I];
+    const L=$('#p-line'); L.className='line full '+(ok?'good':'bad'); L.textContent=it.c.join(' → ');
+    $$('.chip2').forEach(x=>x.disabled=true);
+    v.textContent = ok?'Так, саме в такому порядку.':'Ні. Правильний ланцюг показано вище.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Як це працює</b>'+it.r;
+  }
+  if(KIND==='predict'){
+    const it=ITEMS[I];
+    $$('.opt').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.textContent = ok?'Так і буде.':'Ні — правильне позначено зеленим.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому так</b>'+it.r;
+  }
+  if(KIND==='sort'){
+    const it=ITEMS[I];
+    $$('.groups button').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.g) el.style.cssText='border-color:var(--ok);background:var(--ok-soft)';
+      else if(!ok && i===sel) el.style.cssText='border-color:var(--bad);background:var(--bad-soft)'; });
+    v.innerHTML = (ok?'Так. ':'Ні. ')+'Це <b>'+GROUPS[it.g].toLowerCase()+'</b>.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому</b>'+it.r;
+  }
+  if(KIND==='moon'){
+    const it=ITEMS[I], right=it.next?(it.k+4)%8:it.k;
+    $$('.opt').forEach(el=>{ el.disabled=true; const i=+el.dataset.i;
+      if(i===right) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.innerHTML = (ok?'Так. ':'Ні. ')+'Правильно — <b>'+MOON[right]+'</b>.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>Як рахувати</b>Повний оберт фаз триває близько 29 діб, тож через два тижні фаза стає протилежною: новий місяць ↔ повний, перша чверть ↔ остання. Молодий серп світиться справа, старий — зліва; це підказка, зростає Місяць чи спадає.';
+  }
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+function endRun(forceMax){
+  const g=GAMES.find(x=>x.id===KIND);
+  const max = forceMax || ITEMS.length;
+  PR.best=PR.best||{}; if(RIGHT>(PR.best[KIND]||0)) PR.best[KIND]=RIGHT;
+  saveP();
+  $('#e-h').textContent=g.t;
+  $('#e-title').textContent = RIGHT===max?'Усе точно.' : RIGHT>=max*0.6?'Непогано.' : 'Розбір унизу — він тут головний.';
+  $('#e-now').textContent=RIGHT+'/'+max; $('#e-best').textContent=PR.best[KIND];
+  $('#e-again').onclick=()=>startRun(KIND);
+  let log='';
+  if(KIND==='chain') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.c.join(' → ')+'</span></div>').join('');
+  if(KIND==='sort')  log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.n+' — '+GROUPS[it.g].toLowerCase()+'</span></div>').join('');
+  if(KIND==='moon')  log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+MOON[it.k]+(it.next?' → через два тижні '+MOON[(it.k+4)%8]:'')+'</span></div>').join('');
+  if(KIND==='predict')log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.o[it.a]+'</span></div>').join('');
+  $('#e-log').innerHTML = log ? '<b style="display:block;margin-bottom:6px">Що було</b>'+log : '';
+  $('#e-log').style.display = log ? 'block' : 'none';
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
