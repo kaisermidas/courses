@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Вибір</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:64px;text-align:right}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opt.mine{border-color:var(--accent);background:var(--accent-soft)}
+  .args{display:grid;gap:9px;margin-top:12px}
+  .arg{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;font-size:15px}
+  .arg b{display:block;font-size:13px;color:var(--ink-2);margin-bottom:3px}
+  .steps{display:grid;gap:8px}
+  .step{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;
+    display:flex;gap:11px;align-items:flex-start;font-size:16px}
+  .step .n{width:26px;height:26px;flex:none;border-radius:50%;background:#F4F2EC;color:var(--ink-2);
+    display:grid;place-items:center;font-size:14px;font-weight:600}
+  .step.on .n{background:var(--accent);color:#fff}
+  .step.good{border-color:var(--ok);background:var(--ok-soft)}
+  .step.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .story{background:#F4F2EC;border-radius:12px;padding:12px 14px;margin-bottom:9px;font-size:16px}
+  .story b{display:block;font-size:13px;color:var(--ink-2);margin-bottom:3px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}.dot.b{background:var(--accent)}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .log-line{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+  .log-line .q{color:var(--ink-2);font-size:13px;display:block}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Вибір</h1>
+    <p>П'ять ігор про вчинки. У першій правильних відповідей немає — там важливо, що обереш саме ти й чи зможеш пояснити чому.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-sc"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Далі</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score" id="e-score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" id="e-share" style="display:none" onclick="shareChoices()">Поділитися вибором</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-etyka-v1';
+let PR = {best:{}, choices:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const shuffle=a=>[...a].sort(()=>Math.random()-.5);
+
+/* ================= ДИЛЕМИ ================= */
+const DIL=[
+ {id:'d1', q:'На контрольній друг просить дати списати. Він не вчив, бо доглядав хворого молодшого брата.',
+  o:['Дати списати','Не дати, але пояснити після уроку','Не дати й нічого не пояснювати'],
+  a:['Друг у біді, а формальне правило — лише правило. Допомога зараз коштує тобі небагато.',
+     'Списане не зробить його знаючим. Пояснення забере більше часу, зате від нього щось лишиться.',
+     'Правила однакові для всіх, і твоє завдання — не вирішувати за вчителя, кому робити виняток.'],
+  r:'Тут стикаються два хороші правила: «допомагай другові» і «будь чесним». Дорослі теж обирають по-різному — важливо, щоб ти міг сказати, чим саме пожертвував.'},
+ {id:'d2', q:'На вулиці знайшов гаманець із грішми. Документів у ньому немає.',
+  o:['Віднести в найближчий магазин або поліцію','Лишити на видному місці поруч','Забрати собі: власника все одно не знайти'],
+  a:['Найбільший шанс, що річ повернеться. Коштує тобі лише часу.',
+     'Власник часто вертається шукати саме туди. Але гаманець може взяти хтось інший.',
+     'Знахідка без спроби знайти власника юридично вважається привласненням — і почувається згодом відповідно.'],
+  r:'Питання не в тому, чи спіймають. Спробуй уявити, що це гаманець того, кого ти знаєш.'},
+ {id:'d3', q:'Ти бачив, як однокласник розбив вікно. Учителька звинуватила іншого.',
+  o:['Сказати правду вчительці','Сказати тому, хто розбив, щоб зізнався сам','Промовчати: не твоя справа'],
+  a:['Невинного покарають просто зараз — це вже сталося, і мовчання робить тебе учасником.',
+     'Дає людині шанс виправити самій. Але якщо вона не зізнається, покарають невинного.',
+     'У класі не люблять тих, хто доносить. Але тоді ціну платить той, хто не винен.'],
+  r:'Різниця між «донести» і «захистити невинного» — саме в тому, кому від твоїх слів стане краще, а кому гірше.'},
+ {id:'d4', q:'Бабуся подарувала светр, який тобі геть не подобається. Питає, чи сподобався.',
+  o:['Сказати правду прямо','Подякувати за подарунок і не оцінювати сам светр','Сказати, що дуже подобається'],
+  a:['Чесність, але біль без користі: перешити подарунок уже не вийде.',
+     'Можна бути правдивим і не ранити: подякувати за увагу, а не хвалити річ.',
+     'Приємно зараз — і ще десять таких светрів попереду.'],
+  r:'Це класичне питання про «брехню з ввічливості». Часто вихід не між правдою і брехнею, а в тому, про що саме говорити.'},
+ {id:'d5', q:'Друг попросив збрехати його батькам, що ввечері він був у тебе. Насправді ти не знаєш, де він був.',
+  o:['Збрехати — він же просив','Відмовитися брехати, але не розповідати нічого самому','Розповісти батькам правду'],
+  a:['Дружба тримається на вірності. Але тоді відповідальність за все, що сталося, стає й твоєю.',
+     'Ти нікого не зраджуєш і нікого не обманюєш: «я не буду про це говорити» — теж позиція.',
+     'Якщо він у небезпеці, мовчання може коштувати дорого.'],
+  r:'Ключове питання: це таємниця чи приховування небезпеки. Перше можна берегти, друге — ні.'},
+ {id:'d6', q:'Ти пообіцяв другові піти в кіно. Потім тебе покликали на день народження, куди дуже хотілося.',
+  o:['Піти в кіно, як домовлялися','Чесно сказати другові й попросити перенести','Написати, що захворів'],
+  a:['Обіцянка є обіцянка. Свято буде ще, а довіра будується роками.',
+     'Друг має право знати справжню причину — і сам вирішити, образитися чи ні.',
+     'Найлегший вихід сьогодні й найдорожчий, якщо правда вилізе.'],
+  r:'Перенести домовленість можна майже завжди. Зіпсувати довіру вигаданою причиною — значно легше, ніж повернути.'},
+ {id:'d7', q:'У грі кілька гравців знущаються з новачка. Тебе це не стосується.',
+  o:['Написати їм, щоб припинили','Написати новачкові щось підтримувальне','Вийти з гри й не втручатися'],
+  a:['Найпряміше. Іноді спрацьовує, іноді переводить агресію на тебе.',
+     'Тихо, безпечно й дієво: підтримка свідка зменшує шкоду більше, ніж будь-яка відповідь кривдникам.',
+     'Ти нічим не ризикуєш, але для новачка нічого не змінюється.'],
+  r:'Дослідження цькування дають один стійкий результат: найбільше важить не покарання кривдників, а те, чи знайшовся хоч один, хто став на бік жертви.'},
+ {id:'d8', q:'Учителька помилилася на твою користь і поставила на бал більше.',
+  o:['Сказати про помилку','Промовчати — вона доросла, сама перевірить','Сказати, але тільки якщо помітять інші'],
+  a:['Коштує тобі бал і дає тобі право вимагати справедливості, коли помиляться не на твою користь.',
+     'Спокуса зрозуміла. Але бал, який ти не заробив, знеціює всі інші.',
+     'Це вибір не за принципом, а за ризиком — і саме так найлегше загубити власне правило.'],
+  r:'Хороша перевірка: чи вчинив би ти так само, якби помилка була не на твою користь.'},
+ {id:'d9', q:'Гру, яку продають за гроші, можна безкоштовно завантажити з піратського сайту.',
+  o:['Завантажити: однаково всі так роблять','Не завантажувати, пошукати безкоштовну альтернативу','Завантажити, а якщо сподобається — купити'],
+  a:['Найпоширеніший аргумент — і найслабший: «усі так роблять» ніколи не був причиною.',
+     'Безкоштовних чесних ігор насправді багато, просто вони менш розкручені.',
+     'Так справді роблять, але обіцянку собі виконують одиниці. І ще: піратські сайти — головне джерело вірусів.'],
+  r:'За грою стоять люди, яким платять за їхню роботу. Питання не в тому, чи спіймають, а в тому, чи вважаєш ти чужу працю вартою оплати.'},
+ {id:'d10', q:'Молодший брат розбив мамину улюблену чашку і просить не казати.',
+  o:['Не казати — він же просив','Умовити зізнатися самому й піти разом','Сказати мамі одразу'],
+  a:['Ти на його боці. Але коли правда відкриється, винними будете обидва.',
+     'Разом не так страшно, а зізнання від нього самого важить утричі більше.',
+     'Швидко й чесно, але брат сприйме це як зраду.'],
+  r:'Часто найкращий вихід — не обирати між «здати» і «покрити», а допомогти людині зробити правильну річ самій.'}
+];
+/* ================= ФАКТ ЧИ ДУМКА ================= */
+const FACT=[
+ {q:'Київ — столиця України.', a:true, r:'Це можна перевірити в будь-якому джерелі — отже, факт.'},
+ {q:'Київ — найкрасивіше місто у світі.', a:false, r:'Краса не вимірюється: перевірити твердження неможливо, тож це думка.'},
+ {q:'Вода на рівні моря закипає при 100 градусах.', a:true, r:'Перевіряється дослідом і щоразу дає той самий результат.'},
+ {q:'Математика — найнудніший предмет.', a:false, r:'Оцінка, а не факт. Хтось скаже протилежне — і обидва матимуть рацію щодо себе.'},
+ {q:'У собак нюх кращий, ніж у людей.', a:true, r:'Вимірюється кількістю нюхових рецепторів — це перевірне твердження.'},
+ {q:'Усі коти ліниві.', a:false, r:'Узагальнення на основі враження. Достатньо одного активного кота, щоб воно розсипалося.'},
+ {q:'Земля обертається навколо Сонця.', a:true, r:'Факт, підтверджений спостереженнями й розрахунками.'},
+ {q:'Ця книжка надто довга.', a:false, r:'«Надто» — завжди оцінка. Кількість сторінок — факт, а «надто» додає той, хто читає.'},
+ {q:'У лютому 28 або 29 днів.', a:true, r:'Правило календаря, яке легко перевірити.'},
+ {q:'Краще жити в селі, ніж у місті.', a:false, r:'Тут немає жодного способу виміряти «краще» — це думка, хай і поширена.'},
+ {q:'У нашому класі 27 учнів.', a:true, r:'Порахувати можна — отже, факт. Навіть якщо число назвали неправильно, це лишається фактичним твердженням, просто хибним.'},
+ {q:'Він поводиться нечесно.', a:false, r:'Оцінка вчинку. Фактом було б: «він списав» — а вже «нечесно» додаєш ти.'}
+];
+/* ================= НАСЛІДКИ ================= */
+const CONSEQ=[
+ {t:'Списав контрольну в сусіда', s:['Отримав хорошу оцінку','Тему так і не зрозумів',
+   'Наступна самостійна — значно гірша','Довелося наздоганяти вдвічі більше матеріалу'],
+  r:'Оцінка — найшвидший наслідок і найменш важливий. Реальна ціна приходить не одразу, і саме тому її легко не помітити.'},
+ {t:'Збрехав другові', s:['Незручна розмова не сталася','Друг дізнався правду від інших',
+   'Перестав розповідати тобі важливе','Поступово ви віддалилися'],
+  r:'Брехня майже завжди економить кілька хвилин і коштує кількох місяців.'},
+ {t:'Пожартував з однокласника перед усім класом', s:['Усі засміялися','Він замовк і відсів',
+   'Інші зрозуміли, що з тобою бути об\'єктом жарту небезпечно','З тобою стали обережнішими'],
+  r:'Жарт «на публіку» дає миттєву вигоду тобі й довгу шкоду стосункам — причому не лише з тим, з кого сміялися.'},
+ {t:'Узяв без дозволу річ брата й зламав', s:['Скористався тим, чим хотів','Річ зламалася',
+   'Сховав і не сказав','Брат більше нічого не дає навіть коли просиш'],
+  r:'Втрата довіри триває набагато довше за поламану річ — і полагодити її складніше.'},
+ {t:'Визнав помилку одразу', s:['Неприємна розмова','Тебе не покарали суворо, бо сказав сам',
+   'Дорослі побачили, що тобі можна вірити','Тобі стали доручати серйозніші речі'],
+  r:'Це той самий механізм, що й у брехні, тільки в інший бік: коротка неприємність — довга вигода.'},
+ {t:'Пообіцяв і не прийшов, не попередивши', s:['Уникнув незручного дзвінка','Друг прочекав годину',
+   'Наступного разу тебе не покликали','Ти й не дізнався чому'],
+  r:'Найгірший наслідок ненадійності — той, про який тобі не скажуть.'}
+];
+/* ================= ОЧИМА ІНШОГО ================= */
+const EMP=[
+ {q:'Новенький у класі третій день сидить на перерві сам і гортає телефон.',
+  o:['Йому так зручніше, він не хоче спілкуватися','Найімовірніше, він чекає, щоб хтось підійшов першим',
+     'Він зазнається','Йому нудно з нами'], a:1,
+  r:'Телефон у такій ситуації — найчастіше спосіб не виглядати самотнім. Певності немає — і саме тому найпростіший хід не здогадуватися, а підійти й спитати.'},
+ {q:'Ти виграв у настільну гру, суперник мовчки складає фішки.',
+  o:['Йому байдуже','Він засмучений, але не хоче це показувати','Він злий на тебе','Він хоче зіграти ще'], a:1,
+  r:'Мовчання рідко означає байдужість. Тут доречно не втішати згори, а просто запропонувати реванш.'},
+ {q:'Мама втретє просить прибрати зі столу й підвищує голос.',
+  o:['Вона несправедлива','Вона втомилася, і справа вже не в столі',
+     'Їй подобається сваритися','Вона просто в поганому настрої через мене'], a:1,
+  r:'Третє прохання майже ніколи не про сам стіл. За роздратуванням зазвичай стоїть утома і відчуття, що тебе не чують.'},
+ {q:'Друг не відповідає на повідомлення другий день.',
+  o:['Він образився на мене','Причин може бути багато, і більшість із них не про мене',
+     'Він знайшов інших друзів','Він не хоче дружити'], a:1,
+  r:'Схильність пояснювати чужу поведінку своєю провиною — часта пастка. Найкорисніше — спитати прямо, а не добудовувати історію.'},
+ {q:'Однокласник голосно сміється з власної двійки.',
+  o:['Йому справді смішно','Часто так прикривають сором','Він не поважає вчителів','Він хоче уваги'], a:1,
+  r:'Сміх буває захистом. Той, хто сміється першим із себе, часто боїться, що засміються інші.'},
+ {q:'Молодший брат ламає твою вежу з кубиків.',
+  o:['Він хоче тебе розлютити','Найчастіше він просто хоче, щоб ти з ним грався',
+     'Він шкідливий','Йому подобається ламати'], a:1,
+  r:'У малих дітей зіпсувати те, чим зайнятий старший, — незграбний спосіб покликати до гри.'},
+ {q:'Учителька несподівано різко відповіла на твоє запитання.',
+  o:['Вона вважає моє запитання дурним','Можливо, у неї важкий день, і це не про тебе',
+     'Вона мене недолюблює','Більше не питатиму'], a:1,
+  r:'Найдорожчий висновок тут — останній: одна різка відповідь не варта того, щоб перестати питати.'},
+ {q:'Друг хвалиться новим телефоном, а в тебе такого немає.',
+  o:['Він хоче принизити мене','Найімовірніше, він радий і хоче поділитися',
+     'Він знає, що мені прикро','Він завжди хвалиться'], a:1,
+  r:'Заздрість підказує найгірше пояснення. Помічати її в собі — уже половина справи.'}
+];
+/* ================= НАМІР І НАСЛІДОК ================= */
+const INTENT=[
+ {a:'Петрик допомагав мамі накривати на стіл, ніс піднос і випадково розбив п\'ятнадцять чашок.',
+  b:'Іван потайки ліз до шафи по варення і навмисно зіштовхнув одну чашку, щоб прикрити слід.',
+  ans:1, r:'Наслідок більший у першого, намір — у другого. Дорослі зазвичай судять за наміром: випадковість не робить людину поганою, хоч і вимагає відшкодування. Цей дослід придумав Жан Піаже: молодші діти дивляться на кількість розбитого, старші — на намір.'},
+ {a:'Оля обіцяла подрузі прийти, але захворіла й не змогла.',
+  b:'Аня обіцяла прийти, передумала й вимкнула телефон.',
+  ans:1, r:'Результат однаковий — подруга чекала марно. Але одна не могла, а друга вирішила не попереджати. Різниця саме в тому, чи був у людини вибір.'},
+ {a:'Максим штовхнув однокласника, коли біг, і той упав.',
+  b:'Тарас непомітно підставив ногу, і однокласник упав так само.',
+  ans:1, r:'Однаковий синець — різні вчинки. Перше вимагає вибачення, друге ще й розмови про те, навіщо.'},
+ {a:'Данило розповів секрет друга, не знаючи, що це секрет.',
+  b:'Артем знав, що це секрет, і розповів «лише одному».',
+  ans:1, r:'Незнання зменшує провину, але не скасовує шкоди: секрет однаково розійшовся. Тому на майбутнє корисне правило — перепитати, чи можна це переказувати.'},
+ {a:'Соня хотіла зробити сюрприз і без дозволу взяла мамин телефон, щоб замовити торт.',
+  b:'Ліза без дозволу взяла мамин телефон, щоб погратися.',
+  ans:1, r:'Добрий намір не робить вчинок правильним, але змінює розмову про нього. Обидві порушили правило — і обговорювати варто саме правило.'},
+ {a:'Хлопець побачив, як хтось тоне, злякався і побіг по дорослих, згаявши хвилину.',
+  b:'Хлопець побачив те саме, зняв відео й пішов далі.',
+  ans:1, r:'Перший діяв неідеально, зате діяв. Другий мав час і вибір — і зробив гірший.'}
+];
+
+/* ================= ГОЛОВНА ================= */
+const GAMES=[
+ {id:'dil',    ic:'🤔', t:'Дилеми', s:'Правильних відповідей немає — є твій вибір', n:6, noScore:true},
+ {id:'fact',   ic:'🔍', t:'Факт чи думка', s:'Що можна перевірити, а що ні', n:8},
+ {id:'conseq', ic:'➡️', t:'Наслідки', s:'Постав наслідки вчинку по черзі', n:5},
+ {id:'emp',    ic:'👀', t:'Очима іншого', s:'Що насправді відчуває той, хто поруч', n:6},
+ {id:'intent', ic:'⚖️', t:'Намір чи наслідок', s:'Хто вчинив гірше — і чому', n:5}
+];
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const B=PR.best||{};
+    const b=document.createElement('button'); b.className='item';
+    const sc = g.noScore ? (Object.keys(PR.choices||{}).length ? Object.keys(PR.choices).length+' виборів' : '')
+                         : (B[g.id]!==undefined ? B[g.id]+'/'+g.n : '');
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.onclick=()=>startRun(g.id); box.appendChild(b);
+  });
+}
+
+/* ================= РУШІЙ ================= */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[], order=[], sel=null;
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const g=GAMES.find(x=>x.id===kind);
+  const src = kind==='dil'?DIL : kind==='fact'?FACT : kind==='conseq'?CONSEQ : kind==='emp'?EMP : INTENT;
+  ITEMS=shuffle(src).slice(0,g.n);
+  go('s-play'); renderItem();
+}
+function dots(){
+  $('#p-dots').innerHTML=ITEMS.map((_,i)=>{
+    const l=LOG[i];
+    const c = l===undefined ? (i===I?'now':'') : (KIND==='dil' ? 'b' : (l?'g':'r'));
+    return '<span class="dot '+c+'"></span>'; }).join('');
+  $('#p-sc').textContent = KIND==='dil' ? (I+1)+'/'+ITEMS.length : RIGHT+'/'+ITEMS.length;
+}
+function renderItem(){
+  const it=ITEMS[I]; order=[]; sel=null; dots();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').style.display='none';
+  const b=$('#p-body');
+  if(KIND==='dil'){
+    const prev = PR.choices && PR.choices[it.id];
+    $('#p-task').innerHTML=it.q + (prev!==undefined ? '<br><br><span style="color:var(--ink-2);font-size:14px">Минулого разу ти обрав інший або цей самий варіант — він підсвічений.</span>':'');
+    b.innerHTML='<div class="opts">'+it.o.map((o,i)=>
+      '<button class="opt'+(prev===i?' mine':'')+'" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+  }
+  if(KIND==='fact'){
+    $('#p-task').innerHTML='«'+it.q+'»<br><br>Це твердження можна перевірити?';
+    b.innerHTML='<div class="opts"><button class="opt" data-v="1">Факт — можна перевірити</button>'+
+      '<button class="opt" data-v="0">Думка — це оцінка</button></div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=el.dataset.v==='1'; checkItem(); });
+  }
+  if(KIND==='conseq'){
+    $('#p-task').innerHTML='<b>'+it.t+'</b><br>Постав наслідки за порядком — від найближчого до найдальшого.';
+    b.innerHTML='<div class="steps">'+shuffle([...it.s.keys()]).map(i=>
+      '<button class="step" data-i="'+i+'"><span class="n">·</span><span>'+it.s[i]+'</span></button>').join('')+'</div>';
+    $$('.step',b).forEach(el=>el.onclick=()=>{
+      const i=+el.dataset.i;
+      if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+      $$('.step',b).forEach(x=>{ const p=order.indexOf(+x.dataset.i);
+        x.classList.toggle('on',p>=0); $('.n',x).textContent = p>=0?(p+1):'·'; });
+      $('#p-act').style.display = order.length===it.s.length ? 'inline-block' : 'none';
+      $('#p-act').textContent='Перевірити'; $('#p-act').onclick=checkItem;
+    });
+  }
+  if(KIND==='emp'){
+    $('#p-task').innerHTML=it.q+'<br><br>Що найімовірніше з ним відбувається?';
+    b.innerHTML='<div class="opts">'+it.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+  }
+  if(KIND==='intent'){
+    $('#p-task').innerHTML='Хто, на твою думку, вчинив <b>гірше</b>?';
+    b.innerHTML='<div class="story"><b>Перший</b>'+it.a+'</div><div class="story"><b>Другий</b>'+it.b+'</div>'+
+      '<div class="opts"><button class="opt" data-i="0">Перший</button><button class="opt" data-i="1">Другий</button></div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+  }
+}
+function checkItem(){
+  const it=ITEMS[I]; let ok=null;
+  if(KIND==='dil'){
+    if(sel===null) return;
+    PR.choices=PR.choices||{}; PR.choices[it.id]=sel; saveP();
+    LOG[I]=sel;
+    $$('.opt').forEach((el,i)=>{ el.disabled=true; el.classList.toggle('mine',i===sel); });
+    const v=$('#p-verdict'); v.className='verdict on note';
+    v.textContent='Це твій вибір — правильного тут немає. Вище аргументи за кожен варіант, зокрема й за ті, які ти не обрав.';
+    $('#p-body').insertAdjacentHTML('beforeend','<div class="args">'+
+      it.o.map((o,i)=>'<div class="arg"><b>'+(i===sel?'Твій варіант':'Інший варіант')+'</b>'+it.a[i]+'</div>').join('')+'</div>');
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Що тут насправді стикається</b>'+it.r;
+  } else {
+    if(KIND==='fact'){ if(sel===null) return; ok = sel===it.a; }
+    if(KIND==='conseq'){ if(order.length<it.s.length) return; ok=order.every((v,i)=>v===i); }
+    if(KIND==='emp'){ if(sel===null) return; ok = sel===it.a; }
+    if(KIND==='intent'){ if(sel===null) return; ok = sel===it.ans; }
+    LOG[I]=ok; if(ok) RIGHT++; buzz(ok);
+    const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+    if(KIND==='fact'){
+      $$('.opt').forEach(el=>{ el.disabled=true; const yes=el.dataset.v==='1';
+        if(yes===it.a) el.classList.add('good'); else if(!ok) el.classList.add('bad'); });
+      v.textContent = ok?'Так.':'Ні. '+(it.a?'Це факт.':'Це думка.');
+      $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому</b>'+it.r;
+    }
+    if(KIND==='conseq'){
+      $$('.step').forEach(el=>{ el.disabled=true; el.classList.add(ok?'good':'bad');
+        $('.n',el).textContent=(+el.dataset.i)+1; });
+      const box=$('#p-body .steps');
+      [...box.children].sort((a,b)=>(+a.dataset.i)-(+b.dataset.i)).forEach(el=>box.appendChild(el));
+      v.textContent = ok?'Саме в такому порядку.':'Ні — правильний порядок показано.';
+      $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Головне</b>'+it.r;
+    }
+    if(KIND==='emp'){
+      $$('.opt').forEach((el,i)=>{ el.disabled=true;
+        if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+      v.textContent = ok?'Схоже на правду.':'Найімовірніше інше — зелений варіант.';
+      $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому саме так</b>'+it.r;
+    }
+    if(KIND==='intent'){
+      $$('.opt').forEach((el,i)=>{ el.disabled=true;
+        if(i===it.ans) el.classList.add('good'); else if(!ok) el.classList.add('bad'); });
+      v.textContent = ok?'Так — і річ не в розмірі шкоди.':'Більшість дорослих сказали б інакше.';
+      $('#p-why').className='why on'; $('#p-why').innerHTML='<b>У чому різниця</b>'+it.r;
+    }
+  }
+  dots();
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+function endRun(){
+  const g=GAMES.find(x=>x.id===KIND);
+  $('#e-h').textContent=g.t;
+  $('#e-share').style.display = KIND==='dil' ? 'inline-block' : 'none';
+  $('#e-score').style.display = KIND==='dil' ? 'none' : 'flex';
+  if(KIND==='dil'){
+    $('#e-title').textContent='Шість виборів зроблено.';
+    $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що ти обрав</b>'+
+      ITEMS.map((it,i)=>'<div class="log-line"><span>•</span><span><span class="q">'+it.q+'</span>'+
+        it.o[LOG[i]]+'</span></div>').join('')+
+      '<div style="margin-top:12px;color:var(--ink-2);font-size:14px">Покажи це татові — найцікавіше починається там, де ваші вибори не збіглися.</div>';
+  } else {
+    PR.best=PR.best||{}; if(RIGHT>(PR.best[KIND]||0)) PR.best[KIND]=RIGHT;
+    saveP();
+    $('#e-title').textContent = RIGHT===ITEMS.length?'Усе точно.' : RIGHT>=ITEMS.length*0.6?'Непогано.' : 'Розбір унизу — він тут головний.';
+    $('#e-now').textContent=RIGHT+'/'+ITEMS.length; $('#e-best').textContent=PR.best[KIND];
+    let log='';
+    if(KIND==='fact')   log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.q+' — <b>'+(it.a?'факт':'думка')+'</b></span></div>').join('');
+    if(KIND==='conseq') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.t+'</span></div>').join('');
+    if(KIND==='emp')    log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+it.o[it.a]+'</span></div>').join('');
+    if(KIND==='intent') log=ITEMS.map((it,i)=>'<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+(it.ans===1?it.b:it.a)+'</span></div>').join('');
+    $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що було</b>'+log;
+  }
+  $('#e-again').onclick=()=>startRun(KIND);
+  homeDraw(); go('s-end');
+}
+function shareChoices(){
+  const txt='Дилеми 🤔\n'+ITEMS.map((it,i)=>'• '+it.o[LOG[i]]).join('\n')+'\n\nА ти як?';
+  try{ if(tg && tg.switchInlineQuery) return tg.switchInlineQuery(txt,['users']); }catch(e){}
+  try{ navigator.clipboard.writeText(txt); alert('Скопійовано:\n\n'+txt); }catch(e){ alert(txt); }
+}
+
+homeDraw();
+</script>
+</body>
+</html>
