@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Word Rush</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:56px;text-align:right}
+  .tmr.hot{color:var(--bad)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  input[type=text]{width:100%;font:inherit;padding:12px 13px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
+  .wd{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:#fff;font-size:16px}
+  .wd.on{border-color:var(--accent);background:var(--accent-soft)}
+  .wd.used{opacity:.35}
+  .line{min-height:52px;border:2px dashed var(--line);border-radius:12px;padding:10px 12px;margin:6px 0 10px;
+    font-size:18px;text-align:center;color:var(--ink-2)}
+  .line.full{border-style:solid;color:var(--ink)}
+  .line.good{border-color:var(--ok);background:var(--ok-soft);color:#14603E}
+  .line.bad{border-color:var(--bad);background:var(--bad-soft);color:#8F2018}
+  .speak{display:grid;place-items:center;margin:8px 0 14px}
+  .speak button{width:96px;height:96px;border-radius:50%;background:var(--accent);color:#fff;font-size:38px}
+  .speak .sub{color:var(--ink-2);font-size:14px;margin-top:8px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .verb{font:700 30px/1 ui-rounded,-apple-system,system-ui,sans-serif;text-align:center;margin:16px 0 4px}
+  .verb small{display:block;font:400 15px/1.4 -apple-system,system-ui,sans-serif;color:var(--ink-2);margin-top:8px}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  svg{display:block;margin:6px auto}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Word Rush</h1>
+    <p>П'ять ігор про англійську. Слухати, складати, встигати — не перекладати списки слів.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Games</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-sc"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Check</button></div>
+  </div>
+</section>
+
+<section id="s-verbs" class="screen">
+  <div class="bar"><button class="back" onclick="quitVerbs()">‹ Games</button><h2>Irregular verbs</h2><span class="tmr" id="v-tmr"></span></div>
+  <div class="panel" id="v-intro">
+    <div class="task">Неправильні дієслова не мають правила — їх знають або ні. Тут 60 секунд: дається перша форма, вписуєш <b>Past Simple</b>.</div>
+    <div class="row center"><button class="btn" onclick="runVerbs()">Start · 60 seconds</button></div>
+    <div class="score"><div><b id="v-best">0</b><span>рекорд</span></div></div>
+  </div>
+  <div class="panel" id="v-play" style="display:none">
+    <div class="verb" id="v-word"></div>
+    <input type="text" id="v-in" autocomplete="off" autocapitalize="off" placeholder="Past Simple">
+    <div class="verdict" id="v-verdict"></div>
+    <div class="score">
+      <div><b id="v-right">0</b><span>правильних</span></div>
+      <div><b id="v-wrong">0</b><span>помилок</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Games</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Again</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-english-v1';
+let PR = {best:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function norm(s){ return (s||'').toLowerCase().replace(/[’']/g,"'").replace(/[.,!?]/g,'').replace(/\s+/g,' ').trim(); }
+const CAN_SPEAK = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
+function speak(text, rate){
+  if(!CAN_SPEAK) return false;
+  try{ const u=new SpeechSynthesisUtterance(text); u.lang='en-GB'; u.rate=rate||0.95;
+    speechSynthesis.cancel(); speechSynthesis.speak(u); return true; }catch(e){ return false; }
+}
+
+/* ================= ДАНІ ================= */
+const LISTEN=[
+ {w:'because', t:'тому що'}, {w:'beautiful', t:'гарний'}, {w:'favourite', t:'улюблений'},
+ {w:'Wednesday', t:'середа'}, {w:'friend', t:'друг'}, {w:'science', t:'наука'},
+ {w:'thought', t:'думка; думав'}, {w:'enough', t:'достатньо'}, {w:'February', t:'лютий'},
+ {w:'receive', t:'отримувати'}, {w:'machine', t:'машина, механізм'}, {w:'chocolate', t:'шоколад'},
+ {w:'question', t:'питання'}, {w:'different', t:'інший, різний'}, {w:'through', t:'крізь'},
+ {w:'island', t:'острів'}
+];
+const SENT=[
+ {p:['She','is','always','late'], r:'Прислівники частоти (always, never, often) стоять ПІСЛЯ is/are, але ПЕРЕД звичайним дієсловом: she always comes late.'},
+ {p:['I','have','never','been','to London'], r:'У Present Perfect never стоїть між have і третьою формою дієслова.'},
+ {p:['Do','you','like','ice cream'], r:'Питання в Present Simple починається з do/does, і лише потім іде підмет.'},
+ {p:['He','doesn\'t','play','football','on Sundays'], r:'Після doesn\'t дієслово завжди в першій формі — без -s.'},
+ {p:['There','is','a big red ball','on the table'], r:'There is — так кажуть про наявність. Прикметники йдуть у порядку «оцінка → розмір → колір»: a big red ball.'},
+ {p:['What time','does','the film','start'], r:'У питанні з питальним словом порядок такий: питальне слово → does → підмет → дієслово.'},
+ {p:['We','usually','have','lunch','at one o\'clock'], r:'Usually — прислівник частоти, стоїть перед основним дієсловом.'},
+ {p:['My little sister','can','swim','very well'], r:'Після can дієслово без to і без -s: she can swim.'},
+ {p:['Have','you','ever','seen','a whale'], r:'Питання в Present Perfect: have → підмет → ever → третя форма.'},
+ {p:['I','am going','to the park','now'], r:'Now — сигнал Present Continuous: am/is/are + дієслово з -ing.'}
+];
+const CLOCK=[
+ {h:7,m:30, a:'half past seven', o:['half past six','half to seven','seven half']},
+ {h:8,m:15, a:'quarter past eight', o:['quarter to eight','quarter past seven','eight and quarter']},
+ {h:9,m:45, a:'quarter to ten', o:['quarter past nine','quarter to nine','three quarters nine']},
+ {h:3,m:10, a:'ten past three', o:['ten to three','three past ten','ten past four']},
+ {h:5,m:50, a:'ten to six', o:['ten past five','fifty past five','ten to five']},
+ {h:12,m:0, a:'twelve o\'clock', o:['twelve hours','zero twelve','twelve past']},
+ {h:6,m:20, a:'twenty past six', o:['twenty to six','six past twenty','twenty past seven']},
+ {h:2,m:40, a:'twenty to three', o:['twenty past two','forty past two','twenty to two']},
+ {h:11,m:5, a:'five past eleven', o:['five to eleven','eleven past five','five past twelve']},
+ {h:4,m:35, a:'twenty-five to five', o:['twenty-five past four','thirty-five past four','twenty-five to four']}
+];
+const WORDS=[
+ {q:'<b>magazine</b> — це:', o:['магазин','журнал','склад','вітрина'], a:1, r:'Magazine — журнал. Магазин це shop або store. Такі слова називають «фальшивими друзями перекладача».'},
+ {q:'<b>It\'s raining cats and dogs</b> означає:', o:['падають коти й собаки','злива','дуже холодно','сумно'], a:1, r:'Ідіома про зливу. Дослівний переклад ідіоми завжди дає дурницю — це її головна ознака.'},
+ {q:'<b>accurate</b> — це:', o:['акуратний','точний','швидкий','обережний'], a:1, r:'Accurate — точний. Акуратний буде tidy або neat.'},
+ {q:'<b>break a leg</b> кажуть, щоб:', o:['побажати удачі','пригрозити','попередити про небезпеку','попрощатися'], a:0, r:'Так бажають удачі перед виступом — англійське «ні пуху ні пера».'},
+ {q:'<b>sympathy</b> — це:', o:['симпатія, закоханість','співчуття','характер','згода'], a:1, r:'Sympathy — співчуття. Закоханість — crush або liking.'},
+ {q:'<b>piece of cake</b> означає:', o:['шматок торта на десерт','щось дуже легке','дорога річ','довга справа'], a:1, r:'Так кажуть про завдання, яке робиться без зусиль.'},
+ {q:'<b>actually</b> — це:', o:['актуально','насправді','активно','нарешті'], a:1, r:'Actually — насправді, а не «актуально» (relevant, current).'},
+ {q:'<b>once in a blue moon</b> — це:', o:['щомісяця','дуже рідко','уночі','ніколи'], a:1, r:'Дуже рідко. Блакитний місяць — другий повний місяць за один календарний місяць, і трапляється він нечасто.'},
+ {q:'<b>fabric</b> — це:', o:['фабрика','тканина','виріб','склад'], a:1, r:'Fabric — тканина. Фабрика буде factory.'},
+ {q:'<b>under the weather</b> означає:', o:['під дощем','погано почуватися','у поганому настрої через погоду','запізнюватися'], a:1, r:'Так кажуть, коли трохи захворів: I\'m feeling under the weather.'},
+ {q:'<b>data</b> вимовляється як:', o:['[дата]','[дейта]','[дада]','[дата] або [дейта]'], a:3, r:'Обидва варіанти живі: британці частіше кажуть [дейта], американці — теж, але [дата] теж трапляється. Головне — це не українське «дата» (date).'},
+ {q:'<b>to hit the books</b> означає:', o:['бити книжки','сісти за навчання','купити підручники','кинути школу'], a:1, r:'Ідіома про те, щоб узятися до навчання по-серйозному.'}
+];
+const VERBS=[
+ ['go','went'],['see','saw'],['take','took'],['come','came'],['give','gave'],['make','made'],
+ ['know','knew'],['think','thought'],['find','found'],['tell','told'],['become','became'],
+ ['leave','left'],['feel','felt'],['bring','brought'],['begin','began'],['keep','kept'],
+ ['hold','held'],['write','wrote'],['stand','stood'],['hear','heard'],['let','let'],
+ ['mean','meant'],['meet','met'],['run','ran'],['pay','paid'],['sit','sat'],['speak','spoke'],
+ ['lie','lay'],['lead','led'],['grow','grew'],['lose','lost'],['fall','fell'],['send','sent'],
+ ['build','built'],['understand','understood'],['draw','drew'],['break','broke'],['spend','spent'],
+ ['catch','caught'],['teach','taught'],['buy','bought'],['fly','flew'],['eat','ate'],['drink','drank'],
+ ['swim','swam'],['sing','sang'],['ride','rode'],['choose','chose'],['wear','wore'],['sleep','slept']
+];
+
+/* ================= ГОЛОВНА ================= */
+const GAMES=[
+ {id:'listen', ic:'🎧', t:'Listen and write', s:'Почуй слово — запиши його', n:8},
+ {id:'sent',   ic:'🧩', t:'Build a sentence', s:'Постав слова в правильному порядку', n:6},
+ {id:'clock',  ic:'🕐', t:'What time is it?', s:'Годинник англійською', n:6},
+ {id:'words',  ic:'🎭', t:'Idioms and false friends', s:'Те, що не перекладається дослівно', n:8}
+];
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const b=document.createElement('button'); b.className='item';
+    const sc = (PR.best&&PR.best[g.id]!==undefined) ? PR.best[g.id]+'/'+g.n : '';
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.onclick=()=>startRun(g.id); box.appendChild(b);
+  });
+  const h=document.createElement('div'); h.style.cssText='color:var(--ink-2);font-size:14px;margin:22px 0 8px';
+  h.textContent='На швидкість'; box.appendChild(h);
+  const v=document.createElement('button'); v.className='item';
+  v.innerHTML='<span class="ic">⚡️</span><span class="tx"><b>Irregular verbs</b><span>60 секунд, друга форма</span></span>'+
+              '<span class="sc">'+((PR.best&&PR.best.verbs)||0)+'</span>';
+  v.onclick=openVerbs; box.appendChild(v);
+}
+
+/* ================= РУШІЙ ЗАБІГІВ ================= */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[], sel=null, order=[];
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const g=GAMES.find(x=>x.id===kind);
+  const src = kind==='listen'?LISTEN : kind==='sent'?SENT : kind==='clock'?CLOCK : WORDS;
+  ITEMS=[...src].sort(()=>Math.random()-.5).slice(0,g.n);
+  go('s-play'); renderItem();
+}
+function dots(){
+  $('#p-dots').innerHTML=ITEMS.map((_,i)=>{
+    const l=LOG[i]; return '<span class="dot '+(l===undefined?(i===I?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-sc').textContent=RIGHT+'/'+ITEMS.length;
+}
+function clockSVG(h,m){
+  const ah=((h%12)+m/60)*30-90, am=m*6-90, R=n=>n*Math.PI/180;
+  const x=(a,l)=>100+Math.cos(R(a))*l, y=(a,l)=>100+Math.sin(R(a))*l;
+  let ticks='';
+  for(let i=0;i<12;i++){ const a=i*30-90;
+    ticks+='<line x1="'+x(a,78)+'" y1="'+y(a,78)+'" x2="'+x(a,86)+'" y2="'+y(a,86)+'" stroke="#C9C6BB" stroke-width="3"/>'; }
+  return '<svg viewBox="0 0 200 200" width="180" height="180">'+
+    '<circle cx="100" cy="100" r="92" fill="#fff" stroke="#1E2A3A" stroke-width="4"/>'+ticks+
+    '<line x1="100" y1="100" x2="'+x(ah,48)+'" y2="'+y(ah,48)+'" stroke="#1E2A3A" stroke-width="7" stroke-linecap="round"/>'+
+    '<line x1="100" y1="100" x2="'+x(am,72)+'" y2="'+y(am,72)+'" stroke="#2F6FE4" stroke-width="4" stroke-linecap="round"/>'+
+    '<circle cx="100" cy="100" r="6" fill="#1E2A3A"/></svg>';
+}
+function renderItem(){
+  const it=ITEMS[I]; sel=null; order=[]; dots();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').style.display='inline-block';
+  $('#p-act').textContent='Check'; $('#p-act').onclick=checkItem;
+  const b=$('#p-body');
+  if(KIND==='listen'){
+    $('#p-task').innerHTML='Тисни на кнопку, слухай і запиши слово. Можна слухати скільки завгодно разів.';
+    b.innerHTML='<div class="speak"><button id="p-say">🔊</button>'+
+      '<div class="sub">'+(CAN_SPEAK?'<button class="btn ghost small" id="p-slow" style="margin-top:10px">Повільніше</button>':'Звук недоступний — слово показано нижче')+'</div></div>'+
+      (CAN_SPEAK?'':'<div class="verb">'+it.w+'</div>')+
+      '<input type="text" id="p-inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Write the word">';
+    $('#p-say').onclick=()=>speak(it.w);
+    if(CAN_SPEAK){ $('#p-slow').onclick=()=>speak(it.w,0.6); speak(it.w); }
+    $('#p-inp').onkeydown=e=>{ if(e.key==='Enter') checkItem(); };
+  }
+  if(KIND==='sent'){
+    $('#p-task').textContent='Постав частини в правильному порядку. Тисни по черзі.';
+    const mixed=[...it.p.keys()].sort(()=>Math.random()-.5);
+    b.innerHTML='<div class="line" id="p-line">…</div><div class="words">'+
+      mixed.map(i=>'<button class="wd" data-i="'+i+'">'+it.p[i]+'</button>').join('')+'</div>';
+    $$('.wd',b).forEach(el=>el.onclick=()=>{
+      const i=+el.dataset.i;
+      if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+      $$('.wd',b).forEach(x=>x.classList.toggle('used',order.includes(+x.dataset.i)));
+      const L=$('#p-line'); L.textContent = order.length? order.map(k=>it.p[k]).join(' ') : '…';
+      L.classList.toggle('full', order.length>0);
+    });
+  }
+  if(KIND==='clock'){
+    $('#p-task').innerHTML='<b>What time is it?</b>';
+    const opts=[it.a,...it.o].sort(()=>Math.random()-.5);
+    b.innerHTML=clockSVG(it.h,it.m)+'<div class="opts">'+
+      opts.map(o=>'<button class="opt" data-v="'+o+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=el.dataset.v; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='words'){
+    $('#p-task').innerHTML=it.q;
+    b.innerHTML='<div class="opts">'+it.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+}
+function checkItem(){
+  const it=ITEMS[I]; let ok=false;
+  if(KIND==='listen'){ const v=norm($('#p-inp').value); if(!v) return; ok = v===norm(it.w); }
+  if(KIND==='sent'){ if(order.length<it.p.length) return; ok = order.every((v,i)=>v===i); }
+  if(KIND==='clock'){ if(sel===null) return; ok = sel===it.a; }
+  if(KIND==='words'){ if(sel===null) return; ok = sel===it.a; }
+  LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  if(KIND==='listen'){ const inp=$('#p-inp'); inp.disabled=true; if(!ok) inp.value=it.w;
+    v.innerHTML = (ok?'Correct. ':'Ні. Це <b>'+it.w+'</b>. ')+'<span style="opacity:.85">'+it.t+'</span>';
+    if(CAN_SPEAK) speak(it.w);
+  }
+  if(KIND==='sent'){ const L=$('#p-line'); L.className='line full '+(ok?'good':'bad');
+    L.textContent = it.p.join(' ');
+    $$('.wd').forEach(x=>x.disabled=true);
+    v.textContent = ok?'Correct.':'Ні. Правильний порядок показано вище.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Правило</b>'+it.r;
+    if(CAN_SPEAK) speak(it.p.join(' '));
+  }
+  if(KIND==='clock'){ $$('.opt').forEach(el=>{ el.disabled=true;
+      if(el.dataset.v===it.a) el.classList.add('good'); else if(!ok && el.dataset.v===sel) el.classList.add('bad'); });
+    v.innerHTML = ok?'Correct.':'Ні — це <b>'+it.a+'</b>.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>Як це працює</b>До половини кажуть <b>past</b> («після»), після половини — <b>to</b> («до») і вже наступну годину. 15 хвилин — quarter, 30 — half. 9:45 це «за чверть десята»: quarter to ten.';
+    if(CAN_SPEAK) speak(it.a);
+  }
+  if(KIND==='words'){ $$('.opt').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.textContent = ok?'Correct.':'Ні — правильне позначено зеленим.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Чому</b>'+it.r;
+  }
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Результат' : 'Next →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+function endRun(){
+  const g=GAMES.find(x=>x.id===KIND);
+  PR.best=PR.best||{}; if(RIGHT>(PR.best[KIND]||0)) PR.best[KIND]=RIGHT;
+  saveP();
+  $('#e-h').textContent=g.t;
+  $('#e-title').textContent = RIGHT===ITEMS.length?'Perfect.' : RIGHT>=ITEMS.length*0.6?'Not bad.' : 'Розбір унизу — він тут головний.';
+  $('#e-now').textContent=RIGHT+'/'+ITEMS.length; $('#e-best').textContent=PR.best[KIND];
+  $('#e-again').onclick=()=>startRun(KIND);
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що було</b>'+ITEMS.map((it,i)=>{
+    const name = KIND==='listen'? it.w+' — '+it.t : KIND==='sent'? it.p.join(' ')
+               : KIND==='clock'? it.a : it.q.replace(/<[^>]+>/g,'')+' '+it.o[it.a];
+    return '<div class="log-line"><span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+name+'</span></div>'; }).join('');
+  homeDraw(); go('s-end');
+}
+
+/* ================= НЕПРАВИЛЬНІ ДІЄСЛОВА ================= */
+let VLEFT=0, VR=0, VW=0, VT=null, VCUR=null, VPOOL=[];
+function openVerbs(){
+  $('#v-best').textContent=(PR.best&&PR.best.verbs)||0;
+  $('#v-intro').style.display='block'; $('#v-play').style.display='none';
+  $('#v-tmr').textContent=''; go('s-verbs');
+}
+function runVerbs(){
+  VLEFT=60; VR=0; VW=0; VPOOL=[...VERBS].sort(()=>Math.random()-.5);
+  $('#v-intro').style.display='none'; $('#v-play').style.display='block';
+  $('#v-right').textContent='0'; $('#v-wrong').textContent='0'; $('#v-verdict').className='verdict';
+  nextVerb();
+  $('#v-in').onkeydown=e=>{ if(e.key==='Enter') answerVerb(); };
+  clearInterval(VT);
+  VT=setInterval(()=>{ if(!document.querySelector('#v-tmr')) return clearInterval(VT);
+    VLEFT--; $('#v-tmr').textContent=VLEFT+'с'; $('#v-tmr').classList.toggle('hot',VLEFT<=10);
+    if(VLEFT<=0) endVerbs(); },1000);
+  $('#v-tmr').textContent='60с';
+}
+function nextVerb(){
+  if(!VPOOL.length) VPOOL=[...VERBS].sort(()=>Math.random()-.5);
+  VCUR=VPOOL.pop();
+  $('#v-word').innerHTML=VCUR[0]+'<small>Past Simple?</small>';
+  $('#v-in').value=''; $('#v-in').focus();
+}
+function answerVerb(){
+  const v=norm($('#v-in').value); if(!v) return;
+  const ok = v===norm(VCUR[1]);
+  const ver=$('#v-verdict'); ver.className='verdict on '+(ok?'good':'warn');
+  ver.textContent = ok ? VCUR[0]+' → '+VCUR[1] : VCUR[0]+' → '+VCUR[1]+' (не '+$('#v-in').value.trim()+')';
+  if(ok) VR++; else VW++;
+  $('#v-right').textContent=VR; $('#v-wrong').textContent=VW;
+  nextVerb();
+}
+function quitVerbs(){ clearInterval(VT); go('s-home'); }
+function endVerbs(){
+  clearInterval(VT);
+  PR.best=PR.best||{}; if(VR>(PR.best.verbs||0)) PR.best.verbs=VR;
+  saveP();
+  $('#e-h').textContent='Irregular verbs';
+  $('#e-title').textContent = VR>=15?'Швидко й точно.' : VR>=8?'Непогано.' : 'Ці форми вчать лише повторенням.';
+  $('#e-now').textContent=VR; $('#e-best').textContent=PR.best.verbs;
+  $('#e-again').onclick=openVerbs;
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Найчастіші пастки</b>'+
+    '<div style="font-size:15px">lie → lay, lead → led, fall → fell, feel → felt: дві останні пари плутають найчастіше. '+
+    'А let і put у минулому не змінюються взагалі.</div>';
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
