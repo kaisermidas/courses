@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Словобій</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+    --near:#E9A800;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 18px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+  .meta{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  input[type=text]{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);text-transform:lowercase}
+  /* --- слово дня --- */
+  .wgrid{display:grid;gap:6px;justify-content:center;margin:6px 0 14px}
+  .wrow{display:grid;grid-template-columns:repeat(5,54px);gap:6px}
+  .wc{height:54px;border:2px solid var(--line);border-radius:10px;display:grid;place-items:center;
+    font:700 24px/1 ui-rounded,-apple-system,system-ui,sans-serif;background:#fff;text-transform:uppercase}
+  .wc.f{border-color:#B9B5A8}
+  .wc.g{background:var(--ok);border-color:var(--ok);color:#fff}
+  .wc.n{background:var(--near);border-color:var(--near);color:#fff}
+  .wc.x{background:#C9C6BB;border-color:#C9C6BB;color:#fff}
+  .kb{display:grid;gap:5px;margin-top:8px}
+  .kb .krow{display:flex;gap:4px;justify-content:center}
+  .kb button{min-width:27px;height:44px;padding:0 4px;border-radius:8px;background:#EDEAE1;font-weight:600;font-size:15px;flex:1}
+  .kb button.wide{flex:1.6;font-size:13px}
+  .kb button.g{background:var(--ok);color:#fff}
+  .kb button.n{background:var(--near);color:#fff}
+  .kb button.x{background:#C9C6BB;color:#fff}
+  /* --- склади / варіанти --- */
+  .sylls{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+  .syl{border:2px solid var(--line);border-radius:12px;padding:11px 15px;background:#fff;font-size:20px;font-weight:600}
+  .syl.good{border-color:var(--ok);background:var(--ok-soft)}
+  .syl.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opts{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff;text-align:center;font-size:17px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  /* --- коми --- */
+  .sent{font-size:19px;line-height:2.1;text-align:center;margin:10px 0}
+  .sent .w{padding:0 1px}
+  .sent .gap{display:inline-block;width:20px;height:26px;vertical-align:-6px;border-radius:6px;
+    border:1px dashed #CFCBBF;margin:0 1px;color:var(--ink-2);font-size:19px;line-height:24px;background:#fff}
+  .sent .gap.on{background:var(--volt-soft);border:1px solid var(--volt);color:#6B4B00}
+  .sent .gap.good{background:var(--ok-soft);border:1px solid var(--ok);color:#14603E}
+  .sent .gap.bad{background:var(--bad-soft);border:1px solid var(--bad);color:#8F2018}
+  .word-big{font-size:30px;font-weight:700;text-align:center;letter-spacing:.06em;margin:10px 0}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .stat{display:flex;gap:10px;margin:14px 0 0}
+  .stat div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .stat b{display:block;font-size:23px;line-height:1.2}
+  .stat span{color:var(--ink-2);font-size:13px}
+  .grid-res{font-size:22px;letter-spacing:.1em;text-align:center;line-height:1.35;margin:6px 0}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Словобій</h1>
+    <p>Шість ігор про українську мову. Не переказ правил — гра, де правило треба застосувати за кілька секунд.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-word" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="w-title">Слово дня</h2><span style="width:56px"></span></div>
+  <div class="panel">
+    <div class="meta"><span class="chip" id="w-sub"></span><span class="chip">6 спроб</span></div>
+    <div class="wgrid" id="w-grid"></div>
+    <div class="verdict" id="w-verdict"></div>
+    <div class="kb" id="w-kb"></div>
+    <div class="row center" id="w-after" style="margin-top:12px;display:none">
+      <button class="btn" onclick="shareWord()">Поділитися в чат</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" id="p-back">‹ Ігри</button><div class="dots" id="p-dots"></div><span style="width:56px"></span></div>
+  <div class="panel">
+    <div class="meta"><span class="chip" id="p-kind"></span><span class="chip" id="p-score"></span></div>
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Перевірити</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span style="width:56px"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="stat">
+      <div><b id="e-right">0</b><span>правильних</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-review"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-slovobiy-v1';
+let PR = {best:{}, word:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const today=new Date();
+const DN = Math.floor(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())/864e5);
+const DAY = today.getFullYear()*10000+(today.getMonth()+1)*100+today.getDate();
+const MON=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function shuf(arr,seed){ const r=mulberry(seed), c=[...arr];
+  for(let i=c.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [c[i],c[j]]=[c[j],c[i]]; } return c; }
+function norm(s){ return (s||'').toLowerCase().replace(/[’']/g,'').replace(/\s+/g,' ').trim(); }
+
+/* ================= 1. СЛОВО ДНЯ ================= */
+const W5=['КАЗКА','ВЕРБА','ВІТЕР','ХМАРА','ЗЕМЛЯ','СОНЦЕ','МІСТО','РІЧКА','КНИГА','ШКОЛА',
+ 'ЗОШИТ','ПАРТА','КАВУН','ГРУША','СЛИВА','ВИШНЯ','ТРАВА','ОЗЕРО','МОРОЗ','ВЕСНА',
+ 'РАНОК','ВЕЧІР','ЦУКОР','КОШИК','ВІКНО','ДВЕРІ','ЛАМПА','КИЛИМ','МИШКА','ЗАЄЦЬ',
+ 'БІЛКА','ГОЛУБ','ЧАПЛЯ','КОМАР','РИБКА','ОКУНЬ','ЧОВЕН','ДОЩИК','ЛИСТЯ','КВІТИ',
+ 'ЗІРКА','МЕДОК','СИРОК','ГОРОХ','БУРЯК','ГОРІХ','ПІСОК','ЛІТАК','ПІСНЯ','ЛІКАР'];
+let WROWS=[], WPOS=0, WDONE=false, WANS='';
+function wordOfDay(){ return shuf(W5, Math.floor(DN/W5.length))[DN % W5.length]; }
+const KB_ROWS=['ЙЦУКЕНГШЩЗХЇ','ФІВАПРОЛДЖЄ','ЯЧСМИТЬБЮ'];
+
+function openWord(){
+  WANS = wordOfDay();
+  const st = (PR.word && PR.word.d===DAY) ? PR.word : null;
+  WROWS = st ? [...st.rows] : [];
+  WDONE = st ? !!st.done : false;
+  WPOS = 0;
+  $('#w-sub').textContent = today.getDate()+' '+MON[today.getMonth()];
+  go('s-word'); drawWord();
+}
+function markLetters(guess, ans){
+  const res=Array(5).fill('x'), left={};
+  for(let i=0;i<5;i++){ if(guess[i]===ans[i]) res[i]='g'; else left[ans[i]]=(left[ans[i]]||0)+1; }
+  for(let i=0;i<5;i++){ if(res[i]!=='g' && left[guess[i]]>0){ res[i]='n'; left[guess[i]]--; } }
+  return res;
+}
+function drawWord(){
+  const g=$('#w-grid'); g.innerHTML='';
+  const cur = WDONE ? '' : (window.WCUR||'');
+  for(let r=0;r<6;r++){
+    const row=document.createElement('div'); row.className='wrow';
+    const guess = WROWS[r] || (r===WROWS.length ? cur : '');
+    const marks = WROWS[r] ? markLetters(WROWS[r], WANS) : null;
+    for(let i=0;i<5;i++){
+      const c=document.createElement('div');
+      c.className='wc'+(marks?' '+marks[i]:(guess[i]?' f':''));
+      c.textContent=guess[i]||''; row.appendChild(c);
+    }
+    g.appendChild(row);
+  }
+  // клавіатура
+  const known={};
+  WROWS.forEach(w=>{ const m=markLetters(w,WANS);
+    for(let i=0;i<5;i++){ const L=w[i], cur=known[L];
+      if(m[i]==='g' || (m[i]==='n' && cur!=='g') || (!cur)) known[L]=m[i]; } });
+  const kb=$('#w-kb'); kb.innerHTML='';
+  KB_ROWS.forEach((line,ri)=>{
+    const row=document.createElement('div'); row.className='krow';
+    if(ri===2){ const b=document.createElement('button'); b.className='wide'; b.textContent='⌫';
+      b.onclick=()=>{ if(WDONE)return; window.WCUR=(window.WCUR||'').slice(0,-1); drawWord(); }; row.appendChild(b); }
+    [...line].forEach(L=>{ const b=document.createElement('button');
+      b.textContent=L; if(known[L]) b.classList.add(known[L]);
+      b.onclick=()=>{ if(WDONE)return; if((window.WCUR||'').length<5){ window.WCUR=(window.WCUR||'')+L; drawWord(); } };
+      row.appendChild(b); });
+    if(ri===2){ const b=document.createElement('button'); b.className='wide'; b.textContent='Готово';
+      b.onclick=submitWord; row.appendChild(b); }
+    kb.appendChild(row);
+  });
+  const v=$('#w-verdict');
+  if(WDONE){
+    const won = WROWS.length && WROWS[WROWS.length-1]===WANS;
+    v.className='verdict on '+(won?'good':'warn');
+    v.innerHTML = won ? 'Є! Слово <b>'+WANS+'</b> з '+WROWS.length+'-ї спроби.'
+                      : 'Спроби скінчились. Слово було <b>'+WANS+'</b>.';
+    $('#w-after').style.display='flex'; $('#w-kb').style.display='none';
+  } else { v.className='verdict'; $('#w-after').style.display='none'; $('#w-kb').style.display='grid'; }
+}
+function submitWord(){
+  if(WDONE) return;
+  const g=(window.WCUR||'');
+  if(g.length<5){ const v=$('#w-verdict'); v.className='verdict on note'; v.textContent='Потрібно рівно п\'ять літер.'; return; }
+  WROWS.push(g); window.WCUR='';
+  if(g===WANS || WROWS.length>=6){ WDONE=true; buzz(g===WANS); }
+  PR.word={d:DAY, rows:WROWS, done:WDONE}; saveP();
+  drawWord(); homeDraw();
+}
+function shareWord(){
+  const won = WROWS.length && WROWS[WROWS.length-1]===WANS;
+  const grid = WROWS.map(w=>markLetters(w,WANS).map(m=>m==='g'?'🟩':m==='n'?'🟨':'⬜').join('')).join('\n');
+  const txt='Словобій · слово дня '+today.getDate()+'.'+String(today.getMonth()+1).padStart(2,'0')+'\n'+
+            (won?WROWS.length:'X')+'/6\n'+grid;
+  try{ if(tg && tg.switchInlineQuery) return tg.switchInlineQuery(txt,['users']); }catch(e){}
+  try{ navigator.clipboard.writeText(txt); alert('Скопійовано:\n\n'+txt); }catch(e){ alert(txt); }
+}
+
+/* ================= 2. АНАГРАМИ ================= */
+const ANAG=[
+ {w:'НАСОС', h:'Качає воду'}, {w:'КАРТА', h:'На ній міста й дороги'},
+ {w:'ЛІТАК', h:'Літає і має крила'}, {w:'ВЕСЛО', h:'Ним гребуть у човні'},
+ {w:'КОЛОС', h:'Росте в полі на стеблі'}, {w:'СОКИРА', h:'Нею рубають дрова'},
+ {w:'ЗИМА', h:'Пора року зі снігом'}, {w:'КОРОВА', h:'Дає молоко'},
+ {w:'МАЛИНА', h:'Червона ягода з куща'}, {w:'СТІНА', h:'Тримає дах'},
+ {w:'ПАЛЬТО', h:'Носять узимку'}, {w:'КАЗКА', h:'Її читають на ніч'},
+ {w:'ВЕДМІДЬ', h:'Спить узимку в барлозі'}, {w:'ГОРОБЕЦЬ', h:'Малий сірий птах'},
+ {w:'ЛИСИЦЯ', h:'Руда й хитра'}, {w:'СОНЦЕ', h:'Світить удень'}
+];
+/* ================= 3. НАГОЛОС ================= */
+const NAG=[
+ {s:['ви','па','док'], a:0}, {s:['о','ди','над','цять'], a:1}, {s:['чо','тир','над','цять'], a:2},
+ {s:['фар','тух'], a:1}, {s:['ко','ле','со'], a:0}, {s:['кро','пи','ва'], a:2},
+ {s:['о','лень'], a:0}, {s:['сан','ти','метр'], a:2}, {s:['кі','ло','метр'], a:2},
+ {s:['ре','мінь'], a:0}, {s:['по','мил','ка'], a:0}, {s:['за','гад','ка'], a:0},
+ {s:['но','вий'], a:1}, {s:['чор','но','зем'], a:1}, {s:['дро','ва'], a:0},
+ {s:['при','я','тель'], a:0}, {s:['се','ре','ди','на'], a:1}, {s:['ви','мо','ва'], a:1},
+ {s:['ру','ко','пис'], a:2}, {s:['ко','лі','я'], a:0}
+];
+/* ================= 4. ЧЕТВЕРТИЙ ЗАЙВИЙ ================= */
+const ODD=[
+ {o:['щука','джміль','дощ','ящірка'], a:1, r:'У «джміль» звуків менше, ніж букв (дж — один звук, ь — жодного). У решти звуків більше.'},
+ {o:['вітер','вікно','вишня','вулиця'], a:3, r:'«Вулиця» має чотири склади, решта — по два-три. Склад рахують за голосними.'},
+ {o:['ліс','лісник','лісовий','лисиця'], a:3, r:'«Лисиця» не спільнокореневе: корінь лис-, а не ліс-. Схоже звучання ще не робить слова родичами.'},
+ {o:['день','тінь','кінь','сонце'], a:3, r:'У «сонце» немає м\'якого знака, решта закінчуються на -нь.'},
+ {o:['біг','бігти','бігун','стрибок'], a:3, r:'Три слова з коренем біг-, четверте — з іншого гнізда.'},
+ {o:['синій','швидко','зелений','високий'], a:1, r:'«Швидко» — прислівник, решта — прикметники, що змінюються за родами.'},
+ {o:['молоко','дерево','вікно','стіл'], a:3, r:'«Стіл» чоловічого роду, решта — середнього.'},
+ {o:['читати','писати','книга','малювати'], a:2, r:'«Книга» — іменник серед дієслів.'},
+ {o:['підводний','підбігти','підлога','підземний'], a:2, r:'У «підлога» під- не префікс, а частина кореня — слово не ділиться на під- і -лога.'},
+ {o:['яблуко','юшка','їжак','мама'], a:3, r:'У перших трьох я, ю, ї на початку дають по два звуки, у «мама» такої букви немає.'},
+ {o:['сіль','сільський','солити','сіллю'], a:1, r:'Сільський — від «село», а не від «сіль». Класична пастка на однаковий вигляд кореня.'},
+ {o:['вода','водій','водичка','підводний'], a:1, r:'«Водій» — від «водити», а не від «вода».'}
+];
+/* ================= 5. ЗВУКИ Й БУКВИ ================= */
+const SND=[
+ {w:'щука', a:5, r:'щ = [шч] — два звуки: [шчука]. Букв 4, звуків 5.'},
+ {w:'день', a:3, r:'ь звука не позначає, лише пом\'якшує: [ден\']. Букв 4, звуків 3.'},
+ {w:'яблуко', a:7, r:'я на початку = [йа]: [йаблуко]. Букв 6, звуків 7.'},
+ {w:'джміль', a:4, r:'дж — один звук, ь — жоден: [джм\'іл\']. Букв 6, звуків 4.'},
+ {w:'їжак', a:5, r:'ї завжди = [йі]: [йіжак]. Букв 4, звуків 5.'},
+ {w:'юшка', a:5, r:'ю на початку = [йу]: [йушка]. Букв 4, звуків 5.'},
+ {w:'сіль', a:3, r:'[с\'іл\'] — ь лише пом\'якшує. Букв 4, звуків 3.'},
+ {w:'дзиґа', a:4, r:'дз — один звук: [дзиґа]. Букв 5, звуків 4.'},
+ {w:'край', a:4, r:'й — окремий приголосний звук. Букв 4, звуків 4.'},
+ {w:'ґудзик', a:5, r:'дз — один звук: [ґудзик]. Букв 6, звуків 5.'},
+ {w:'синє', a:4, r:'є після приголосного = [е] плюс м\'якість: [син\'е]. Букв 4, звуків 4.'},
+ {w:'щастя', a:6, r:'щ = два звуки: [шчаст\'а]. Букв 5, звуків 6.'}
+];
+/* ================= 6. КОМИ ================= */
+const KOM=[
+ {w:['Хлопчик','який','знайшов','ключ','побіг','додому'], a:[0,3], r:'Підрядна частина «який знайшов ключ» відокремлюється з обох боків.'},
+ {w:['Мамо','подивись','на','це'], a:[0], r:'«Мамо» — звертання, після нього кома.'},
+ {w:['Я','знаю','що','ти','прийдеш'], a:[1], r:'Кома перед сполучником «що», який приєднує підрядну частину.'},
+ {w:['На','столі','лежали','книжки','зошити','й','олівці'], a:[3], r:'Між однорідними членами кома; перед одиничним «й» коми немає.'},
+ {w:['Коли','зійшло','сонце','ми','вирушили'], a:[2], r:'Підрядна частина стоїть перед головною — кома на межі.'},
+ {w:['Це','була','думаю','гарна','ідея'], a:[1,2], r:'«Думаю» — вставне слово, виділяється комами з обох боків.'},
+ {w:['Тарас','мій','найкращий','друг','живе','поруч'], a:[0,3], r:'«Мій найкращий друг» — прикладка, що пояснює ім\'я; виділяється з обох боків.'},
+ {w:['Іди','сюди','будь','ласка'], a:[1], r:'«Будь ласка» відокремлюється комою.'},
+ {w:['Вітер','дув','сильно','а','дощ','не','вщухав'], a:[2], r:'Перед протиставним «а» кома ставиться завжди.'},
+ {w:['Не','знаю','чи','встигну'], a:[1], r:'Кома перед «чи», що приєднує підрядну частину.'}
+];
+
+/* ================= ІГРИ ================= */
+const GAMES=[
+ {id:'word', ic:'🟩', t:'Слово дня', s:'Вгадай слово з п\'яти літер за 6 спроб', open:openWord},
+ {id:'anag', ic:'🔀', t:'Анаграми', s:'Збери слово з переплутаних літер', open:()=>startRun('anag')},
+ {id:'nag',  ic:'🎯', t:'Наголос', s:'Тапни склад, на який падає наголос', open:()=>startRun('nag')},
+ {id:'odd',  ic:'🚪', t:'Четвертий зайвий', s:'Знайди слово, яке випадає з правила', open:()=>startRun('odd')},
+ {id:'snd',  ic:'🔊', t:'Звуки й букви', s:'Скільки звуків у слові?', open:()=>startRun('snd')},
+ {id:'kom',  ic:'✒️', t:'Коми', s:'Постав коми тапом між словами', open:()=>startRun('kom')}
+];
+const RUN_LEN={anag:8, nag:10, odd:8, snd:8, kom:6};
+const KIND_NAME={anag:'Анаграми', nag:'Наголос', odd:'Четвертий зайвий', snd:'Звуки й букви', kom:'Коми'};
+
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    let sc='';
+    if(g.id==='word'){ const w=PR.word&&PR.word.d===DAY ? PR.word : null;
+      sc = w ? (w.done ? (w.rows[w.rows.length-1]===wordOfDay() ? w.rows.length+'/6' : 'X/6') : 'почато') : ''; }
+    else if(PR.best && PR.best[g.id]!==undefined) sc = PR.best[g.id]+'/'+RUN_LEN[g.id];
+    const b=document.createElement('button'); b.className='item';
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.onclick=g.open; box.appendChild(b);
+  });
+}
+
+/* --- універсальний рушій коротких забігів --- */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[], sel=null, gaps=[];
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const n=RUN_LEN[kind];
+  const src = kind==='anag'?ANAG : kind==='nag'?NAG : kind==='odd'?ODD : kind==='snd'?SND : KOM;
+  ITEMS = shuf(src, Math.floor(Math.random()*1e6)).slice(0,n);
+  $('#p-kind').textContent=KIND_NAME[kind];
+  $('#p-back').onclick=()=>go('s-home');
+  go('s-play'); renderItem();
+}
+
+function drawDots(){
+  $('#p-dots').innerHTML = ITEMS.map((_,i)=>{
+    const l=LOG[i]; return '<span class="dot '+(l===undefined?(i===I?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-score').textContent = RIGHT+' з '+ITEMS.length;
+}
+
+function renderItem(){
+  const it=ITEMS[I]; sel=null; gaps=[];
+  drawDots();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').textContent='Перевірити'; $('#p-act').onclick=checkItem;
+  const body=$('#p-body');
+  if(KIND==='anag'){
+    const letters = shuf([...it.w], it.w.length*7+I).join(' ');
+    $('#p-task').innerHTML='Збери слово з цих літер. Підказка: <b>'+it.h.toLowerCase()+'</b>.';
+    body.innerHTML='<div class="word-big">'+letters+'</div><input type="text" id="p-inp" autocomplete="off" placeholder="Слово">';
+    $('#p-inp').onkeydown=e=>{ if(e.key==='Enter') checkItem(); };
+  }
+  if(KIND==='nag'){
+    $('#p-task').textContent='На який склад падає наголос? Тапни його.';
+    body.innerHTML='<div class="sylls">'+it.s.map((s,i)=>'<button class="syl" data-i="'+i+'">'+s+'</button>').join('')+'</div>';
+    $$('.syl',body).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  } else $('#p-act').style.display='inline-block';
+  if(KIND==='odd'){
+    $('#p-task').textContent='Три слова підкоряються одному правилу, одне — ні. Знайди зайве.';
+    body.innerHTML='<div class="opts">'+it.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',body).forEach(el=>el.onclick=()=>{ sel=+el.dataset.i; checkItem(); });
+    $('#p-act').style.display='none';
+  }
+  if(KIND==='snd'){
+    $('#p-task').innerHTML='Скільки <b>звуків</b> у цьому слові?';
+    body.innerHTML='<div class="word-big">'+it.w+'</div><input type="text" id="p-inp" inputmode="numeric" autocomplete="off" placeholder="Число">';
+    $('#p-inp').onkeydown=e=>{ if(e.key==='Enter') checkItem(); };
+  }
+  if(KIND==='kom'){
+    $('#p-task').textContent='Тапни проміжки, де потрібні коми. Крапку в кінці не рахуємо.';
+    let html='<div class="sent">';
+    it.w.forEach((w,i)=>{ html+='<span class="w">'+w+'</span>';
+      if(i<it.w.length-1) html+='<button class="gap" data-i="'+i+'">·</button>'; });
+    body.innerHTML=html+'</div>';
+    $$('.gap',body).forEach(el=>el.onclick=()=>{ const i=+el.dataset.i;
+      if(gaps.includes(i)){ gaps=gaps.filter(x=>x!==i); el.classList.remove('on'); el.textContent='·'; }
+      else { gaps.push(i); el.classList.add('on'); el.textContent=','; } });
+  }
+}
+
+function checkItem(){
+  const it=ITEMS[I]; let ok=false, right='';
+  if(KIND==='anag'){ const v=norm($('#p-inp').value); if(!v) return; ok = v===norm(it.w); right=it.w.toLowerCase(); }
+  if(KIND==='nag'){ ok = sel===it.a; }
+  if(KIND==='odd'){ ok = sel===it.a; }
+  if(KIND==='snd'){ const v=norm($('#p-inp').value); if(!v) return; ok = parseInt(v,10)===it.a; right=it.a; }
+  if(KIND==='kom'){ const s=[...gaps].sort((x,y)=>x-y);
+    ok = s.length===it.a.length && s.every((v,i)=>v===it.a[i]); }
+  LOG[I]=ok; if(ok) RIGHT++;
+  buzz(ok); drawDots();
+  $('#p-act').disabled=true; $('#p-act').style.display='inline-block';
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  if(KIND==='nag'){ $$('.syl').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.textContent = ok?'Так.':'Ні — наголос на складі «'+it.s[it.a]+'».';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>'+it.s.map((s,i)=>i===it.a?'<u>'+s+'</u>':s).join('-')+'</b> — наголос в українській рухомий, такі слова просто запам\'ятовують.';
+  }
+  if(KIND==='odd'){ $$('.opt').forEach((el,i)=>{ el.disabled=true;
+      if(i===it.a) el.classList.add('good'); else if(!ok && i===sel) el.classList.add('bad'); });
+    v.textContent = ok?'Так.':'Ні — зайве «'+it.o[it.a]+'».';
+    $('#p-why').className='why on'; $('#p-why').innerHTML=it.r;
+  }
+  if(KIND==='anag'){ const inp=$('#p-inp'); if(inp){ inp.disabled=true; if(!ok) inp.value=right; }
+    v.textContent = ok?'Так.':'Ні — це слово «'+right+'».';
+  }
+  if(KIND==='snd'){ const inp=$('#p-inp'); if(inp){ inp.disabled=true; if(!ok) inp.value=right; }
+    v.textContent = ok?'Так.':'Ні — звуків '+right+'.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML=it.r;
+  }
+  if(KIND==='kom'){ $$('.gap').forEach(el=>{ const i=+el.dataset.i; el.disabled=true;
+      el.classList.remove('on');
+      if(it.a.includes(i)){ el.classList.add('good'); el.textContent=','; }
+      else if(gaps.includes(i)){ el.classList.add('bad'); el.textContent=','; } });
+    v.textContent = ok?'Так, рівно там.':'Ні — правильні місця підсвічено зеленим.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML=it.r;
+  }
+  $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+
+function endRun(){
+  const n=ITEMS.length;
+  PR.best=PR.best||{};
+  const prev = PR.best[KIND]||0;
+  if(RIGHT>prev) PR.best[KIND]=RIGHT;
+  saveP();
+  $('#e-h').textContent=KIND_NAME[KIND];
+  $('#e-title').textContent = RIGHT===n?'Чисто. Усі '+n+'.' : RIGHT>=n*0.6?'Непогано.' : 'Розбір нижче — він тут головний.';
+  $('#e-right').textContent=RIGHT; $('#e-best').textContent=PR.best[KIND];
+  $('#e-again').onclick=()=>startRun(KIND);
+  $('#e-review').innerHTML='<b style="display:block;margin-bottom:8px">Що було</b>'+
+    ITEMS.map((it,i)=>{
+      const name = KIND==='anag'?it.w.toLowerCase() : KIND==='nag'?it.s.map((s,j)=>j===it.a?'<u>'+s+'</u>':s).join('-')
+                 : KIND==='odd'?('зайве: '+it.o[it.a]) : KIND==='snd'?(it.w+' — '+it.a)
+                 : it.w.map((w,j)=>w+(it.a.includes(j)?',':'')).join(' ');
+      return '<div style="display:flex;gap:9px;padding:8px 0;border-top:1px solid var(--line);font-size:15px">'+
+             '<span>'+(LOG[i]?'🟩':'🟥')+'</span><span>'+name+'</span></div>'; }).join('');
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
