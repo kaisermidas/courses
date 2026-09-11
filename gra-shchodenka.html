@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Щоденка</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 48px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 18px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .opts{display:grid;gap:8px;margin-top:2px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.pick{border-color:var(--accent);background:var(--accent-soft)}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .opt.off{opacity:.45}
+  input[type=text]{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:14px;padding:14px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .why .term{display:inline-block;background:#F4F2EC;border-radius:999px;padding:3px 11px;font-size:13px;color:var(--ink-2);margin-top:9px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .dots{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.y{background:var(--volt)}.dot.r{background:var(--bad)}
+  .dot.rev{box-shadow:0 0 0 2px var(--volt-soft)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+  .chip.sub{background:var(--accent-soft);color:#1B4FA8}
+  .chip.rev{background:var(--volt-soft);color:#6B4B00}
+  .meta{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .stat{display:flex;gap:10px;margin:14px 0 0}
+  .stat div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .stat b{display:block;font-size:23px;line-height:1.2}
+  .stat span{color:var(--ink-2);font-size:13px}
+  .grid-res{font-size:29px;letter-spacing:.12em;text-align:center;margin:6px 0 2px}
+  .beads{font-size:27px;letter-spacing:.08em;text-align:center;margin:10px 0}
+  .ord{display:grid;gap:8px;margin-top:2px}
+  .ord .it{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff;text-align:left;display:flex;gap:11px;align-items:center}
+  .ord .it .n{width:26px;height:26px;flex:none;border-radius:50%;background:#F4F2EC;color:var(--ink-2);display:grid;place-items:center;font-size:14px;font-weight:600}
+  .ord .it.on .n{background:var(--accent);color:#fff}
+  .ord .it.good{border-color:var(--ok);background:var(--ok-soft)}
+  .ord .it.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .srs{margin-top:14px;font-size:14px;color:var(--ink-2)}
+  .srs i{font-style:normal;color:var(--ink)}
+  .cube{display:grid;grid-template-columns:repeat(3,26px);gap:3px;justify-content:center;margin:10px 0}
+  .cube i{height:26px;background:#E7D9B8;border:1px solid #C9B98F;border-radius:4px}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2)}
+  .tmr.hot{color:var(--bad)}
+  .rev-line{display:flex;gap:9px;padding:7px 0;border-top:1px solid var(--line);font-size:15px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Щоденка</h1>
+    <p id="h-date"></p>
+  </header>
+  <div class="panel">
+    <div class="meta"><span class="chip">5 завдань</span><span class="chip">різні предмети</span><span class="chip">поза підручником</span></div>
+    <p style="margin:0 0 14px;color:var(--ink-2);font-size:15px">
+      Набір визначає дата, а не випадок — у тата сьогодні рівно ці ж п'ять.
+      Дві спроби на завдання. Помилка не зникає: повернеться завтра, потім через 3, 7 і 21 день.</p>
+    <button class="btn" onclick="startRun()" id="b-start">Грати</button>
+    <div class="stat">
+      <div><b id="st-streak">0</b><span>серія днів</span></div>
+      <div><b id="st-acorn">0</b><span>жолудів</span></div>
+      <div><b id="st-queue">0</b><span>на повторення</span></div>
+    </div>
+  </div>
+  <div class="panel" id="p-done" style="display:none">
+    <b>Сьогодні вже зіграно.</b>
+    <div class="grid-res" id="d-grid"></div>
+    <div style="text-align:center;color:var(--ink-2);font-size:14px" id="d-line"></div>
+    <div class="row center" style="margin-top:12px">
+      <button class="btn ghost small" onclick="share()">Поділитися в чат</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-q" class="screen">
+  <div class="bar">
+    <button class="back" onclick="quitRun()">‹ Вийти</button>
+    <div class="dots" id="dots"></div>
+    <span class="tmr" id="tmr" style="width:52px;text-align:right"></span>
+  </div>
+  <div class="panel">
+    <div class="meta"><span class="chip sub" id="q-sub"></span><span class="chip" id="q-tag"></span><span class="chip rev" id="q-rev" style="display:none">повторення</span></div>
+    <div class="task" id="q-task"></div>
+    <div id="q-body"></div>
+    <div class="verdict" id="q-verdict"></div>
+    <div class="why" id="q-why"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="q-act" onclick="act()">Перевірити</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Назад</button><div class="dots"></div><span style="width:52px"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px"></h2>
+    <div class="grid-res" id="e-grid"></div>
+    <div style="text-align:center;color:var(--ink-2);font-size:14px" id="e-line"></div>
+    <div class="stat">
+      <div><b id="e-score">0</b><span>з п'яти</span></div>
+      <div><b id="e-streak">0</b><span>серія 🔥</span></div>
+      <div><b id="e-coins">0</b><span>жолудів</span></div>
+    </div>
+    <div class="srs" id="e-srs"></div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" onclick="share()">Поділитися в чат</button>
+      <button class="btn ghost" onclick="go('s-home')">На головну</button>
+    </div>
+  </div>
+  <div class="panel" id="e-review"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-arena-v1';
+let PR = {streak:0, log:{}, srs:[], coins:0};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+
+/* ---------- час і сид ---------- */
+const today = new Date();
+const DAY = today.getFullYear()*10000 + (today.getMonth()+1)*100 + today.getDate();
+const DN  = Math.floor(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate())/864e5); // номер доби
+function dnPlus(n){ const d=new Date(Date.UTC(1970,0,1+DN+n));
+  return d.getUTCFullYear()*10000+(d.getUTCMonth()+1)*100+d.getUTCDate(); }
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function shuffled(arr,seed){ const r=mulberry(seed), c=[...arr];
+  for(let i=c.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [c[i],c[j]]=[c[j],c[i]]; } return c; }
+const MON=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+
+/* ================= ПУЛ ЗАВДАНЬ =================
+   type: choice | input | order | self
+   Додати нове — просто дописати об'єкт у масив.               */
+const POOL=[
+/* --- 🧩 Логіка / Бобер --- */
+{id:'bo-nam', sub:'🧩 Логіка', tag:'Бобер', type:'choice',
+ q:'Машина проковтує ряд намистин зліва направо. Правило одне: якщо дві однакові опиняються поруч — обидві зникають, а сусіди стають поруч.',
+ extra:'<div class="beads">🔵 🟡 🟡 🔵 🟢</div>',
+ o:['🟢','🔵 🟢','🔵 🔵 🟢','нічого не лишиться'], a:0,
+ hint:'Почни з пари жовтих. Що стане поруч після того, як вони зникнуть?',
+ why:'Жовті зникають → два сині опиняються поруч → зникають і вони. Лишається 🟢. Машина щоразу дивиться лише на верхівку того, що вже склала — це стек.',
+ term:'стек · LIFO'},
+
+{id:'bo-rob', sub:'🧩 Логіка', tag:'Бобер', type:'choice',
+ q:'Робот дивиться на північ і виконує програму: <b>повторити 4 рази { крок, крок, поворот направо }</b>. Що правда про фінал?',
+ o:['Стоїть там само і дивиться на північ','Стоїть на 8 кроків північніше','Стоїть там само, але дивиться на південь','Стоїть за 2 кроки на схід'], a:0,
+ hint:'Чотири повороти направо — це скільки повних обертів?',
+ why:'Кожен цикл — два кроки і чверть оберта. Чотири цикли малюють квадрат: робот повертається в старт і дивиться туди ж, куди починав.',
+ term:'цикл · інваріант'},
+
+{id:'bo-monety', sub:'🧩 Логіка', tag:'Бобер', type:'input',
+ q:'Дев\'ять однакових на вигляд монет, одна з них важча. Є терези без гир (лише порівнюють дві купки). За скільки зважувань <b>гарантовано</b> знайти важку?',
+ a:['2','два','двa'], hint:'Не ділити навпіл. Спробуй розкласти на три рівні купки.',
+ why:'Кладемо по 3 проти 3. Якщо рівновага — важка серед третьої трійки. Далі з трійки: 1 проти 1. Разом два зважування. Ділення на три частини працює швидше за ділення навпіл, бо терези дають три відповіді: більше, менше, рівно.',
+ term:'трійковий пошук'},
+
+{id:'bo-cezar', sub:'🧩 Логіка', tag:'Бобер', type:'choice',
+ q:'Шифр: кожну літеру замінюють на <b>наступну</b> за українською абеткою (я → а). Що зашифровано як <b>НПТ</b>?',
+ o:['МОС','МНР','ЛОП','НОС'], a:0,
+ hint:'Розшифрувати — значить зробити крок назад: яка літера стоїть перед Н?',
+ why:'Н→М, П→О, Т→С. Виходить МОС. Шифрування й розшифрування — та сама дія в різні боки; такий шифр називають шифром Цезаря, і зламується він за 32 спроби.',
+ term:'шифр Цезаря'},
+
+{id:'bo-slovnyk', sub:'🧩 Логіка', tag:'Бобер', type:'input',
+ q:'У словнику 1000 сторінок. Ти шукаєш слово так: відкрив посередині, глянув, у якій половині воно, і далі так само. Скільки разів доведеться відкрити словник у найгіршому випадку?',
+ a:['10'], hint:'Щоразу сторінок лишається вдвічі менше: 1000 → 500 → 250...',
+ why:'1000 → 500 → 250 → 125 → 63 → 32 → 16 → 8 → 4 → 2 → 1. Десять разів. Так працює двійковий пошук: мільйон сторінок дав би лише 20 кроків.',
+ term:'двійковий пошук'},
+
+{id:'bo-cherga', sub:'🧩 Логіка', tag:'Бобер', type:'choice',
+ q:'У черзі стоять п\'ятеро. Кожні 10 секунд перший отримує квиток і йде, але кожні 15 секунд у <b>кінець</b> черги стає одна нова людина. Що буде з чергою?',
+ o:['Скорочуватиметься','Зростатиме','Лишиться сталою','Спершу зросте, потім зникне'], a:0,
+ hint:'Порахуй за хвилину: скільки вийшло і скільки зайшло?',
+ why:'За 60 секунд виходить 6 людей, заходить 4. Черга коротшає на 2 щохвилини. Це основне правило будь-якої черги: важлива не довжина, а швидкість входу проти швидкості виходу.',
+ term:'черга · FIFO'},
+
+/* --- 🔢 Математика / Кенгуру --- */
+{id:'ke-ruk', sub:'🔢 Математика', tag:'Кенгуру', type:'input',
+ q:'У кімнаті 7 дітей. Кожен потиснув руку кожному рівно один раз. Скільки було рукостискань?',
+ a:['21'], hint:'Кожен зробив 6 потисків. Але кожне потискання порахували двічі.',
+ why:'7 · 6 = 42 — це якщо рахувати з боку кожного. Але в рукостисканні двоє, тож ділимо навпіл: 21. Формула n·(n−1)/2 працює для будь-якої кількості.',
+ term:'комбінаторика'},
+
+{id:'ke-kub', sub:'🔢 Математика', tag:'Кенгуру', type:'choice',
+ q:'Куб 3×3×3 пофарбували ззовні і розрізали на 27 однакових кубиків. У скількох пофарбовано рівно <b>дві</b> грані?',
+ extra:'<div class="cube"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>',
+ o:['8','12','6','9'], a:1,
+ hint:'Дві грані має той, хто сидить на ребрі — але не в кутку.',
+ why:'Кути мають три грані (їх 8), центри граней — одну (6), серединка — жодної. Лишаються ребра: 12 ребер, на кожному один кубик між кутами → 12.',
+ term:'просторова уява'},
+
+{id:'ke-pat', sub:'🔢 Математика', tag:'Кенгуру', type:'input',
+ q:'Яке число має стояти замість знака питання?<br><b>1, 2, 6, 24, ?</b>',
+ a:['120'], hint:'Порівняй сусідні числа: у скільки разів кожне більше за попереднє?',
+ why:'Кожне наступне більше в 2, потім у 3, потім у 4 рази. Далі — у 5: 24 · 5 = 120. Такі числа називають факторіалами: 5! = 1·2·3·4·5.',
+ term:'факторіал'},
+
+{id:'ke-slymak', sub:'🔢 Математика', tag:'Кенгуру', type:'input',
+ q:'Равлик повзе з колодязя глибиною 10 метрів. За день піднімається на 3 метри, за ніч сповзає на 2. На який день він вилізе?',
+ a:['8','восьмий','8-й'], hint:'Порахуй, де він буде на початку 8-го дня. Чи потрібна йому ще одна ніч?',
+ why:'За добу равлик виграє 1 метр, тож на ранок 8-го дня він на висоті 7 м. Цього дня піднімається ще на 3 і виходить — ніч уже не рахується. Класична пастка: останній крок завжди інший.',
+ term:'задача про останній крок'},
+
+{id:'ke-udar', sub:'🔢 Математика', tag:'Кенгуру', type:'input',
+ q:'Годинник б\'є 6 разів за 5 секунд (від першого удару до шостого). Скільки секунд триватимуть 12 ударів?',
+ a:['11'], hint:'Рахуй не удари, а проміжки між ними.',
+ why:'Між 6 ударами 5 проміжків — по 1 секунді. Між 12 ударами проміжків 11, отже 11 секунд. Помилка «стовпчиків і прогонів»: стовпчиків завжди на один більше, ніж прольотів.',
+ term:'помилка стовпчика'},
+
+{id:'ke-odynyci', sub:'🔢 Математика', tag:'Кенгуру', type:'input',
+ q:'Скільки разів цифра <b>1</b> зустрічається серед чисел від 1 до 100?',
+ a:['21'], hint:'Окремо порахуй одиниці на місці десятків і окремо — на місці одиниць.',
+ why:'На місці одиниць: 1, 11, 21 ... 91 — десять разів. На місці десятків: від 10 до 19 — ще десять. Плюс 100. Разом 21; число 11 має аж дві одиниці, і це головна пастка.',
+ term:'систематичний перебір'},
+
+/* --- 📝 Українська / Словобій --- */
+{id:'um-zvuk', sub:'📝 Українська', tag:'Словобій', type:'choice',
+ q:'У якому слові звуків <b>більше</b>, ніж букв?',
+ o:['джміль','щука','день','льон'], a:1,
+ hint:'Шукай букву, яка одна, а звуків позначає два.',
+ why:'«Щ» завжди звучить як два звуки [шч]: щука — 4 букви, 5 звуків. У «джміль» навпаки: дж — один звук, ь — жодного.',
+ term:'фонетика · буква ≠ звук'},
+
+{id:'um-anag', sub:'📝 Українська', tag:'Словобій', type:'input',
+ q:'Переставте всі літери слова <b>СОСНА</b> так, щоб вийшло інше українське слово. Яке?',
+ a:['насос'], hint:'Це пристрій. Читається однаково і зліва, і справа.',
+ why:'СОСНА → НАСОС. Слово з тих самих літер — анаграма; а «насос» ще й читається однаково в обидва боки, тобто паліндром.',
+ term:'анаграма · паліндром'},
+
+{id:'um-nag', sub:'📝 Українська', tag:'Словобій', type:'choice',
+ q:'У якому слові наголос падає на <b>перший</b> склад?',
+ o:['фартух','випадок','одинадцять','ознака'], a:1,
+ hint:'Три з чотирьох — класичні пастки, де наголос тягне в середину слова.',
+ why:'ВИпадок — на перший. Решта: фартУх, одинАдцять, ознАка. Наголос в українській рухомий, тому його вчать словом, а не правилом.',
+ term:'орфоепія'},
+
+{id:'um-koma', sub:'📝 Українська', tag:'Словобій', type:'input',
+ q:'Скільки ком потрібно поставити?<br><b>Хлопчик який знайшов ключ побіг додому і віддав знахідку сторожу</b>',
+ a:['2','дві'], hint:'Знайди підрядну частину — і згадай, що вона огороджується з обох боків.',
+ why:'Хлопчик<b>,</b> який знайшов ключ<b>,</b> побіг додому і віддав знахідку сторожу. Дві коми — на початку і в кінці підрядної частини. Перед «і» коми немає: однорідні присудки без повтору сполучника.',
+ term:'відокремлення підрядної частини'},
+
+{id:'um-fraz', sub:'📝 Українська', tag:'Словобій', type:'choice',
+ q:'Що означає фразеологізм <b>пекти раків</b>?',
+ o:['дуже поспішати','червоніти від сорому','готувати вечерю','сердитися на когось'], a:1,
+ hint:'Подумай, якого кольору стає рак, коли його зварити.',
+ why:'Рак під час варіння червоніє — звідси й значення: червоніти від сорому. Фразеологізм не можна розуміти буквально: його значення не складається зі значень слів.',
+ term:'фразеологізм'},
+
+{id:'um-rid', sub:'📝 Українська', tag:'Словобій', type:'choice',
+ q:'У якому рядку обидва слова вжито за літературною нормою?',
+ o:['біль була гострою, собака загавкала','біль був гострим, собака загавкав','біль була гострою, собака загавкав','біль був гострим, собака загавкала'], a:1,
+ hint:'Обидва слова — того самого роду. Якого саме?',
+ why:'І «біль», і «собака» в українській — чоловічого роду: <b>біль був гострим</b>, <b>собака загавкав</b>. Помилка приходить із російської, де «боль» жіночого роду, а «собака» так само жіночого. Так само з «дріб», «степ», «тюль» — у нас вони чоловічі.',
+ term:'рід іменника'},
+
+/* --- 🔤 Англійська --- */
+{id:'en-idiom', sub:'🔤 Англійська', tag:'Word Rush', type:'input',
+ q:'Finish the idiom: <b>It\'s raining cats and ___</b>',
+ a:['dogs','dog'], hint:'Another animal. Four letters.',
+ why:'It\'s raining cats and dogs = злива. Ідіому не можна перекладати словами: буквально вийде маячня — і це головна ознака ідіоми.',
+ term:'idiom'},
+
+{id:'en-false', sub:'🔤 Англійська', tag:'Word Rush', type:'choice',
+ q:'Слово <b>magazine</b> українською означає:',
+ o:['магазин','журнал','склад зброї','вітрина'], a:1,
+ hint:'Це те, що читають, а не те, куди ходять по хліб.',
+ why:'Magazine — журнал. Магазин англійською shop або store. Такі слова називають «фальшивими друзями перекладача»: звучать знайомо, а значать інше.',
+ term:'false friends'},
+
+{id:'en-plural', sub:'🔤 Англійська', tag:'Word Rush', type:'input',
+ q:'One goose, two ___ ?',
+ a:['geese'], hint:'Not gooses. The vowel changes inside the word.',
+ why:'Goose → geese, як foot → feet і tooth → teeth. Це давні форми множини, старші за правило «додай -s»; тому вони збереглися лише в кількох найуживаніших словах.',
+ term:'irregular plural'},
+
+{id:'en-order', sub:'🔤 Англійська', tag:'Word Rush', type:'order',
+ q:'Постав слова в правильному порядку, тапаючи по черзі.',
+ items:['She','is','always','late'],
+ a:[0,1,2,3],
+ hint:'Прислівник частоти (always) стоїть після дієслова to be.',
+ why:'She is always late. Порядок в англійському реченні жорсткий: підмет → дієслово → решта. А always, never, often ставлять після is/are, але перед звичайним дієсловом (she always comes late).',
+ term:'word order · adverbs of frequency'},
+
+/* --- 🏛 Історія --- */
+{id:'is-chrono', sub:'🏛 Історія', tag:'Хронос', type:'order',
+ q:'Постав події за часом — від найдавнішої до найновішої. Тисни по черзі.',
+ items:['Перші Олімпійські ігри в Греції','Хрещення Русі','Перша друкована книга Гутенберга','Перший політ людини в космос'],
+ a:[0,1,2,3],
+ hint:'Дві події — дуже давні, дві — значно ближчі до нас.',
+ why:'776 р. до н.е. → 988 р. → близько 1450 р. → 1961 р. Відстані різні: від Олімпіад до Хрещення часу минуло більше, ніж від Гутенберга до космосу.',
+ term:'хронологія · масштаб часу'},
+
+{id:'is-rym', sub:'🏛 Історія', tag:'Хронос', type:'input',
+ q:'Запиши арабськими цифрами римське число <b>MCMXCI</b>.',
+ a:['1991'], hint:'CM — це не 900 через додавання, а 1000 мінус 100. Так само XC.',
+ why:'M = 1000, CM = 900, XC = 90, I = 1 → 1991. Якщо менша цифра стоїть перед більшою, її віднімають — саме тому римські числа незручні для обчислень.',
+ term:'римська нумерація'},
+
+{id:'is-fake', sub:'🏛 Історія', tag:'Хронос', type:'choice',
+ q:'«У середньовіччі всі вважали Землю пласкою, і лише Колумб довів, що вона кругла». Це:',
+ o:['правда','вигадка XIX століття','правда лише для Європи','правда лише для моряків'], a:1,
+ hint:'Подумай, чи знали про форму Землі в Давній Греції — і чи могли це забути.',
+ why:'Кулястість Землі довели ще давні греки, і освічені люди середньовіччя це знали. Міф про «пласку Землю» вигадали в XIX ст., щоб показати релігію темною. Суперечка з Колумбом була не про форму, а про розмір Землі — і мав рацію не він.',
+ term:'історичний міф'},
+
+/* --- 🌿 Довкілля --- */
+{id:'pr-lid', sub:'🌿 Довкілля', tag:'Колосок', type:'choice',
+ q:'Склянка налита водою по самі вінця, у ній плаває шматок льоду, що стирчить над водою. Лід розтанув. Що з водою?',
+ o:['Перелилася через край','Рівень лишився той самий','Рівень трохи опустився','Залежить від розміру льоду'], a:1,
+ hint:'Лід плаває, бо витісняє рівно стільки води, скільки важить сам.',
+ why:'Плаваючий лід витісняє об\'єм води, що дорівнює його вазі. Розтанувши, він дає рівно цей об\'єм — рівень не змінюється. Тому танення морської криги не піднімає рівень океану, а танення льодовиків на суші — піднімає.',
+ term:'закон Архімеда'},
+
+{id:'pr-misiac', sub:'🌿 Довкілля', tag:'Колосок', type:'choice',
+ q:'Чому Місяць завжди повернутий до Землі одним боком?',
+ o:['Він не обертається навколо своєї осі','Він обертається навколо осі рівно за той самий час, що й навколо Землі','Його зворотний бік завжди в тіні','Земля притягує важчий бік Місяця'], a:1,
+ hint:'Пройди навколо стільця, весь час дивлячись на нього. Чи повернувся ти сам?',
+ why:'Місяць робить один оберт навколо осі рівно за один оберт навколо Землі — 27,3 доби. Це синхронне обертання, і виникло воно через притягання Землі. Зворотний бік не «темний»: він освітлюється так само, просто ми його не бачимо.',
+ term:'синхронне обертання'},
+
+{id:'pr-lito', sub:'🌿 Довкілля', tag:'Колосок', type:'choice',
+ q:'Чому влітку тепліше, ніж узимку?',
+ o:['Земля влітку ближча до Сонця','Вісь Землі нахилена, і промені падають крутіше','Сонце влітку гарячіше','Атмосфера влітку тонша'], a:1,
+ hint:'Коли в нас літо, в Австралії зима. Чи може Земля бути одночасно ближче і далі?',
+ why:'Річ у нахилі осі на 23,5°: влітку промені падають крутіше і день довший. До того ж у липні Земля якраз найдалі від Сонця — це остаточно ховає версію про відстань.',
+ term:'нахил осі · пори року'},
+
+{id:'pr-sovy', sub:'🌿 Довкілля', tag:'Колосок', type:'choice',
+ q:'З лісу зникли всі сови. Що станеться <b>першим</b>?',
+ o:['Стане більше мишей','Стане менше дерев','Стане більше вовків','Нічого не зміниться'], a:0,
+ hint:'Сова — хижак. Хто був її здобиччю?',
+ why:'Спершу розмножуються миші — зникає той, хто їх стримував. Далі миші виїдають насіння й молоді пагони, і лише потім страждають дерева. У ланцюгу живлення наслідки йдуть по черзі, а не одразу.',
+ term:'ланцюг живлення'},
+
+/* --- 🎨 Мистецтво --- */
+{id:'my-kolir', sub:'🎨 Мистецтво', tag:'Око і вухо', type:'choice',
+ q:'Синя фарба + жовта фарба = зелена. А якщо навести на стіну синій і жовтий <b>промінь</b> світла?',
+ o:['Теж буде зелено','Буде майже біло','Буде темно','Буде фіолетово'], a:1,
+ hint:'Фарба забирає кольори з білого світла. А промінь — додає.',
+ why:'Фарби змішуються віднімально: кожна забирає частину світла. Промені — додавально: синє плюс жовте дає майже біле. Тому екран телефона складає всі кольори з червоного, зеленого й синього світла.',
+ term:'адитивне і субтрактивне змішування'},
+
+{id:'my-takt', sub:'🎨 Мистецтво', tag:'Око і вухо', type:'input',
+ q:'Скільки чвертних нот уміщується в одному такті розміру <b>3/4</b>?',
+ a:['3','три'], hint:'Верхнє число каже скільки, нижнє — чого саме.',
+ why:'Верхня цифра — кількість долей, нижня — їхня тривалість. 3/4 означає три чвертні на такт: так рахують вальс — раз-два-три.',
+ term:'розмір такту'},
+
+/* --- 💪 Здоров'я і безпека --- */
+{id:'zb-galmo', sub:'💪 Здоров\'я', tag:'Ситуація', type:'choice',
+ q:'Ти виходиш на дорогу за 20 метрів перед автівкою, що їде 60 км/год. Водій тебе бачить. Що станеться?',
+ o:['Він устигне зупинитися','Він не встигне: потрібно близько 36 метрів','Усе залежить від гальм','Він устигне, якщо дорога суха'], a:1,
+ hint:'Спершу водій має усвідомити, і лише потім натиснути. Машина весь цей час їде.',
+ why:'На 60 км/год машина долає 17 метрів за секунду. Поки водій реагує (близько 1 с) — 17 метрів уже позаду, і ще близько 20 метрів триває гальмування. Разом близько 36 метрів на сухому асфальті, на мокрому більше.',
+ term:'шлях реакції + гальмівний шлях'},
+
+{id:'zb-opik', sub:'💪 Здоров\'я', tag:'Ситуація', type:'choice',
+ q:'На руку хлюпнув окріп. Що робити <b>найпершим</b>?',
+ o:['Змастити олією чи кремом','Тримати під прохолодною проточною водою 10–20 хвилин','Прикласти лід','Проколоти пухир'], a:1,
+ hint:'Головне завдання — забрати тепло, яке ще продовжує пошкоджувати шкіру.',
+ why:'Опік «горить» ізсередини ще кілька хвилин, тому головне — прохолодна вода 10–20 хв. Олія утримує тепло, лід додає обмороження, а проколотий пухир — це відкриті ворота для інфекції.',
+ term:'перша допомога при опіку'},
+
+/* --- 🧠 Що? Де? Коли? --- */
+{id:'qd-luk', sub:'🧠 Що? Де? Коли?', tag:'60 секунд', type:'self',
+ q:'Чому кришки каналізаційних люків роблять круглими, а не квадратними? Одна причина — головна.',
+ hint:'Спробуй подумки впустити кришку в отвір під різними кутами.',
+ answer:'Кругла кришка не може провалитися в отвір: у круга «ширина» однакова в усіх напрямках. Квадратну можна повернути й опустити по діагоналі — вона пройде у власний отвір.',
+ why:'Це властивість фігури сталої ширини. Ще бонуси: круглу кришку можна котити й не треба вирівнювати за кутом, коли ставиш на місце.',
+ term:'фігура сталої ширини'},
+
+{id:'qd-dzerkalo', sub:'🧠 Що? Де? Коли?', tag:'60 секунд', type:'self',
+ q:'Чому дзеркало міняє місцями ліве і праве, але не міняє верх і низ?',
+ hint:'А чи справді воно міняє саме ліве й праве? Що воно міняє насправді?',
+ answer:'Дзеркало взагалі не міняє ліве і праве. Воно міняє місцями перед і зад: твій ніс у відображенні дивиться назустріч. Ліве й праве «міняються» лише тому, що ми подумки розвертаємо себе, щоб стати на місце відображення.',
+ why:'Перевірка: ляж на бік — і «переплутаними» здадуться вже верх і низ. Міняється завжди та вісь, що перпендикулярна до дзеркала.',
+ term:'дзеркальна симетрія'},
+
+{id:'qd-iliuminator', sub:'🧠 Що? Де? Коли?', tag:'60 секунд', type:'self',
+ q:'Чому ілюмінатори в літаках круглі, хоч квадратні дали б більше огляду?',
+ hint:'Перші реактивні пасажирські літаки мали саме квадратні вікна — і вони розбивалися.',
+ answer:'У кутах квадрата напруга від тиску концентрується, і звідти починається тріщина. У круглого отвору кутів немає — навантаження розходиться рівномірно по краю.',
+ why:'На цьому вчилися кров\'ю: у 1954 році два літаки de Havilland Comet розвалилися в повітрі саме через тріщини від кутів вікон. Відтоді всі ілюмінатори закруглені.',
+ term:'концентрація напружень'},
+
+{id:'qd-visota', sub:'🧠 Що? Де? Коли?', tag:'60 секунд', type:'self',
+ q:'Нагорі, де летять літаки, мороз близько −55 °C і майже нема чим дихати. То навіщо забиратися так високо?',
+ hint:'Що там є такого, чого немає внизу? Точніше — чого там немає.',
+ answer:'Там розріджене повітря, а отже — набагато менший опір. Літак витрачає значно менше пального на ту саму швидкість. Додатково: вище хмар менше турбулентності й погоди, а висота дає час на планування, якщо відмовить двигун.',
+ why:'Двигунам повітря таки потрібне, тому вище 12 км його вже замало — саме тут проходить компроміс між економією і тягою.',
+ term:'опір середовища'}
+];
+
+/* ---------- вибірка дня: без повторів у межах циклу ---------- */
+const PER=5;
+function dailySet(){
+  const cycles = Math.max(1, Math.floor(POOL.length/PER));   // скільки днів до повного оберту
+  const cyc = Math.floor(DN/cycles), pos = DN % cycles;
+  const all = shuffled(POOL, cyc);
+  const set = all.slice(pos*PER, pos*PER+PER);
+  const rest = all.slice(cycles*PER);                        // хвіст циклу — резерв на заміни
+  for(let i=0;i<set.length;i++){                             // не більше одного предмета двічі
+    if(set.findIndex((t,j)=>j<i && t.sub===set[i].sub) < 0) continue;
+    const k = rest.findIndex(t=>!set.some(s=>s.sub===t.sub));
+    if(k>=0){ set[i]=rest[k]; rest.splice(k,1); }
+  }
+  return set;
+}
+function dueItems(){
+  return (PR.srs||[]).filter(x=>x.due<=DAY)
+    .map(x=>POOL.find(t=>t.id===x.id)).filter(Boolean).slice(0,3);
+}
+
+/* ---------- стан забігу ---------- */
+let SET=[], REV=0, idx=0, tries=0, res=[], picked=null, order=[], timer=null, left=0, revealed=false;
+
+function homeDraw(){
+  $('#h-date').textContent = today.getDate()+' '+MON[today.getMonth()]+'. П\'ять завдань дня.';
+  $('#st-streak').textContent = PR.streak||0;
+  $('#st-acorn').textContent = PR.coins||0;
+  $('#st-queue').textContent = dueItems().length;
+  const done = PR.log && PR.log[String(DAY)];
+  $('#p-done').style.display = done ? 'block' : 'none';
+  $('#b-start').textContent = done ? (dueItems().length ? 'Пройти повторення' : 'Зіграти ще раз') : 'Грати';
+  if(done){ $('#d-grid').textContent = done.grid; $('#d-line').textContent = done.score+'/5 · серія '+(PR.streak||0)+' 🔥'; }
+}
+
+function startRun(){
+  const base = dailySet(), rev = dueItems();
+  SET = [...base, ...rev]; REV = base.length;
+  idx=0; res=[]; go('s-q'); renderQ();
+}
+function quitRun(){ stopTimer(); go('s-home'); }
+
+function drawDots(){
+  $('#dots').innerHTML = SET.map((_,i)=>{
+    const c = res[i]===2?'g':res[i]===1?'y':res[i]===0?'r':(i===idx?'now':'');
+    return '<span class="dot '+c+(i>=REV?' rev':'')+'"></span>';
+  }).join('');
+}
+
+function stopTimer(){ if(timer){ clearInterval(timer); timer=null; } const e=$('#tmr'); if(e) e.textContent=''; }
+function startTimer(sec){
+  left=sec; const el=$('#tmr'); el.textContent=left+'с';
+  timer=setInterval(()=>{
+    if(!document.querySelector('#tmr')) return stopTimer();
+    left--; el.textContent=left+'с'; el.classList.toggle('hot',left<=10);
+    if(left<=0){ stopTimer(); if(!revealed) revealSelf(true); }
+  },1000);
+}
+
+function renderQ(){
+  const t=SET[idx]; tries=0; picked=null; order=[]; revealed=false;
+  stopTimer(); drawDots();
+  $('#q-sub').textContent=t.sub; $('#q-tag').textContent=t.tag;
+  $('#q-rev').style.display = idx>=REV ? 'inline-block' : 'none';
+  $('#q-task').innerHTML = t.q + (t.extra||'');
+  $('#q-verdict').className='verdict'; $('#q-why').className='why';
+  $('#q-act').disabled=false; $('#q-act').onclick=act;
+  const b=$('#q-body');
+  if(t.type==='choice'){
+    $('#q-act').textContent='Перевірити';
+    b.innerHTML='<div class="opts">'+t.o.map((o,i)=>'<button class="opt" data-i="'+i+'">'+o+'</button>').join('')+'</div>';
+    $$('.opt',b).forEach(el=>el.onclick=()=>{ if(revealed)return;
+      $$('.opt',b).forEach(x=>x.classList.remove('pick')); el.classList.add('pick'); picked=+el.dataset.i; });
+  } else if(t.type==='input'){
+    $('#q-act').textContent='Перевірити';
+    b.innerHTML='<input type="text" id="q-inp" autocomplete="off" autocapitalize="off" placeholder="Відповідь">';
+    $('#q-inp').onkeydown=e=>{ if(e.key==='Enter') act(); };
+  } else if(t.type==='order'){
+    $('#q-act').textContent='Перевірити';
+    b.innerHTML='<div class="ord">'+t.items.map((s,i)=>'<button class="it" data-i="'+i+'"><span class="n">·</span><span>'+s+'</span></button>').join('')+'</div>';
+    $$('.it',b).forEach(el=>el.onclick=()=>{ if(revealed)return;
+      const i=+el.dataset.i;
+      if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
+      $$('.it',b).forEach(x=>{ const p=order.indexOf(+x.dataset.i);
+        x.classList.toggle('on',p>=0); $('.n',x).textContent = p>=0 ? (p+1) : '·'; });
+    });
+  } else {
+    $('#q-act').textContent='Показати відповідь';
+    b.innerHTML='<input type="text" id="q-inp" autocomplete="off" placeholder="Запиши думку — перевіриш себе сам">';
+    startTimer(60);
+  }
+}
+
+function norm(s){ return (s||'').toLowerCase().replace(/[’']/g,'').replace(/\s+/g,' ').trim(); }
+
+function act(){
+  const t=SET[idx];
+  if(t.type==='self'){ if(!revealed) revealSelf(false); return; }
+  let ok=false;
+  if(t.type==='choice'){ if(picked===null) return; ok = picked===t.a; }
+  if(t.type==='input'){ const v=norm($('#q-inp').value); if(!v) return; ok = t.a.some(a=>norm(a)===v); }
+  if(t.type==='order'){ if(order.length<t.items.length) return; ok = order.every((v,i)=>v===t.a[i]); }
+  tries++;
+  if(ok) return finishQ(tries===1?2:1);
+  buzz(false);
+  if(tries===1){
+    $('#q-verdict').className='verdict on warn';
+    $('#q-verdict').innerHTML='Ні. Підказка: '+t.hint+'<br><span style="opacity:.8">Лишилась одна спроба.</span>';
+    if(t.type==='choice'){ const el=$('.opt.pick'); if(el){ el.classList.remove('pick'); el.classList.add('off'); } picked=null; }
+    if(t.type==='order'){ order=[]; $$('.it').forEach(x=>{x.classList.remove('on'); $('.n',x).textContent='·';}); }
+    return;
+  }
+  finishQ(0);
+}
+
+function revealSelf(auto){
+  revealed=true; stopTimer();
+  const t=SET[idx];
+  $('#q-verdict').className='verdict on note';
+  $('#q-verdict').innerHTML=(auto?'Час вийшов. ':'')+'<b>Відповідь:</b> '+t.answer+'<br><br>Чесно: збігається з тим, що ти думав?';
+  $('#q-body').innerHTML='<div class="row"><button class="btn ghost" onclick="finishQ(2)">Так, я так і думав</button>'+
+    '<button class="btn ghost" onclick="finishQ(0)">Ні, не вгадав</button></div>';
+  $('#q-act').disabled=true;
+  showWhy();
+}
+
+function showWhy(){
+  const t=SET[idx];
+  $('#q-why').className='why on';
+  $('#q-why').innerHTML='<b>Чому так</b>'+t.why+'<span class="term">'+t.term+'</span>';
+}
+
+function finishQ(score){
+  const t=SET[idx];
+  res[idx]=score; drawDots(); buzz(score>0);
+  if(t.type!=='self'){
+    if(t.type==='choice'){ $$('.opt').forEach((el,i)=>{ el.classList.remove('pick','off');
+      if(i===t.a) el.classList.add('good'); else if(score===0) el.classList.add('bad'); el.disabled=true; }); }
+    if(t.type==='order'){ $$('.it').forEach((el,i)=>{ el.classList.add(score>0?'good':'bad'); el.disabled=true;
+      $('.n',el).textContent = t.a.indexOf(i)+1; }); }
+    if(t.type==='input'){ const inp=$('#q-inp'); if(inp){ inp.disabled=true; if(score===0) inp.value=t.a[0]; } }
+    $('#q-verdict').className='verdict on '+(score>0?'good':'warn');
+    $('#q-verdict').textContent = score===2?'Точно. З першого разу.' : score===1?'Так — з другої спроби.' : 'Ні. Правильне позначено вище.';
+    showWhy();
+  }
+  srsUpdate(t.id, score);
+  $('#q-act').disabled=false;
+  $('#q-act').textContent = idx===SET.length-1 ? 'Підсумок' : 'Далі →';
+  $('#q-act').onclick = ()=>{ idx++; if(idx>=SET.length) endRun(); else renderQ(); };
+}
+
+/* ---------- черга повторення ---------- */
+const STEPS=[1,3,7,21];
+function srsUpdate(id,score){
+  PR.srs = PR.srs||[];
+  const i = PR.srs.findIndex(x=>x.id===id), ex = i>=0 ? PR.srs[i] : null;
+  if(score===0){                                  // помилка — назад на початок
+    if(ex){ ex.stage=0; ex.due=dnPlus(1); } else PR.srs.push({id, stage:0, due:dnPlus(1)});
+    return;
+  }
+  if(!ex) return;                                 // нова задача взята чисто — нічого не заводимо
+  if(score===1){ ex.stage=Math.max(0,ex.stage); ex.due=dnPlus(STEPS[ex.stage]); return; }
+  ex.stage++;                                     // з першого разу — крок далі
+  if(ex.stage>=STEPS.length) PR.srs.splice(i,1);  // засвоєно, прибираємо
+  else ex.due=dnPlus(STEPS[ex.stage]);
+}
+function dueText(){
+  const q=(PR.srs||[]).length;
+  if(!q) return 'Черга повторення порожня — усе взято чисто.';
+  return 'У черзі: <i>'+q+'</i>. Кожне повернеться завтра, потім через 3, 7 і 21 день — і лише тоді зникне.';
+}
+
+function endRun(){
+  stopTimer();
+  const main = res.slice(0,REV);
+  const grid = main.map(r=>r===2?'🟩':r===1?'🟨':'🟥').join('');
+  const score = main.filter(r=>r>0).length;
+  const coins = res.reduce((s,r)=>s+(r===2?3:r===1?1:0),0);
+  const key=String(DAY);
+  if(!(PR.log&&PR.log[key])){
+    const y=String(dnPlus(-1));
+    PR.streak = (PR.log && PR.log[y]) ? (PR.streak||0)+1 : 1;
+    PR.log = PR.log||{}; PR.log[key]={grid,score};
+    PR.coins=(PR.coins||0)+coins;
+  }
+  PR.lastGrid=grid; PR.lastScore=score;
+  saveP();
+  $('#e-title').textContent = score===5?'Чисто. Усі п\'ять.' : score>=3?'Непогано.' : 'Буває. Головне — розбір.';
+  $('#e-grid').textContent = grid;
+  $('#e-line').textContent = today.getDate()+' '+MON[today.getMonth()]+' · той самий набір, що й у тата';
+  $('#e-score').textContent=score; $('#e-streak').textContent=PR.streak; $('#e-coins').textContent='+'+coins;
+  $('#e-srs').innerHTML = dueText();
+  $('#e-review').innerHTML = '<b style="display:block;margin-bottom:9px">Що було в наборі</b>'+
+    SET.map((t,i)=>'<div class="rev-line"><span>'+(res[i]===2?'🟩':res[i]===1?'🟨':'🟥')+'</span>'+
+      '<span><b>'+t.tag+'</b> · '+t.term+(i>=REV?' <span class="chip rev">повторення</span>':'')+'</span></div>').join('');
+  homeDraw(); go('s-end');
+}
+
+function share(){
+  const g=PR.lastGrid||'', s=PR.lastScore||0;
+  const txt='Совеня · Щоденка '+today.getDate()+'.'+String(today.getMonth()+1).padStart(2,'0')+'\n'+g+'  '+s+'/5 · серія '+(PR.streak||0)+' 🔥';
+  try{ if(tg && tg.switchInlineQuery) return tg.switchInlineQuery(txt,['users']); }catch(e){}
+  try{ navigator.clipboard.writeText(txt); alert('Скопійовано:\n\n'+txt); }catch(e){ alert(txt); }
+}
+
+homeDraw();
+</script>
+</body>
+</html>
