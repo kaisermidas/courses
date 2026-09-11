@@ -635,7 +635,7 @@ function reveal(ok, firstTry){
   $('#q-why').innerHTML='<b>Чому так</b>'+t.why+'<span class="term">'+t.term+'</span>';
   $('#q-hint').style.display='none';
   if(ok){ PR.solved=PR.solved||{}; PR.solved[t.id]=firstTry?2:1; saveP(); srsHit('bober:'+t.id); }
-  else srsMiss('bober:'+t.id,'Бобер',{sub:THEMES[t.th],tag:'Бобер · '+t.t,type:t.type,q:t.q,extra:t.extra,
+  else srsMiss('bober:'+t.id,'Бобер',{sub:'🧩 Логіка',tag:'Бобер · '+t.t,type:t.type,q:t.q,extra:t.extra,
     o:t.o,a:t.a,items:t.items,hint:t.hint,why:t.why,term:t.term});
   $('#q-act').textContent='До списку'; $('#q-act').onclick=()=>{ homeDraw(); go('s-home'); };
 }
@@ -651,7 +651,7 @@ function endContest(){
   if(pts>(PR.best||0)){ PR.best=pts; PR.medal=medal; }
   answers.forEach((a,i)=>{ const t=SET[i];
     if(a&&a.ok){ PR.solved=PR.solved||{}; if(!PR.solved[t.id]) PR.solved[t.id]=1; srsHit('bober:'+t.id); }
-    else if(a) srsMiss('bober:'+t.id,'Бобер',{sub:THEMES[t.th],tag:'Бобер · '+t.t,type:t.type,q:t.q,extra:t.extra,
+    else if(a) srsMiss('bober:'+t.id,'Бобер',{sub:'🧩 Логіка',tag:'Бобер · '+t.t,type:t.type,q:t.q,extra:t.extra,
       o:t.o,a:t.a,items:t.items,hint:t.hint,why:t.why,term:t.term}); });
   saveP();
   $('#e-medal').textContent = medal.split(' ')[0];
