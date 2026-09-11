@@ -128,6 +128,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
@@ -325,6 +359,7 @@ function checkItem(){
   if(KIND==='sort'){ if(sel===null) return; ok = sel===ITEMS[I].g; }
   if(KIND==='moon'){ const it=ITEMS[I]; const right = it.next?(it.k+4)%8:it.k; if(sel===null) return; ok = sel===right; }
   LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  srsNat(ITEMS[I], ok);
   const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
 
   if(KIND==='planets'){
@@ -371,6 +406,22 @@ function checkItem(){
   $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
   $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
 }
+function srsNat(it, ok){
+  const S='🌿 Довкілля';
+  let id=null, card=null;
+  if(KIND==='predict'){ id='nat:pred:'+it.q.slice(0,40);
+    card={sub:S,tag:'Що станеться',type:'choice',q:it.q,o:it.o,a:it.a,
+      hint:'Уяви дослід крок за кроком.', why:it.r, term:'передбачення досліду'}; }
+  if(KIND==='sort'){ id='nat:sort:'+it.n;
+    card={sub:S,tag:'Хто є хто',type:'choice',q:'До якої групи належить <b>'+it.n+'</b>?',
+      o:GROUPS,a:it.g,hint:'Дивись на дихання, покриви й те, як з\'являються малята.', why:it.r, term:'класифікація'}; }
+  if(KIND==='chain'){ id='nat:chain:'+it.c.join('|');
+    card={sub:S,tag:'Ланцюг живлення',type:'order',q:'Склади ланцюг живлення: хто кого їсть.',
+      items:it.c,a:it.c.map((_,i)=>i),hint:'Починай із джерела енергії.', why:it.r, term:'ланцюг живлення'}; }
+  if(!id) return;
+  if(ok) srsHit(id); else srsMiss(id,'Колосок',card);
+}
+
 function endRun(forceMax){
   const g=GAMES.find(x=>x.id===KIND);
   const max = forceMax || ITEMS.length;
