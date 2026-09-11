@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ніч у школі — квест</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .story{background:#F4F2EC;border-radius:12px;padding:13px 15px;margin-bottom:14px;font-size:16px;line-height:1.55}
+  .story b{color:var(--ink)}
+  .note{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .door{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .door .ic{width:44px;height:44px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:21px;background:var(--accent-soft)}
+  .door .tx{flex:1;min-width:0}
+  .door b{display:block;font-size:16px}
+  .door span{color:var(--ink-2);font-size:13px}
+  .door .st{font-size:19px}
+  .door.done{border-color:var(--ok);background:var(--ok-soft)}
+  .door.locked{opacity:.55}
+  .final{border:2px dashed var(--volt);background:var(--volt-soft)}
+  .frags{display:flex;gap:8px;justify-content:center;margin:14px 0 2px}
+  .frag{width:46px;height:56px;border:2px solid var(--line);border-radius:10px;background:#fff;
+    display:grid;place-items:center;font:700 24px/1 ui-rounded,-apple-system,system-ui,sans-serif;color:var(--ink-2)}
+  .frag.got{border-color:var(--volt);background:var(--volt-soft);color:#6B4B00}
+  .lock{display:flex;gap:9px;align-items:center;margin-top:6px}
+  .lock input{flex:1;font:700 21px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.25em;text-align:center;
+    padding:12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);text-transform:uppercase;width:100%}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.hint{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .why .term{display:inline-block;background:#F4F2EC;border-radius:999px;padding:3px 11px;font-size:13px;color:var(--ink-2);margin-top:8px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:58px;text-align:right}
+  .switches{display:grid;gap:8px;margin:10px 0}
+  .sw{display:flex;gap:11px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:#fff;text-align:left}
+  .sw .val{width:54px;flex:none;border-radius:9px;padding:5px 0;text-align:center;font-weight:600;font-size:14px;background:#EDEAE1;color:var(--ink-2)}
+  .sw.yes .val{background:var(--ok);color:#fff}
+  .sw .q{flex:1;font-size:15px}
+  .bits{font:700 22px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.3em;text-align:center;margin:10px 0;color:var(--accent)}
+  .abc{font:15px/2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;text-align:center;
+    background:#F4F2EC;border-radius:10px;padding:9px;margin:10px 0;word-break:break-word}
+  .screen-txt{font:700 27px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.28em;text-align:center;
+    background:#2F3B4E;color:#7DF7A5;border-radius:12px;padding:16px 10px;margin:12px 0}
+  .dials{display:flex;gap:12px;justify-content:center;margin:10px 0}
+  .dial{text-align:center}
+  .dial input{width:74px;font:700 24px/1 inherit;text-align:center;padding:11px 4px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  .dial span{display:block;color:var(--ink-2);font-size:13px;margin-top:5px}
+  .paper{background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 12px 12px 0;
+    padding:12px 15px;margin:12px 0;font-size:15px}
+  .paper li{margin:3px 0}
+  .stat{display:flex;gap:10px;margin:14px 0 0}
+  .stat div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .stat b{display:block;font-size:23px;line-height:1.2}
+  .stat span{color:var(--ink-2);font-size:13px}
+  .medal{text-align:center;font-size:46px;margin:2px 0}
+  .log-line{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Ніч у школі</h1>
+    <p>Двері зачинилися о сьомій. П'ять кабінетів, п'ять замків — і в кожному цифра від коду головного виходу. Предмети різні, вихід один.</p>
+  </header>
+  <div class="panel">
+    <div class="frags" id="h-frags"></div>
+    <div style="text-align:center;color:var(--ink-2);font-size:14px" id="h-line"></div>
+  </div>
+  <div id="h-doors"></div>
+</section>
+
+<section id="s-room" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Коридор</button><h2 id="r-title"></h2><span class="tmr" id="r-tmr"></span></div>
+  <div class="panel">
+    <div class="story" id="r-story"></div>
+    <div id="r-body"></div>
+    <div class="verdict" id="r-verdict"></div>
+    <div class="why" id="r-why"></div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" id="r-act">Відкрити</button>
+      <button class="btn ghost" id="r-hint">Підказка</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-win" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Назад</button><h2>Вихід</h2><span class="tmr"></span></div>
+  <div class="panel">
+    <div class="medal">🌅</div>
+    <h2 style="font-size:23px;text-align:center">Двері відчинились</h2>
+    <div style="text-align:center;color:var(--ink-2);font-size:15px;margin-top:4px" id="w-line"></div>
+    <div class="stat">
+      <div><b id="w-time">—</b><span>часу в школі</span></div>
+      <div><b id="w-hints">0</b><span>підказок</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" onclick="shareQuest()">Поділитися в чат</button>
+      <button class="btn ghost" onclick="resetQuest()">Пройти знову</button>
+    </div>
+  </div>
+  <div class="panel" id="w-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-kvest1-v1';
+let PR = {open:{}, hints:0, t0:0, done:false, secs:0};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+function norm(s){ return (s||'').toString().toUpperCase().replace(/[’'\s]/g,'').trim(); }
+
+/* ================= КІМНАТИ ================= */
+const ABC='АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
+const ROOMS=[
+{
+  id:'r1', ic:'🔢', t:'Кабінет математики', sub:'Сейф на три колеса', frag:'4',
+  story:'У кутку стоїть учительський сейф із трьома коліщатками. Поруч на парті — записка, писана олівцем:',
+  body:'<div class="paper"><b>Код із трьох цифр:</b><ul>'+
+       '<li>сума всіх трьох цифр — <b>8</b>;</li>'+
+       '<li>друга цифра вдвічі більша за першу;</li>'+
+       '<li>третя дорівнює різниці другої й першої.</li></ul></div>'+
+       '<div class="lock"><input type="text" id="r1-in" inputmode="numeric" maxlength="3" placeholder="000"></div>',
+  get:()=>norm($('#r1-in').value), a:'242',
+  hints:['Познач першу цифру буквою — і запиши через неї дві інші.',
+         'Якщо перша — a, то друга 2a, а третя 2a − a = a. Отже a + 2a + a = 8.'],
+  why:'a + 2a + a = 4a = 8, тобто a = 2. Код 242. Коли невідомих ніби три, а насправді всі три виражаються через одну — задача стає рівнянням в один рядок.',
+  term:'рівняння з однією невідомою'
+},
+{
+  id:'r2', ic:'🏛', t:'Кабінет історії', sub:'Замок на чотири цифри', frag:'9',
+  story:'Шафа з книжками замкнена, і замок просить чотири цифри. На корінці найтовщої книжки вибито рік — але римськими:',
+  body:'<div class="screen-txt">MCMXCI</div>'+
+       '<div class="lock"><input type="text" id="r2-in" inputmode="numeric" maxlength="4" placeholder="0000"></div>',
+  get:()=>norm($('#r2-in').value), a:'1991',
+  hints:['M = 1000, C = 100, X = 10, I = 1. Але дві літери поспіль іноді означають віднімання.',
+         'CM — це не 1100, а 1000 − 100 = 900. Так само XC = 90.'],
+  why:'M (1000) + CM (900) + XC (90) + I (1) = 1991. Менша цифра перед більшою віднімається — саме через це римськими числами незручно рахувати, і Європа зрештою перейшла на арабські.',
+  term:'римська нумерація'
+},
+{
+  id:'r3', ic:'🌿', t:'Лабораторія', sub:'Чотири вимикачі', frag:'1',
+  story:'На стіні — щиток із чотирма вимикачами, під кожним табличка з твердженням. Правда вмикає струм, брехня лишає вимкненим. Унизу віконце для числа: <b>увімкнені вимикачі треба прочитати як двійкове число і ввести десяткове</b>.',
+  body:'<div class="switches" id="r3-sw"></div><div class="bits" id="r3-bits">0 0 0 0</div>'+
+       '<div class="lock"><input type="text" id="r3-in" inputmode="numeric" maxlength="2" placeholder="0"></div>',
+  sw:[{q:'Плаваючий лід, розтанувши, підніме рівень води в склянці', v:false},
+      {q:'Місяць обертається навколо своєї осі', v:true},
+      {q:'Улітку Земля ближча до Сонця, ніж узимку', v:false},
+      {q:'Повітря має вагу', v:true}],
+  get:()=>norm($('#r3-in').value), a:'5',
+  hints:['Три з чотирьох тверджень — класичні помилки. Лід витісняє рівно свою вагу; пори року — це нахил осі; повітря таки важить.',
+         'Правильно виходить 0101. Розряди зліва направо: 8, 4, 2, 1 — склади ті, де стоїть одиниця.'],
+  why:'Хибні твердження — перше й третє, правдиві — друге й четверте: 0101. Це 4 + 1 = 5. Двійковий запис і є спосіб зберігати відповіді «так/ні»: чотири вимикачі дають 16 різних станів.',
+  term:'двійкова система'
+},
+{
+  id:'r4', ic:'📝', t:'Кабінет мови', sub:'Два коліщатка', frag:'3',
+  story:'Шафа з зошитами має два коліщатка й напис крейдою: «Ліве — скільки в слові <b>букв</b>, праве — скільки <b>звуків</b>». На дошці велике слово:',
+  body:'<div class="screen-txt">ЩАСТЯ</div>'+
+       '<div class="dials"><div class="dial"><input type="text" id="r4-a" inputmode="numeric" maxlength="1" placeholder="?"><span>букв</span></div>'+
+       '<div class="dial"><input type="text" id="r4-b" inputmode="numeric" maxlength="1" placeholder="?"><span>звуків</span></div></div>',
+  get:()=>norm($('#r4-a').value)+norm($('#r4-b').value), a:'56',
+  hints:['Букви порахувати легко. Далі згадай, яка з них звучить не так, як пишеться.',
+         'Щ — це завжди два звуки [шч]. А «я» після приголосного другого звука не додає, лише пом\'якшує.'],
+  why:'Букв п\'ять: щ-а-с-т-я. Звуків шість: [шчаст\'а], бо щ = [шч], а «я» тут лише пом\'якшує [т]. Код 56. Букв і звуків у слові майже ніколи не порівну — на цьому й будується вся фонетика.',
+  term:'буква ≠ звук'
+},
+{
+  id:'r5', ic:'💻', t:'Комп\'ютерний клас', sub:'Пароль словом', frag:'6',
+  story:'Монітор світиться. У полі пароля — чотири літери, а на полі біля клавіатури приписка: «кожну літеру зсунуто на одну вперед за абеткою».',
+  body:'<div class="screen-txt">ТПГБ</div><div class="abc">'+ABC.split('').join(' ')+'</div>'+
+       '<div class="lock"><input type="text" id="r5-in" maxlength="8" placeholder="слово"></div>',
+  get:()=>norm($('#r5-in').value), a:'СОВА',
+  hints:['Зсунуто вперед — значить, щоб прочитати, треба зсунути назад.',
+         'Т → С, П → О. Далі зроби те саме з двома останніми літерами.'],
+  why:'Т→С, П→О, Г→В, Б→А. Пароль СОВА. Шифрування й розшифрування тут — та сама дія в різні боки; такий шифр звався шифром Цезаря і зламується перебором усіх 33 зсувів.',
+  term:'шифр Цезаря'
+}
+];
+const FINAL = ROOMS.map(r=>r.frag).join('');
+
+/* ================= ГОЛОВНА ================= */
+function elapsed(){ if(!PR.t0) return PR.secs||0;
+  return (PR.secs||0) + Math.floor((Date.now()-PR.t0)/1000); }
+function fmt(s){ return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); }
+
+function homeDraw(){
+  const got = ROOMS.filter(r=>PR.open[r.id]).length;
+  $('#h-frags').innerHTML = ROOMS.map(r=>
+    '<div class="frag'+(PR.open[r.id]?' got':'')+'">'+(PR.open[r.id]?r.frag:'?')+'</div>').join('');
+  $('#h-line').textContent = PR.done ? 'Вихід відкрито. Час: '+fmt(PR.secs)
+    : got===ROOMS.length ? 'Усі цифри зібрано — лишився головний вихід.'
+    : 'Зібрано '+got+' з '+ROOMS.length+' цифр коду.';
+  const box=$('#h-doors'); box.innerHTML='';
+  ROOMS.forEach(r=>{
+    const done=!!PR.open[r.id];
+    const b=document.createElement('button'); b.className='door'+(done?' done':'');
+    b.innerHTML='<span class="ic">'+r.ic+'</span><span class="tx"><b>'+r.t+'</b><span>'+r.sub+'</span></span>'+
+                '<span class="st">'+(done?'🔓':'🔒')+'</span>';
+    b.onclick=()=>openRoom(r.id); box.appendChild(b);
+  });
+  const f=document.createElement('button'); f.className='door final';
+  f.innerHTML='<span class="ic" style="background:#fff">🚪</span><span class="tx"><b>Головний вихід</b>'+
+              '<span>'+(got===ROOMS.length?'Код із п\'яти цифр':'Спершу збери всі цифри')+'</span></span>'+
+              '<span class="st">'+(PR.done?'🌅':'🔒')+'</span>';
+  f.onclick=()=>openFinal(); box.appendChild(f);
+}
+
+/* ================= КІМНАТА ================= */
+let CUR=null, hintN=0, tick=null;
+
+function startClock(){
+  if(!PR.t0 && !PR.done){ PR.t0=Date.now(); saveP(); }
+  stopClock();
+  tick=setInterval(()=>{ const e=$('#r-tmr'); if(!e) return stopClock(); e.textContent=fmt(elapsed()); },1000);
+  const e=$('#r-tmr'); if(e) e.textContent=fmt(elapsed());
+}
+function stopClock(){ if(tick){ clearInterval(tick); tick=null; } }
+
+function openRoom(id){
+  CUR=ROOMS.find(r=>r.id===id); hintN=0;
+  $('#r-title').textContent=CUR.t;
+  $('#r-story').innerHTML=CUR.story;
+  $('#r-body').innerHTML=CUR.body;
+  $('#r-verdict').className='verdict'; $('#r-why').className='why';
+  $('#r-act').disabled=false; $('#r-act').style.display='inline-block';
+  $('#r-act').textContent='Відкрити'; $('#r-act').onclick=tryOpen;
+  $('#r-hint').style.display='inline-block'; $('#r-hint').disabled=false; $('#r-hint').onclick=showHint;
+  if(CUR.id==='r3') buildSwitches();
+  go('s-room'); startClock();
+  if(PR.open[CUR.id]) solvedView(true);
+}
+
+function buildSwitches(){
+  const box=$('#r3-sw'); const state=[false,false,false,false];
+  box.innerHTML=CUR.sw.map((s,i)=>'<button class="sw" data-i="'+i+'"><span class="val">ні</span><span class="q">'+s.q+'</span></button>').join('');
+  const paint=()=>{ $$('.sw',box).forEach((el,i)=>{ el.classList.toggle('yes',state[i]);
+      $('.val',el).textContent=state[i]?'так':'ні'; });
+    $('#r3-bits').textContent=state.map(v=>v?1:0).join(' '); };
+  $$('.sw',box).forEach(el=>el.onclick=()=>{ const i=+el.dataset.i; state[i]=!state[i]; paint(); });
+  paint();
+}
+
+function showHint(){
+  if(!CUR || hintN>=CUR.hints.length) return;
+  const v=$('#r-verdict'); v.className='verdict on hint';
+  v.innerHTML='<b>Підказка '+(hintN+1)+'.</b> '+CUR.hints[hintN];
+  hintN++; PR.hints=(PR.hints||0)+1; saveP();
+  if(hintN>=CUR.hints.length) $('#r-hint').disabled=true;
+}
+
+function tryOpen(){
+  const val=CUR.get();
+  if(!val) return;
+  const ok = val===CUR.a;
+  buzz(ok);
+  if(!ok){ const v=$('#r-verdict'); v.className='verdict on warn';
+    v.textContent='Замок не піддається. Спробуй ще — або візьми підказку.'; return; }
+  if(!PR.open[CUR.id]){ PR.open[CUR.id]=1; saveP(); }
+  solvedView(false);
+}
+
+function solvedView(already){
+  const v=$('#r-verdict'); v.className='verdict on good';
+  v.innerHTML=(already?'Цей замок уже відкрито. ':'Клац. ')+'Цифра коду: <b>'+CUR.frag+'</b>';
+  $('#r-why').className='why on';
+  $('#r-why').innerHTML='<b>Як це працює</b>'+CUR.why+'<span class="term">'+CUR.term+'</span>';
+  $$('#r-body input').forEach(i=>{ i.value=CUR.id==='r4'? '' : CUR.a; i.disabled=true; });
+  if(CUR.id==='r4'){ $('#r4-a').value='5'; $('#r4-b').value='6'; }
+  $$('#r-body .sw').forEach((el,i)=>{ el.disabled=true;
+    el.classList.toggle('yes', CUR.sw[i].v); $('.val',el).textContent=CUR.sw[i].v?'так':'ні'; });
+  if(CUR.id==='r3') $('#r3-bits').textContent=CUR.sw.map(s=>s.v?1:0).join(' ');
+  $('#r-hint').style.display='none';
+  $('#r-act').textContent='У коридор'; $('#r-act').onclick=()=>{ homeDraw(); go('s-home'); };
+}
+
+/* ================= ФІНАЛ ================= */
+function openFinal(){
+  const got = ROOMS.filter(r=>PR.open[r.id]).length;
+  CUR=null; stopClock();
+  if(PR.done) return winView();
+  $('#r-title').textContent='Головний вихід';
+  $('#r-story').innerHTML = got<ROOMS.length
+    ? 'Важкі двері з цифровим замком на п\'ять знаків. Бракує цифр: <b>'+(ROOMS.length-got)+'</b>. Повертайся, коли відчиниш решту кабінетів.'
+    : 'Ті самі двері, що зачинились о сьомій. П\'ять коліщаток — і всі п\'ять цифр у тебе на руках, у порядку кабінетів.';
+  $('#r-body').innerHTML = got<ROOMS.length ? '' :
+    '<div class="frags">'+ROOMS.map(r=>'<div class="frag got">'+r.frag+'</div>').join('')+'</div>'+
+    '<div class="lock"><input type="text" id="rf-in" inputmode="numeric" maxlength="5" placeholder="00000"></div>';
+  $('#r-verdict').className='verdict'; $('#r-why').className='why';
+  $('#r-hint').style.display='none';
+  $('#r-act').style.display = got<ROOMS.length ? 'none' : 'inline-block';
+  $('#r-act').textContent='Відчинити'; $('#r-act').disabled=false;
+  $('#r-act').onclick=()=>{
+    if(norm($('#rf-in').value)!==FINAL){ buzz(false);
+      const v=$('#r-verdict'); v.className='verdict on warn'; v.textContent='Замок клацнув і став на місце. Цифри йдуть у порядку кабінетів.'; return; }
+    buzz(true);
+    PR.secs=elapsed(); PR.t0=0; PR.done=true; saveP(); winView();
+  };
+  go('s-room');
+}
+
+function winView(){
+  $('#w-line').textContent='Код '+FINAL+' підійшов. За вікном уже світає.';
+  $('#w-time').textContent=fmt(PR.secs||0);
+  $('#w-hints').textContent=PR.hints||0;
+  $('#w-log').innerHTML='<b style="display:block;margin-bottom:6px">Що відкривало замки</b>'+
+    ROOMS.map(r=>'<div class="log-line"><span>'+r.ic+'</span><span><b>'+r.t+'</b> · '+r.term+'</span></div>').join('');
+  $('#r-act').style.display='inline-block';
+  homeDraw(); go('s-win');
+}
+function shareQuest(){
+  const txt='Ніч у школі 🔦\nВийшов за '+fmt(PR.secs||0)+', підказок: '+(PR.hints||0)+'/10';
+  try{ if(tg && tg.switchInlineQuery) return tg.switchInlineQuery(txt,['users']); }catch(e){}
+  try{ navigator.clipboard.writeText(txt); alert('Скопійовано:\n\n'+txt); }catch(e){ alert(txt); }
+}
+function resetQuest(){ PR={open:{}, hints:0, t0:0, done:false, secs:0}; saveP(); homeDraw(); go('s-home'); }
+
+homeDraw();
+</script>
+</body>
+</html>
