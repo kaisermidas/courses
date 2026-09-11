@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Хронос</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:64px;text-align:right}
+  .tmr.hot{color:var(--bad)}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  input[type=text]{width:100%;font:inherit;padding:12px 13px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  /* стрічка */
+  .card{border:2px solid var(--volt);background:var(--volt-soft);border-radius:14px;padding:14px 16px;
+    text-align:center;font-size:18px;font-weight:600;margin-bottom:10px}
+  .tape{border-left:3px solid var(--line);margin:6px 0 6px 12px;padding-left:0}
+  .ev{display:flex;gap:11px;align-items:baseline;padding:7px 0 7px 14px;position:relative;font-size:15px}
+  .ev:before{content:'';position:absolute;left:-8px;top:14px;width:11px;height:11px;border-radius:50%;background:var(--accent)}
+  .ev .y{font-weight:700;min-width:88px;font-variant-numeric:tabular-nums}
+  .ev.new{background:var(--ok-soft);border-radius:0 10px 10px 0}
+  .ev.new:before{background:var(--ok)}
+  .ev.err{background:var(--bad-soft);border-radius:0 10px 10px 0}
+  .ev.err:before{background:var(--bad)}
+  .slot{display:block;width:100%;margin:2px 0 2px 14px;padding:7px 0;border:1px dashed #CFCBBF;border-radius:9px;
+    color:var(--ink-2);font-size:13px;background:#fff;text-align:center}
+  .slot:hover{border-color:var(--accent);color:var(--accent)}
+  .lives{font-size:19px;letter-spacing:.12em}
+  .opts{display:grid;gap:8px;margin-top:4px}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:#fff;text-align:left;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .duel{display:grid;gap:10px;margin:10px 0}
+  .duel button{border:2px solid var(--line);border-radius:14px;padding:16px 14px;background:#fff;font-size:17px;text-align:center}
+  .duel button.good{border-color:var(--ok);background:var(--ok-soft)}
+  .duel button.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .big{font:700 32px/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;margin:16px 0 6px;letter-spacing:.08em}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Хронос</h1>
+    <p>П'ять ігор про час. Не «в якому році», а де ця подія стоїть серед інших — і скільки між ними насправді минуло.</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-tape" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><span class="lives" id="t-lives"></span><span class="tmr" id="t-sc"></span></div>
+  <div class="panel">
+    <div class="card" id="t-card"></div>
+    <div style="color:var(--ink-2);font-size:14px;text-align:center;margin-bottom:8px">Тисни проміжок, куди ця подія вписується</div>
+    <div class="tape" id="t-tape"></div>
+    <div class="verdict" id="t-verdict"></div>
+  </div>
+</section>
+
+<section id="s-duel" class="screen">
+  <div class="bar"><button class="back" onclick="quitDuel()">‹ Ігри</button><h2>Що було раніше</h2><span class="tmr" id="d-tmr"></span></div>
+  <div class="panel" id="d-intro">
+    <div class="task">Дві події — тисни ту, що сталася <b>раніше</b>. 60 секунд, скільки встигнеш.</div>
+    <div class="row center"><button class="btn" onclick="runDuel()">Почати</button></div>
+    <div class="score"><div><b id="d-best">0</b><span>рекорд</span></div></div>
+  </div>
+  <div class="panel" id="d-play" style="display:none">
+    <div class="duel" id="d-pair"></div>
+    <div class="verdict" id="d-verdict"></div>
+    <div class="score">
+      <div><b id="d-right">0</b><span>правильних</span></div>
+      <div><b id="d-wrong">0</b><span>помилок</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-rome" class="screen">
+  <div class="bar"><button class="back" onclick="quitRome()">‹ Ігри</button><h2>Римські цифри</h2><span class="tmr" id="r-tmr"></span></div>
+  <div class="panel" id="r-intro">
+    <div class="task">I=1, V=5, X=10, L=50, C=100, D=500, M=1000. Менша цифра перед більшою — віднімається: IX=9, CM=900. 60 секунд.</div>
+    <div class="row center"><button class="btn" onclick="runRome()">Почати</button></div>
+    <div class="score"><div><b id="r-best">0</b><span>рекорд</span></div></div>
+  </div>
+  <div class="panel" id="r-play" style="display:none">
+    <div class="big" id="r-q"></div>
+    <div style="text-align:center;color:var(--ink-2);font-size:14px;margin-bottom:10px" id="r-hint"></div>
+    <input type="text" id="r-in" autocomplete="off" autocapitalize="characters" placeholder="Відповідь">
+    <div class="verdict" id="r-verdict"></div>
+    <div class="score">
+      <div><b id="r-right">0</b><span>правильних</span></div>
+      <div><b id="r-wrong">0</b><span>помилок</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-sc"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Перевірити</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-istoriya-v1';
+let PR = {best:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function norm(s){ return (s||'').toString().toUpperCase().replace(/\s/g,'').trim(); }
+
+/* ================= ПОДІЇ ================= */
+const EV=[
+ {y:-3200, t:'У Шумері з\'являється перша писемність'},
+ {y:-2560, t:'Добудовано піраміду Хеопса'},
+ {y:-776,  t:'Перші Олімпійські ігри в Греції'},
+ {y:-753,  t:'Заснування Рима за легендою'},
+ {y:-334,  t:'Похід Александра Македонського на Схід'},
+ {y:79,    t:'Виверження Везувію засипає Помпеї'},
+ {y:476,   t:'Падіння Західної Римської імперії'},
+ {y:882,   t:'Олег захоплює Київ і робить його столицею'},
+ {y:988,   t:'Хрещення Русі'},
+ {y:1037,  t:'Ярослав Мудрий засновує бібліотеку в Києві'},
+ {y:1240,  t:'Монголи руйнують Київ'},
+ {y:1450,  t:'Гутенберг друкує першу книгу на верстаті'},
+ {y:1492,  t:'Колумб перетинає океан і досягає Америки'},
+ {y:1519,  t:'Магеллан вирушає в навколосвітнє плавання'},
+ {y:1556,  t:'Виникає Запорозька Січ'},
+ {y:1574,  t:'Іван Федоров друкує «Апостол» у Львові'},
+ {y:1648,  t:'Починається Визвольна війна Хмельницького'},
+ {y:1659,  t:'Битва під Конотопом'},
+ {y:1709,  t:'Полтавська битва'},
+ {y:1769,  t:'Ватт удосконалює паровий двигун'},
+ {y:1789,  t:'Велика французька революція'},
+ {y:1840,  t:'Виходить «Кобзар» Шевченка'},
+ {y:1861,  t:'В Україні відкривають першу залізницю'},
+ {y:1876,  t:'Белл патентує телефон'},
+ {y:1879,  t:'Едісон показує довговічну лампочку'},
+ {y:1903,  t:'Брати Райт піднімають у повітря літак'},
+ {y:1914,  t:'Починається Перша світова війна'},
+ {y:1917,  t:'Проголошено Українську Народну Республіку'},
+ {y:1939,  t:'Починається Друга світова війна'},
+ {y:1957,  t:'На орбіту виходить перший супутник'},
+ {y:1961,  t:'Перша людина летить у космос'},
+ {y:1969,  t:'Люди вперше ступають на Місяць'},
+ {y:1986,  t:'Аварія на Чорнобильській АЕС'},
+ {y:1991,  t:'Україна проголошує незалежність'},
+ {y:2007,  t:'Представлено перший iPhone'},
+ {y:2022,  t:'Початок повномасштабного вторгнення в Україну'}
+];
+function yr(y){ return y<0 ? Math.abs(y)+' до н.е.' : y+''; }
+
+/* ================= 1. СТРІЧКА ЧАСУ ================= */
+let TAPE=[], POOL=[], CUR=null, LIVES=3, SCORE=0, TOVER=false;
+function startTape(){
+  POOL=[...EV].sort(()=>Math.random()-.5);
+  TAPE=[POOL.pop()]; CUR=POOL.pop(); LIVES=3; SCORE=0; TOVER=false;
+  $('#t-verdict').className='verdict';
+  go('s-tape'); drawTape();
+}
+function drawTape(mark){
+  $('#t-lives').textContent='❤️'.repeat(LIVES)+'🖤'.repeat(3-LIVES);
+  $('#t-sc').textContent=SCORE+' карт';
+  $('#t-card').textContent = CUR ? CUR.t : '—';
+  const box=$('#t-tape'); box.innerHTML='';
+  const slot=(i,label)=>{ const b=document.createElement('button'); b.className='slot'; b.textContent=label;
+    b.onclick=()=>placeCard(i); box.appendChild(b); };
+  if(!TOVER && CUR) slot(0,'раніше за все нижче');
+  TAPE.forEach((e,i)=>{
+    const d=document.createElement('div');
+    d.className='ev'+(mark&&mark.i===i?(mark.ok?' new':' err'):'');
+    d.innerHTML='<span class="y">'+yr(e.y)+'</span><span>'+e.t+'</span>';
+    box.appendChild(d);
+    if(!TOVER && CUR) slot(i+1, i===TAPE.length-1 ? 'пізніше за все вище' : 'між цими двома');
+  });
+}
+function placeCard(pos){
+  if(TOVER||!CUR) return;
+  const before = pos>0 ? TAPE[pos-1].y : -Infinity;
+  const after  = pos<TAPE.length ? TAPE[pos].y : Infinity;
+  const ok = CUR.y>=before && CUR.y<=after;
+  const card=CUR;
+  TAPE.push(card); TAPE.sort((a,b)=>a.y-b.y);
+  const realIdx=TAPE.findIndex(e=>e===card);
+  buzz(ok);
+  const v=$('#t-verdict');
+  if(ok){ SCORE++; v.className='verdict on good'; v.innerHTML='Так — '+yr(card.y)+'.'; }
+  else { LIVES--; v.className='verdict on warn';
+    v.innerHTML='Ні. Це '+yr(card.y)+' — картка стала на своє місце.'; }
+  CUR = POOL.length ? POOL.pop() : null;
+  if(LIVES<=0 || !CUR) TOVER=true;
+  drawTape({i:realIdx, ok});
+  if(TOVER) setTimeout(endTape, 900);
+}
+function endTape(){
+  PR.best=PR.best||{}; if(SCORE>(PR.best.tape||0)) PR.best.tape=SCORE;
+  saveP();
+  $('#e-h').textContent='Стрічка часу';
+  $('#e-title').textContent = SCORE>=15?'Чуття часу є.' : SCORE>=7?'Непогана стрічка.' : 'Далекі століття плутаються найчастіше.';
+  $('#e-now').textContent=SCORE; $('#e-best').textContent=PR.best.tape;
+  $('#e-again').onclick=startTape;
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Твоя стрічка</b>'+
+    TAPE.map(e=>'<div class="log-line"><span style="min-width:84px;font-weight:700">'+yr(e.y)+'</span><span>'+e.t+'</span></div>').join('');
+  homeDraw(); go('s-end');
+}
+
+/* ================= 2. ЩО БУЛО РАНІШЕ ================= */
+let DL=0, DR=0, DW=0, DT=null, DPAIR=null;
+function openDuel(){ $('#d-best').textContent=(PR.best&&PR.best.duel)||0;
+  $('#d-intro').style.display='block'; $('#d-play').style.display='none'; $('#d-tmr').textContent=''; go('s-duel'); }
+function runDuel(){
+  DL=60; DR=0; DW=0;
+  $('#d-intro').style.display='none'; $('#d-play').style.display='block';
+  $('#d-right').textContent='0'; $('#d-wrong').textContent='0'; $('#d-verdict').className='verdict';
+  nextPair();
+  clearInterval(DT);
+  DT=setInterval(()=>{ if(!document.querySelector('#d-tmr')) return clearInterval(DT);
+    DL--; $('#d-tmr').textContent=DL+'с'; $('#d-tmr').classList.toggle('hot',DL<=10);
+    if(DL<=0) endDuel(); },1000);
+  $('#d-tmr').textContent='60с';
+}
+function nextPair(){
+  let a,b;
+  do { a=EV[rnd(0,EV.length-1)]; b=EV[rnd(0,EV.length-1)]; } while(a===b || Math.abs(a.y-b.y)<15);
+  DPAIR=[a,b].sort(()=>Math.random()-.5);
+  $('#d-pair').innerHTML=DPAIR.map((e,i)=>'<button data-i="'+i+'">'+e.t+'</button>').join('');
+  $$('#d-pair button').forEach(el=>el.onclick=()=>answerPair(+el.dataset.i));
+}
+function answerPair(i){
+  const early = DPAIR[0].y<DPAIR[1].y ? 0 : 1;
+  const ok = i===early;
+  if(ok) DR++; else DW++;
+  $('#d-right').textContent=DR; $('#d-wrong').textContent=DW;
+  const v=$('#d-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  v.innerHTML=DPAIR.map(e=>yr(e.y)+' — '+e.t).join('<br>');
+  $$('#d-pair button').forEach((el,k)=>el.classList.add(k===early?'good':'bad'));
+  buzz(ok);
+  setTimeout(()=>{ if(DL>0) nextPair(); }, 700);
+}
+function quitDuel(){ clearInterval(DT); go('s-home'); }
+function endDuel(){
+  clearInterval(DT);
+  PR.best=PR.best||{}; if(DR>(PR.best.duel||0)) PR.best.duel=DR;
+  saveP();
+  $('#e-h').textContent='Що було раніше';
+  $('#e-title').textContent = DR>=15?'Швидко й точно.' : DR>=8?'Непогано.' : 'Порядок подій вчиться стрічкою, а не датами.';
+  $('#e-now').textContent=DR; $('#e-best').textContent=PR.best.duel;
+  $('#e-again').onclick=openDuel; $('#e-log').innerHTML='';
+  homeDraw(); go('s-end');
+}
+
+/* ================= 3. РИМСЬКІ ЦИФРИ ================= */
+const RMAP=[[1000,'M'],[900,'CM'],[500,'D'],[400,'CD'],[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],
+            [10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+function toRoman(n){ let s=''; RMAP.forEach(([v,l])=>{ while(n>=v){ s+=l; n-=v; } }); return s; }
+function fromRoman(s){ const V={I:1,V:5,X:10,L:50,C:100,D:500,M:1000}; let r=0;
+  for(let i=0;i<s.length;i++){ const a=V[s[i]], b=V[s[i+1]]; if(!a) return NaN; r += (b&&b>a)? -a : a; } return r; }
+let RL=0, RR=0, RW=0, RT=null, RCUR=null;
+function openRome(){ $('#r-best').textContent=(PR.best&&PR.best.rome)||0;
+  $('#r-intro').style.display='block'; $('#r-play').style.display='none'; $('#r-tmr').textContent=''; go('s-rome'); }
+function runRome(){
+  RL=60; RR=0; RW=0;
+  $('#r-intro').style.display='none'; $('#r-play').style.display='block';
+  $('#r-right').textContent='0'; $('#r-wrong').textContent='0'; $('#r-verdict').className='verdict';
+  nextRome();
+  $('#r-in').onkeydown=e=>{ if(e.key==='Enter') answerRome(); };
+  clearInterval(RT);
+  RT=setInterval(()=>{ if(!document.querySelector('#r-tmr')) return clearInterval(RT);
+    RL--; $('#r-tmr').textContent=RL+'с'; $('#r-tmr').classList.toggle('hot',RL<=10);
+    if(RL<=0) endRome(); },1000);
+  $('#r-tmr').textContent='60с';
+}
+function nextRome(){
+  const n = Math.random()<0.5 ? rnd(1,99) : rnd(100,2026);
+  const toLatin = Math.random()<0.5;
+  RCUR = toLatin ? {q:String(n), a:toRoman(n), hint:'запиши римськими'} : {q:toRoman(n), a:String(n), hint:'запиши арабськими'};
+  $('#r-q').textContent=RCUR.q; $('#r-hint').textContent=RCUR.hint;
+  $('#r-in').value=''; $('#r-in').focus();
+}
+function answerRome(){
+  const v=norm($('#r-in').value); if(!v) return;
+  const ok = v===norm(RCUR.a);
+  if(ok) RR++; else RW++;
+  $('#r-right').textContent=RR; $('#r-wrong').textContent=RW;
+  const ver=$('#r-verdict'); ver.className='verdict on '+(ok?'good':'warn');
+  ver.textContent = RCUR.q+' = '+RCUR.a;
+  nextRome();
+}
+function quitRome(){ clearInterval(RT); go('s-home'); }
+function endRome(){
+  clearInterval(RT);
+  PR.best=PR.best||{}; if(RR>(PR.best.rome||0)) PR.best.rome=RR;
+  saveP();
+  $('#e-h').textContent='Римські цифри';
+  $('#e-title').textContent = RR>=12?'Читаєш як арабські.' : RR>=6?'Непогано.' : 'Найбільше часу з\'їдають CM, XC і IV.';
+  $('#e-now').textContent=RR; $('#e-best').textContent=PR.best.rome;
+  $('#e-again').onclick=openRome; $('#e-log').innerHTML='';
+  homeDraw(); go('s-end');
+}
+
+/* ================= 4. СКІЛЬКИ МИНУЛО ================= */
+const GAPS=[
+ {a:-776, b:988,  r:'Від 776 до н.е. до 988 н.е.: 776 + 988 = 1764 роки. Роки до нашої ери йдуть у зворотний бік, тому їх додають, а не віднімають. Нуля між ними немає — одразу після 1 р. до н.е. настає 1 рік.'},
+ {a:988,  b:1240, r:'Від Хрещення до монгольської навали — 252 роки. Приблизно стільки ж, скільки від Полтавської битви до сьогодні.'},
+ {a:1450, b:1492, r:'Від друкарського верстата до подорожі Колумба — лише 42 роки. Друк і великі відкриття — це майже одне покоління.'},
+ {a:1903, b:1969, r:'Від першого польоту братів Райт до висадки на Місяць — 66 років. Люди, які бачили перший літак, застали й Місяць.'},
+ {a:1986, b:2022, r:'Від Чорнобиля до повномасштабного вторгнення — 36 років.'},
+ {a:-753, b:476,  r:'Від заснування Рима до падіння Західної Римської імперії — 1229 років. Рим прожив довше, ніж минуло від його падіння до наших днів.'},
+ {a:1789, b:1917, r:'Від французької революції до проголошення УНР — 128 років.'},
+ {a:1957, b:1961, r:'Від першого супутника до першої людини в космосі — лише 4 роки.'}
+];
+let GSET=[], GI=0, GLOG=[];
+function startGaps(){ GSET=[...GAPS].sort(()=>Math.random()-.5).slice(0,6); GI=0; GLOG=[]; go('s-play'); renderGap(); }
+function gdots(){ $('#p-dots').innerHTML=GSET.map((_,i)=>{
+  const l=GLOG[i]; return '<span class="dot '+(l===undefined?(i===GI?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-sc').textContent=GLOG.filter(Boolean).length+'/'+GSET.length; }
+function renderGap(){
+  const it=GSET[GI]; gdots();
+  const A=EV.find(e=>e.y===it.a), B=EV.find(e=>e.y===it.b);
+  $('#p-task').innerHTML='Скільки років минуло між цими подіями?<br><br><b>'+yr(it.a)+'</b> — '+A.t+'<br><b>'+yr(it.b)+'</b> — '+B.t;
+  $('#p-body').innerHTML='<input type="text" id="p-inp" inputmode="numeric" autocomplete="off" placeholder="Кількість років">';
+  $('#p-inp').onkeydown=e=>{ if(e.key==='Enter') checkGap(); };
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').disabled=false; $('#p-act').textContent='Перевірити'; $('#p-act').onclick=checkGap;
+}
+function checkGap(){
+  const it=GSET[GI];
+  const real = it.a<0 && it.b>0 ? Math.abs(it.a)+it.b : it.b-it.a;
+  const v=parseInt(($('#p-inp').value||'').replace(/\s/g,''),10);
+  if(isNaN(v)) return;
+  const ok = v===real;
+  GLOG[GI]=ok; buzz(ok); gdots();
+  $('#p-inp').disabled=true;
+  const ver=$('#p-verdict'); ver.className='verdict on '+(ok?'good':'warn');
+  ver.innerHTML = ok ? 'Так — '+real+' років.' : 'Ні. Правильно '+real+' років.';
+  $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Як рахувати</b>'+it.r;
+  $('#p-act').textContent = GI===GSET.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ GI++; if(GI>=GSET.length) endGaps(); else renderGap(); };
+}
+function endGaps(){
+  const right=GLOG.filter(Boolean).length;
+  PR.best=PR.best||{}; if(right>(PR.best.gaps||0)) PR.best.gaps=right;
+  saveP();
+  $('#e-h').textContent='Скільки минуло';
+  $('#e-title').textContent = right===GSET.length?'Усі інтервали точні.' : right>=4?'Непогано.' : 'Найбільша пастка — перехід через нашу еру.';
+  $('#e-now').textContent=right+'/'+GSET.length; $('#e-best').textContent=PR.best.gaps;
+  $('#e-again').onclick=startGaps;
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Розбір</b>'+GSET.map((it,i)=>
+    '<div class="log-line"><span>'+(GLOG[i]?'🟩':'🟥')+'</span><span>'+yr(it.a)+' → '+yr(it.b)+'</span></div>').join('');
+  homeDraw(); go('s-end');
+}
+
+/* ================= 5. ПРАВДА ЧИ МІФ ================= */
+const MYTH=[
+ {q:'У середньовіччі всі вважали Землю пласкою, і лише Колумб довів протилежне.', a:false,
+  r:'Кулястість Землі довели ще давні греки, освічені люди середньовіччя це знали. Міф вигадали в XIX столітті. Суперечка з Колумбом була про розмір Землі — і мав рацію не він.'},
+ {q:'Вікінги носили шоломи з рогами.', a:false,
+  r:'Жодного рогатого шолома археологи не знайшли. Образ вигадав художник для опери Вагнера в 1876 році.'},
+ {q:'Єгипетські піраміди будували раби.', a:false,
+  r:'Розкопки селища будівельників показали: це були наймані працівники з житлом, пайком і лікарем. Їх годували й ховали з пошаною.'},
+ {q:'Великий китайський мур видно з космосу неозброєним оком.', a:false,
+  r:'Не видно: мур вузький і кольором зливається з довкіллям. Астронавти це неодноразово підтверджували.'},
+ {q:'Перша книга, надрукована в Україні, вийшла у Львові.', a:true,
+  r:'Іван Федоров надрукував «Апостол» у Львові 1574 року — це перша точно датована друкована книга в Україні.'},
+ {q:'Ярослав Мудрий заснував у Києві першу відому бібліотеку Русі.', a:true,
+  r:'Літопис під 1037 роком розповідає про зібрання книг при Софійському соборі.'},
+ {q:'Наполеон був дуже низького зросту.', a:false,
+  r:'Приблизно 1,68 м — звичайний зріст для того часу. Плутанина виникла через різницю між французькими й англійськими дюймами та через глузливі карикатури.'},
+ {q:'Олімпійські ігри в давнину припиняли війни.', a:true,
+  r:'Оголошували священне перемир\'я — екехейрію, щоб учасники й глядачі могли безпечно дістатися Олімпії.'},
+ {q:'Люди в середньовіччі жили в середньому років сорок, бо старіли швидше.', a:false,
+  r:'Середнє число занижувала дитяча смертність. Хто переживав дитинство, часто доживав до шістдесяти й більше.'},
+ {q:'Слово «Україна» вперше з\'являється в літописі 1187 року.', a:true,
+  r:'Київський літопис під 1187 роком згадує «Оукраина» у зв\'язку зі смертю переяславського князя.'}
+];
+let MSET=[], MI=0, MLOG=[];
+function startMyth(){ MSET=[...MYTH].sort(()=>Math.random()-.5).slice(0,6); MI=0; MLOG=[]; go('s-play'); renderMyth(); }
+function mdots(){ $('#p-dots').innerHTML=MSET.map((_,i)=>{
+  const l=MLOG[i]; return '<span class="dot '+(l===undefined?(i===MI?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-sc').textContent=MLOG.filter(Boolean).length+'/'+MSET.length; }
+function renderMyth(){
+  const it=MSET[MI]; mdots();
+  $('#p-task').innerHTML=it.q;
+  $('#p-body').innerHTML='<div class="opts"><button class="opt" data-v="1">Правда</button><button class="opt" data-v="0">Міф</button></div>';
+  $$('.opt').forEach(el=>el.onclick=()=>checkMyth(el.dataset.v==='1'));
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').style.display='none';
+}
+function checkMyth(val){
+  const it=MSET[MI], ok = val===it.a;
+  MLOG[MI]=ok; buzz(ok); mdots();
+  $$('.opt').forEach(el=>{ el.disabled=true;
+    const isRight = (el.dataset.v==='1')===it.a;
+    el.classList.add(isRight?'good':'bad'); });
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  v.textContent = ok ? (it.a?'Так, це правда.':'Так, це міф.') : (it.a?'Насправді це правда.':'Насправді це міф.');
+  $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Як воно було</b>'+it.r;
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = MI===MSET.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ MI++; if(MI>=MSET.length) endMyth(); else renderMyth(); };
+}
+function endMyth(){
+  const right=MLOG.filter(Boolean).length;
+  PR.best=PR.best||{}; if(right>(PR.best.myth||0)) PR.best.myth=right;
+  saveP();
+  $('#e-h').textContent='Правда чи міф';
+  $('#e-title').textContent = right===MSET.length?'Жоден міф не пройшов.' : right>=4?'Непогано.' : 'Половина «загальновідомого» — вигадка XIX століття.';
+  $('#e-now').textContent=right+'/'+MSET.length; $('#e-best').textContent=PR.best.myth;
+  $('#e-again').onclick=startMyth;
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що було</b>'+MSET.map((it,i)=>
+    '<div class="log-line"><span>'+(MLOG[i]?'🟩':'🟥')+'</span><span>'+it.q+' — <b>'+(it.a?'правда':'міф')+'</b></span></div>').join('');
+  homeDraw(); go('s-end');
+}
+
+/* ================= ГОЛОВНА ================= */
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  const add=(ic,t,s,sc,fn)=>{ const b=document.createElement('button'); b.className='item';
+    b.innerHTML='<span class="ic">'+ic+'</span><span class="tx"><b>'+t+'</b><span>'+s+'</span></span><span class="sc">'+(sc||'')+'</span>';
+    b.onclick=fn; box.appendChild(b); };
+  const B=PR.best||{};
+  add('📜','Стрічка часу','Встав подію між іншими. Три життя', B.tape?B.tape+' карт':'', startTape);
+  add('⚔️','Що було раніше','Дуель подій на 60 секунд', B.duel||'', openDuel);
+  add('🏛','Римські цифри','Туди й назад на швидкість', B.rome||'', openRome);
+  add('⏳','Скільки минуло','Інтервали, зокрема через нашу еру', B.gaps!==undefined?B.gaps+'/6':'', startGaps);
+  add('🕵️','Правда чи міф','Те, що «всі знають» про минуле', B.myth!==undefined?B.myth+'/6':'', startMyth);
+}
+
+homeDraw();
+</script>
+</body>
+</html>
