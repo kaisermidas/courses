@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Око і вухо</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:64px;text-align:right}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  .opts{display:grid;gap:8px;grid-template-columns:1fr 1fr}
+  .opt{border:1px solid var(--line);border-radius:12px;padding:14px 12px;background:#fff;text-align:center;font-size:16px}
+  .opt.good{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+  .play{display:grid;place-items:center;margin:10px 0 16px}
+  .play button{width:100px;height:100px;border-radius:50%;background:var(--accent);color:#fff;font-size:40px}
+  .play .sub{color:var(--ink-2);font-size:14px;margin-top:9px;text-align:center}
+  .pads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .pad{height:88px;border-radius:16px;border:3px solid rgba(0,0,0,.08);font-size:26px;display:grid;place-items:center}
+  .pad.p0{background:#F3C9C0}.pad.p1{background:#CFE0B8}.pad.p2{background:#C6D6F0}.pad.p3{background:#F2E2B0}
+  .pad.lit{filter:brightness(1.22);transform:scale(.97)}
+  .swatch{height:86px;border-radius:14px;border:2px solid rgba(0,0,0,.1)}
+  .mixrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .mixrow div{text-align:center;color:var(--ink-2);font-size:13px}
+  .sl{margin:12px 0 4px}
+  .sl label{display:flex;justify-content:space-between;font-size:15px;margin-bottom:2px}
+  .sl input{width:100%}
+  .sw4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}
+  .sw4 button{height:76px;border-radius:14px;border:3px solid transparent}
+  .sw4 button.good{border-color:var(--ok)}
+  .sw4 button.bad{border-color:var(--bad)}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.r{background:var(--bad)}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  .lvl{font:700 46px/1 ui-rounded,-apple-system,system-ui,sans-serif;text-align:center;margin:8px 0 2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Око і вухо</h1>
+    <p>П'ять ігор, де мистецтво треба чути й бачити, а не переказувати. Звук справжній — його рахує сам пристрій.</p>
+  </header>
+  <div id="home-list"></div>
+  <div class="panel" id="no-audio" style="display:none">
+    <b>Звук недоступний</b>
+    <div style="color:var(--ink-2);font-size:15px;margin-top:4px">Три музичні гри потребують звуку. Спробуй відкрити Мініпрограму ще раз або перевір, чи не вимкнено звук на пристрої. Ігри з кольором працюють і так.</div>
+  </div>
+</section>
+
+<section id="s-play" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="p-dots"></div><span class="tmr" id="p-sc"></span></div>
+  <div class="panel">
+    <div class="task" id="p-task"></div>
+    <div id="p-body"></div>
+    <div class="verdict" id="p-verdict"></div>
+    <div class="why" id="p-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="p-act">Перевірити</button></div>
+  </div>
+</section>
+
+<section id="s-echo" class="screen">
+  <div class="bar"><button class="back" onclick="quitEcho()">‹ Ігри</button><h2>Луна</h2><span class="tmr" id="ec-lvl"></span></div>
+  <div class="panel">
+    <div class="task" id="ec-task">Слухай послідовність і повтори її, тапаючи ті самі кольори. Щоразу додається одна нота.</div>
+    <div class="pads" id="ec-pads">
+      <button class="pad p0" data-i="0">🔴</button>
+      <button class="pad p1" data-i="1">🟢</button>
+      <button class="pad p2" data-i="2">🔵</button>
+      <button class="pad p3" data-i="3">🟡</button>
+    </div>
+    <div class="verdict" id="ec-verdict"></div>
+    <div class="row center" style="margin-top:12px">
+      <button class="btn" id="ec-go">Почати</button>
+      <button class="btn ghost" onclick="playEcho()">Повторити звук</button>
+    </div>
+    <div class="score">
+      <div><b id="ec-now">0</b><span>цього разу</span></div>
+      <div><b id="ec-best">0</b><span>рекорд</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-mix" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="mx-dots"></div><span class="tmr" id="mx-sc"></span></div>
+  <div class="panel">
+    <div class="task">Змішай три фарби так, щоб влучити в зразок. Точність рахується автоматично.</div>
+    <div class="mixrow">
+      <div><div class="swatch" id="mx-target"></div>зразок</div>
+      <div><div class="swatch" id="mx-mine"></div>твоя суміш</div>
+    </div>
+    <div class="sl"><label><span>🔴 червона</span><b id="mx-l0">0%</b></label><input type="range" id="mx-0" min="0" max="100" value="33"></div>
+    <div class="sl"><label><span>🟡 жовта</span><b id="mx-l1">0%</b></label><input type="range" id="mx-1" min="0" max="100" value="33"></div>
+    <div class="sl"><label><span>🔵 синя</span><b id="mx-l2">0%</b></label><input type="range" id="mx-2" min="0" max="100" value="33"></div>
+    <div class="verdict" id="mx-verdict"></div>
+    <div class="why" id="mx-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="mx-act">Порівняти</button></div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-mystetstvo-v1';
+let PR = {best:{}};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+
+/* ================= ЗВУК ================= */
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const CAN_AUDIO = !!AudioCtx;
+let AC=null;
+function ac(){ if(!CAN_AUDIO) return null;
+  if(!AC){ try{ AC=new AudioCtx(); }catch(e){ return null; } }
+  if(AC.state==='suspended') AC.resume();
+  return AC; }
+function tone(midi, dur, delay, type){
+  const c=ac(); if(!c) return;
+  dur=dur||0.55; delay=delay||0;
+  const t=c.currentTime+delay;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type||'triangle';
+  o.frequency.value = 440*Math.pow(2,(midi-69)/12);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(0.22,t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t); o.stop(t+dur+0.05);
+}
+function chord(root, minor, delay){
+  const d=delay||0;
+  [0, minor?3:4, 7].forEach((s,i)=>tone(root+s, 0.9, d+i*0.28));   // спершу по черзі
+  [0, minor?3:4, 7].forEach(s=>tone(root+s, 1.1, d+1.05));          // потім разом
+}
+
+/* ================= 1. ІНТЕРВАЛИ ================= */
+const INTERVALS=[
+ {s:12, n:'октава', r:'Дві ноти звучать майже як одна, тільки друга «тонша». З октави починається будь-яка пісня, яку співають чоловік і дитина разом.'},
+ {s:7,  n:'квінта', r:'Порожній, відкритий звук — так налаштовують скрипку й так звучать волинки.'},
+ {s:4,  n:'терція', r:'Найсолодший інтервал: саме на терціях будують підголоски в народних піснях.'},
+ {s:2,  n:'секунда', r:'Дві сусідні клавіші. Звучить тісно й трохи неприємно — цим користуються у страшних саундтреках.'}
+];
+/* ================= 4. КОЛІР ================= */
+const PAINT=[[214,40,40],[240,200,40],[40,80,180]];   // червона, жовта, синя
+function mixRGB(w){
+  const s=w[0]+w[1]+w[2] || 1;
+  return [0,1,2].map(k => Math.round((PAINT[0][k]*w[0]+PAINT[1][k]*w[1]+PAINT[2][k]*w[2])/s));
+}
+function css(c){ return 'rgb('+c[0]+','+c[1]+','+c[2]+')'; }
+function dist(a,b){ return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2); }
+function hsl(h){ return 'hsl('+h+',65%,55%)'; }
+
+/* ================= ГОЛОВНА ================= */
+const GAMES=[
+ {id:'int',  ic:'🎵', t:'Інтервали на слух', s:'Октава, квінта, терція, секунда', n:8, audio:true, open:()=>startRun('int')},
+ {id:'mode', ic:'🙂', t:'Мажор чи мінор', s:'Одна нота змінює настрій акорду', n:8, audio:true, open:()=>startRun('mode')},
+ {id:'echo', ic:'🔁', t:'Луна', s:'Повтори послідовність нот', n:0, audio:true, open:openEcho},
+ {id:'mix',  ic:'🎨', t:'Влучити в колір', s:'Три фарби, один зразок', n:5, audio:false, open:startMix},
+ {id:'comp', ic:'🌈', t:'Доповнювальний колір', s:'Хто кому протилежний на колі', n:8, audio:false, open:()=>startRun('comp')}
+];
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  GAMES.forEach(g=>{
+    const b=document.createElement('button'); b.className='item';
+    const B=PR.best||{};
+    const sc = B[g.id]!==undefined ? (g.id==='echo' ? B.echo+' нот' : B[g.id]+'/'+g.n) : '';
+    b.innerHTML='<span class="ic">'+g.ic+'</span><span class="tx"><b>'+g.t+'</b><span>'+g.s+'</span></span><span class="sc">'+sc+'</span>';
+    b.disabled = g.audio && !CAN_AUDIO;
+    if(b.disabled) b.style.opacity=.5;
+    b.onclick=g.open; box.appendChild(b);
+  });
+  $('#no-audio').style.display = CAN_AUDIO ? 'none' : 'block';
+}
+
+/* ================= РУШІЙ ЗАБІГІВ ================= */
+let KIND='', ITEMS=[], I=0, RIGHT=0, LOG=[];
+
+function startRun(kind){
+  KIND=kind; I=0; RIGHT=0; LOG=[];
+  const g=GAMES.find(x=>x.id===kind);
+  ITEMS=[];
+  for(let i=0;i<g.n;i++){
+    if(kind==='int'){ const iv=INTERVALS[i%INTERVALS.length]; ITEMS.push({root:rnd(55,67), iv}); }
+    if(kind==='mode'){ ITEMS.push({root:rnd(55,65), minor: Math.random()<0.5}); }
+    if(kind==='comp'){ ITEMS.push({h:rnd(0,359)}); }
+  }
+  ITEMS.sort(()=>Math.random()-.5);
+  go('s-play'); renderItem();
+}
+function dots(){
+  $('#p-dots').innerHTML=ITEMS.map((_,i)=>{
+    const l=LOG[i]; return '<span class="dot '+(l===undefined?(i===I?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#p-sc').textContent=RIGHT+'/'+ITEMS.length;
+}
+function renderItem(){
+  const it=ITEMS[I]; dots();
+  $('#p-verdict').className='verdict'; $('#p-why').className='why';
+  $('#p-act').style.display='none';
+  const b=$('#p-body');
+  if(KIND==='int'){
+    $('#p-task').innerHTML='Послухай дві ноти. Який це інтервал?';
+    b.innerHTML='<div class="play"><button id="p-say">🔊</button><div class="sub">Можна слухати скільки завгодно</div></div>'+
+      '<div class="opts">'+INTERVALS.map((x,i)=>'<button class="opt" data-i="'+i+'">'+x.n+'</button>').join('')+'</div>';
+    const playIt=()=>{ tone(it.root,0.6,0); tone(it.root+it.iv.s,0.6,0.7); tone(it.root,1.0,1.5); tone(it.root+it.iv.s,1.0,1.5); };
+    $('#p-say').onclick=playIt; playIt();
+    $$('.opt',b).forEach(el=>el.onclick=()=>check(INTERVALS[+el.dataset.i].n===it.iv.n, +el.dataset.i));
+  }
+  if(KIND==='mode'){
+    $('#p-task').innerHTML='Послухай акорд — спершу по нотах, потім разом. Мажор чи мінор?';
+    b.innerHTML='<div class="play"><button id="p-say">🔊</button><div class="sub">Мажор звучить світло, мінор — сумно</div></div>'+
+      '<div class="opts"><button class="opt" data-i="0">Мажор 🙂</button><button class="opt" data-i="1">Мінор 🙁</button></div>';
+    const playIt=()=>chord(it.root, it.minor, 0);
+    $('#p-say').onclick=playIt; playIt();
+    $$('.opt',b).forEach(el=>el.onclick=()=>check((+el.dataset.i===1)===it.minor, +el.dataset.i));
+  }
+  if(KIND==='comp'){
+    $('#p-task').innerHTML='Ось колір. Який із чотирьох — його <b>доповнювальний</b>, тобто протилежний на колірному колі?';
+    const right=(it.h+180)%360;
+    const wrong=[(it.h+60)%360,(it.h+120)%360,(it.h+240)%360];
+    const all=[{h:right,ok:true},...wrong.map(h=>({h,ok:false}))].sort(()=>Math.random()-.5);
+    b.innerHTML='<div class="swatch" style="background:'+hsl(it.h)+'"></div><div class="sw4">'+
+      all.map((x,i)=>'<button data-ok="'+(x.ok?1:0)+'" style="background:'+hsl(x.h)+'"></button>').join('')+'</div>';
+    $$('.sw4 button',b).forEach(el=>el.onclick=()=>{
+      $$('.sw4 button',b).forEach(x=>{
+        if(x.dataset.ok==='1') x.classList.add('good');
+        else if(x===el) x.classList.add('bad'); });
+      check(el.dataset.ok==='1', -1);
+    });
+  }
+}
+function check(ok, choice){
+  const it=ITEMS[I];
+  LOG[I]=ok; if(ok) RIGHT++; buzz(ok); dots();
+  $$('#p-body .opt').forEach((el,i)=>{ el.disabled=true;
+    const right = KIND==='int' ? INTERVALS[i].n===it.iv.n : (i===1)===it.minor;
+    if(right) el.classList.add('good'); else if(!ok && i===choice) el.classList.add('bad'); });
+  $$('#p-body .sw4 button').forEach(el=>el.disabled=true);
+  const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  if(KIND==='int'){ v.innerHTML = (ok?'Так. ':'Ні. ')+'Це <b>'+it.iv.n+'</b> — '+it.iv.s+' півтонів.';
+    $('#p-why').className='why on'; $('#p-why').innerHTML='<b>Як це чути</b>'+it.iv.r; }
+  if(KIND==='mode'){ v.innerHTML = (ok?'Так. ':'Ні. ')+'Це <b>'+(it.minor?'мінор':'мажор')+'</b>.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>У чому різниця</b>Мажор і мінор відрізняються лише <b>однією</b> нотою — середньою. У мажорі вона на чотири півтони вище за основну, у мінорі на три. Один півтон — і музика з радісної стає сумною.'; }
+  if(KIND==='comp'){ v.textContent = ok?'Так — протилежний колір.':'Ні. Правильний обведено зеленим.';
+    $('#p-why').className='why on';
+    $('#p-why').innerHTML='<b>Колірне коло</b>Доповнювальні — ті, що стоять навпроти: червоний і зелений, синій і помаранчевий, жовтий і фіолетовий. Поряд вони здаються яскравішими, а змішані фарбами дають сірий. Тому кіноафіші так часто роблять синьо-помаранчевими.'; }
+  $('#p-act').style.display='inline-block'; $('#p-act').disabled=false;
+  $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
+  $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+function endRun(){
+  const g=GAMES.find(x=>x.id===KIND);
+  PR.best=PR.best||{}; if(RIGHT>(PR.best[KIND]||0)) PR.best[KIND]=RIGHT;
+  saveP();
+  $('#e-h').textContent=g.t;
+  $('#e-title').textContent = RIGHT===ITEMS.length?'Усе точно.' : RIGHT>=ITEMS.length*0.6?'Непогано.' : 'Вухо тренується лише слуханням.';
+  $('#e-now').textContent=RIGHT+'/'+ITEMS.length; $('#e-best').textContent=PR.best[KIND];
+  $('#e-again').onclick=()=>startRun(KIND); $('#e-log').innerHTML='';
+  homeDraw(); go('s-end');
+}
+
+/* ================= ЛУНА ================= */
+const PADNOTE=[60,64,67,72];
+let SEQ=[], step=0, ECHO_ON=false;
+function openEcho(){
+  SEQ=[]; step=0; ECHO_ON=false;
+  $('#ec-best').textContent=(PR.best&&PR.best.echo)||0;
+  $('#ec-now').textContent='0';
+  $('#ec-verdict').className='verdict';
+  $('#ec-go').textContent='Почати'; $('#ec-go').onclick=echoNext;
+  $$('#ec-pads .pad').forEach(el=>el.onclick=()=>padTap(+el.dataset.i));
+  $('#ec-lvl').textContent='';
+  go('s-echo');
+}
+function litPad(i,delay){
+  setTimeout(()=>{ const el=$('#ec-pads .pad[data-i="'+i+'"]'); if(!el) return;
+    el.classList.add('lit'); setTimeout(()=>el.classList.remove('lit'),330); }, delay*1000);
+}
+function playEcho(){
+  if(!SEQ.length) return;
+  ECHO_ON=false;
+  SEQ.forEach((n,k)=>{ tone(PADNOTE[n],0.4,k*0.55); litPad(n,k*0.55); });
+  setTimeout(()=>{ ECHO_ON=true; step=0; $('#ec-verdict').className='verdict on note';
+    $('#ec-verdict').textContent='Твоя черга: повтори '+SEQ.length+' нот'+(SEQ.length===1?'у':''); }, SEQ.length*550+250);
+}
+function echoNext(){
+  SEQ.push(rnd(0,3));
+  $('#ec-lvl').textContent=SEQ.length+' нот';
+  $('#ec-go').textContent='Ще раз спочатку'; $('#ec-go').onclick=openEcho;
+  $('#ec-verdict').className='verdict on note'; $('#ec-verdict').textContent='Слухай…';
+  playEcho();
+}
+function padTap(i){
+  tone(PADNOTE[i],0.35,0); litPad(i,0);
+  if(!ECHO_ON) return;
+  if(i!==SEQ[step]){
+    ECHO_ON=false; buzz(false);
+    const len=SEQ.length-1;
+    PR.best=PR.best||{}; if(len>(PR.best.echo||0)) PR.best.echo=len;
+    saveP();
+    $('#ec-verdict').className='verdict on warn';
+    $('#ec-verdict').textContent='Не та нота. Довжина твоєї луни: '+len+'.';
+    $('#ec-now').textContent=len; $('#ec-best').textContent=PR.best.echo;
+    $('#ec-go').textContent='Спробувати знову'; $('#ec-go').onclick=openEcho;
+    homeDraw(); return;
+  }
+  step++;
+  if(step>=SEQ.length){
+    ECHO_ON=false; buzz(true);
+    $('#ec-now').textContent=SEQ.length;
+    $('#ec-verdict').className='verdict on good'; $('#ec-verdict').textContent='Точно. Далі буде довше.';
+    $('#ec-go').textContent='Наступна нота'; $('#ec-go').onclick=echoNext;
+  }
+}
+function quitEcho(){ ECHO_ON=false; go('s-home'); }
+
+/* ================= ЗМІШАЙ КОЛІР ================= */
+let MX=[], MI=0, MLOG=[];
+function randMix(){
+  let w; do { w=[rnd(0,10),rnd(0,10),rnd(0,10)]; } while(w[0]+w[1]+w[2]<4);
+  return w;
+}
+function startMix(){
+  MX=Array.from({length:5},randMix); MI=0; MLOG=[];
+  go('s-mix'); renderMix();
+}
+function mixDots(){
+  $('#mx-dots').innerHTML=MX.map((_,i)=>{
+    const l=MLOG[i]; return '<span class="dot '+(l===undefined?(i===MI?'now':''):(l?'g':'r'))+'"></span>'; }).join('');
+  $('#mx-sc').textContent=MLOG.filter(Boolean).length+'/'+MX.length;
+}
+function renderMix(){
+  mixDots();
+  $('#mx-target').style.background=css(mixRGB(MX[MI]));
+  [0,1,2].forEach(k=>{ const s=$('#mx-'+k); s.value=33; s.disabled=false; s.oninput=paintMix; });
+  paintMix();
+  $('#mx-verdict').className='verdict'; $('#mx-why').className='why';
+  $('#mx-act').disabled=false; $('#mx-act').textContent='Порівняти'; $('#mx-act').onclick=checkMix;
+}
+function myMix(){ return [0,1,2].map(k=>+$('#mx-'+k).value); }
+function paintMix(){
+  const w=myMix(), s=w[0]+w[1]+w[2]||1;
+  $('#mx-mine').style.background=css(mixRGB(w));
+  [0,1,2].forEach(k=>$('#mx-l'+k).textContent=Math.round(w[k]/s*100)+'%');
+}
+function checkMix(){
+  const target=mixRGB(MX[MI]), mine=mixRGB(myMix());
+  const d=dist(target,mine), ok=d<28;
+  MLOG[MI]=ok; buzz(ok); mixDots();
+  [0,1,2].forEach(k=>$('#mx-'+k).disabled=true);
+  const v=$('#mx-verdict'); v.className='verdict on '+(ok?'good':'warn');
+  const acc=Math.max(0,Math.round(100-d/2.5));
+  v.innerHTML=(ok?'Влучив. ':'Поки мимо. ')+'Точність: <b>'+acc+'%</b>';
+  const s=MX[MI][0]+MX[MI][1]+MX[MI][2];
+  $('#mx-why').className='why on';
+  $('#mx-why').innerHTML='<b>Зразок</b>У ньому '+Math.round(MX[MI][0]/s*100)+'% червоної, '+
+    Math.round(MX[MI][1]/s*100)+'% жовтої і '+Math.round(MX[MI][2]/s*100)+'% синьої. '+
+    'Фарби змішуються віднімально: кожна забирає частину світла, тому чим більше фарб, тим темніша суміш — і саме тому з трьох основних не вийде зробити білу.';
+  $('#mx-act').textContent = MI===MX.length-1 ? 'Підсумок' : 'Далі →';
+  $('#mx-act').onclick=()=>{ MI++; if(MI>=MX.length) endMix(); else renderMix(); };
+}
+function endMix(){
+  const right=MLOG.filter(Boolean).length;
+  PR.best=PR.best||{}; if(right>(PR.best.mix||0)) PR.best.mix=right;
+  saveP();
+  $('#e-h').textContent='Влучити в колір';
+  $('#e-title').textContent = right===MX.length?'Око точне.' : right>=3?'Непогано.' : 'Починай із того кольору, якого в зразку найбільше.';
+  $('#e-now').textContent=right+'/'+MX.length; $('#e-best').textContent=PR.best.mix;
+  $('#e-again').onclick=startMix; $('#e-log').innerHTML='';
+  homeDraw(); go('s-end');
+}
+
+homeDraw();
+</script>
+</body>
+</html>
