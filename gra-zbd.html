@@ -430,7 +430,7 @@ function checkItem(timeout){
   $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
 }
 function srsSafe(it, ok){
-  const S='💪 Безпека';
+  const S="💪 Здоров'я";
   let id=null, card=null;
   if(KIND==='sit'){ id='zbd:sit:'+it.q.slice(0,40);
     card={sub:S,tag:'Ситуація',type:'choice',q:it.q,o:it.o,a:it.a,
