@@ -162,6 +162,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 const today=new Date();
@@ -417,6 +451,7 @@ function checkItem(){
   if(KIND==='kom'){ const s=[...gaps].sort((x,y)=>x-y);
     ok = s.length===it.a.length && s.every((v,i)=>v===it.a[i]); }
   LOG[I]=ok; if(ok) RIGHT++;
+  srsWord(it, ok);
   buzz(ok); drawDots();
   $('#p-act').disabled=true; $('#p-act').style.display='inline-block';
   const v=$('#p-verdict'); v.className='verdict on '+(ok?'good':'warn');
@@ -448,6 +483,31 @@ function checkItem(){
   $('#p-act').disabled=false;
   $('#p-act').textContent = I===ITEMS.length-1 ? 'Підсумок' : 'Далі →';
   $('#p-act').onclick=()=>{ I++; if(I>=ITEMS.length) endRun(); else renderItem(); };
+}
+
+function srsWord(it, ok){
+  const S='📝 Українська';
+  let id=null, card=null;
+  if(KIND==='anag'){ id='slovo:anag:'+it.w;
+    card={sub:S,tag:'Анаграма',type:'input',
+      q:'Переставте всі літери так, щоб вийшло інше слово. Підказка: '+it.h.toLowerCase()+'.',
+      extra:'<div class="word-big">'+[...it.w].join(' ')+'</div>', a:[it.w],
+      hint:it.h, why:'Слово з тих самих літер називають анаграмою.', term:'анаграма'}; }
+  if(KIND==='snd'){ id='slovo:snd:'+it.w;
+    card={sub:S,tag:'Звуки й букви',type:'input',
+      q:'Скільки <b>звуків</b> у слові <b>'+it.w+'</b>?', a:[String(it.a)],
+      hint:'Згадай, які букви дають два звуки, а які — жодного.', why:it.r, term:'фонетика'}; }
+  if(KIND==='odd'){ id='slovo:odd:'+it.o.join('-');
+    card={sub:S,tag:'Четвертий зайвий',type:'choice',
+      q:'Три слова підкоряються одному правилу, одне — ні. Яке зайве?',
+      o:it.o, a:it.a, hint:'Дивись не на значення, а на будову й звучання.', why:it.r, term:'аналіз слова'}; }
+  if(KIND==='nag'){ id='slovo:nag:'+it.s.join('');
+    card={sub:S,tag:'Наголос',type:'choice',
+      q:'На який склад падає наголос у слові <b>'+it.s.join('-')+'</b>?',
+      o:it.s, a:it.a, hint:'Вимов слово вголос кілька разів.',
+      why:'Правильно: '+it.s.map((x,j)=>j===it.a?x.toUpperCase():x).join('-')+'.', term:'орфоепія'}; }
+  if(!id) return;
+  if(ok) srsHit(id); else srsMiss(id,'Словобій',card);
 }
 
 function endRun(){
