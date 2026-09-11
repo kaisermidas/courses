@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Числова арена</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --paper:#FBFAF6; --ink:#1E2A3A; --ink-2:#5B6779; --line:#E3E1D9; --grid:#E8E5DA;
+    --accent:#2F6FE4; --accent-soft:#E6EEFF; --volt:#E9A800; --volt-soft:#FFF3D4;
+    --ok:#1F9D63; --ok-soft:#E3F6EC; --bad:#D8433B; --bad-soft:#FCE9E7; --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;color:var(--ink);background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:28px 28px;font:17px/1.5 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif}
+  h1,h2,h3{font-family:ui-rounded,-apple-system,system-ui,sans-serif;letter-spacing:-.015em;margin:0}
+  button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:pointer}
+  button:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .app{max-width:680px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 18px 44px}
+  .screen{display:none}.screen.on{display:block}
+  header.hero{margin:6px 0 16px}
+  header.hero h1{font-size:31px;line-height:1.15}
+  header.hero p{color:var(--ink-2);margin:8px 0 0;max-width:34em}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:17px;margin-bottom:14px}
+  .task{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:16px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .center{justify-content:center}
+  .btn{background:var(--accent);color:#fff;border-radius:12px;padding:12px 17px;font-weight:600;font-size:15px}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .btn.small{padding:8px 12px;font-size:14px}
+  .btn[disabled]{opacity:.45}
+  .item{display:flex;gap:13px;align-items:center;width:100%;text-align:left;
+    background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin-bottom:9px}
+  .item .ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;font-size:20px;background:var(--accent-soft)}
+  .item .tx{flex:1;min-width:0}
+  .item b{display:block;font-size:16px}
+  .item span{color:var(--ink-2);font-size:13px}
+  .item .sc{color:var(--ok);font-weight:700;font-size:14px}
+  .bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-height:32px}
+  .bar .back{color:var(--accent);font-weight:600}
+  .bar h2{font-size:16px;flex:1;text-align:center;color:var(--ink-2);font-weight:600}
+  .tmr{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink-2);width:56px;text-align:right}
+  .tmr.hot{color:var(--bad)}
+  .chip{display:inline-block;background:#F4F2EC;border-radius:999px;padding:4px 11px;font-size:13px;color:var(--ink-2)}
+  .meta{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .verdict{margin-top:12px;padding:13px 15px;border-radius:12px;font-size:15px;display:none}
+  .verdict.on{display:block}
+  .verdict.good{background:var(--ok-soft);color:#14603E}
+  .verdict.warn{background:var(--bad-soft);color:#8F2018}
+  .verdict.note{background:var(--volt-soft);color:#6B4B00}
+  .why{margin-top:12px;padding:13px 15px;border:1px solid var(--line);border-left:4px solid var(--volt);
+    border-radius:0 12px 12px 0;background:#fff;font-size:15px;display:none}
+  .why.on{display:block}
+  .why b{display:block;margin-bottom:4px}
+  input[type=text]{width:100%;font:inherit;padding:12px 13px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+  /* 24 */
+  .nums{display:flex;gap:10px;justify-content:center;margin:14px 0}
+  .num{width:62px;height:72px;border:2px solid var(--line);border-radius:14px;background:#fff;
+    display:grid;place-items:center;font:700 30px/1 ui-rounded,-apple-system,system-ui,sans-serif}
+  .num.used{border-color:var(--ok);background:var(--ok-soft);color:#14603E}
+  .keys{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:10px}
+  .keys button{height:46px;border-radius:10px;background:#EDEAE1;font-weight:600;font-size:19px}
+  .keys button.op{background:var(--accent-soft);color:#1B4FA8}
+  .expr{font:700 24px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;
+    background:#F4F2EC;border-radius:12px;padding:14px 10px;margin:4px 0 6px;min-height:56px;word-break:break-word}
+  /* нім */
+  .heap{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:14px 0;min-height:60px}
+  .stick{width:14px;height:46px;border-radius:4px;background:linear-gradient(#E7C892,#C79A55);border:1px solid #A87F3E}
+  .stick.gone{opacity:.15}
+  .who{text-align:center;font-size:15px;color:var(--ink-2);margin-top:6px}
+  .score{display:flex;gap:10px;margin:14px 0 0}
+  .score div{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;text-align:center}
+  .score b{display:block;font-size:23px;line-height:1.2}
+  .score span{color:var(--ink-2);font-size:13px}
+  /* фермі */
+  .scale{height:12px;border-radius:6px;background:linear-gradient(90deg,var(--bad),var(--volt),var(--ok),var(--volt),var(--bad));margin:12px 0 4px}
+  .big{font:700 34px/1 ui-rounded,-apple-system,system-ui,sans-serif;text-align:center;margin:10px 0}
+  .dots{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.now{background:var(--accent);transform:scale(1.35)}
+  .dot.g{background:var(--ok)}.dot.y{background:var(--volt)}.dot.r{background:var(--bad)}
+  .trick{background:var(--volt-soft);border-radius:12px;padding:13px 15px;font-size:15px;margin-bottom:12px}
+  .trick b{display:block;margin-bottom:4px}
+  .ex{font:700 30px/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;margin:16px 0}
+  .log-line{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="s-home" class="screen on">
+  <header class="hero">
+    <h1>Числова арена</h1>
+    <p>Чотири гри, де числа треба крутити, а не переписувати. Жодного прикладу «розв'яжи стовпчиком».</p>
+  </header>
+  <div id="home-list"></div>
+</section>
+
+<section id="s-24" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2>Двадцять чотири</h2><span class="tmr" id="g24-n"></span></div>
+  <div class="panel">
+    <div class="task">Склади з усіх чотирьох чисел вираз, що дорівнює <b>24</b>. Кожне число рівно один раз, дії будь-які.</div>
+    <div class="nums" id="g24-nums"></div>
+    <div class="expr" id="g24-expr"></div>
+    <div class="keys" id="g24-keys"></div>
+    <div class="verdict" id="g24-verdict"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" onclick="check24()">Перевірити</button>
+      <button class="btn ghost" onclick="giveUp24()">Здаюсь</button>
+      <button class="btn ghost" onclick="next24()">Інша четвірка</button>
+    </div>
+  </div>
+</section>
+
+<section id="s-nim" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2>Сірники</h2><span class="tmr"></span></div>
+  <div class="panel">
+    <div class="task">Беріть по черзі 1, 2 або 3 сірники. Хто візьме останній — виграв. Ти ходиш першим.</div>
+    <div class="heap" id="nim-heap"></div>
+    <div class="who" id="nim-who"></div>
+    <div class="row center" style="margin-top:12px" id="nim-btns">
+      <button class="btn" onclick="nimTake(1)">Взяти 1</button>
+      <button class="btn" onclick="nimTake(2)">Взяти 2</button>
+      <button class="btn" onclick="nimTake(3)">Взяти 3</button>
+    </div>
+    <div class="verdict" id="nim-verdict"></div>
+    <div class="why" id="nim-why"></div>
+    <div class="row center" style="margin-top:12px">
+      <button class="btn ghost" onclick="newNim()">Нова партія</button>
+      <button class="btn ghost" onclick="nimSecret()">Показати стратегію</button>
+    </div>
+    <div class="score">
+      <div><b id="nim-w">0</b><span>твої перемоги</span></div>
+      <div><b id="nim-l">0</b><span>перемоги бота</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-fermi" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><div class="dots" id="f-dots"></div><span class="tmr"></span></div>
+  <div class="panel">
+    <div class="task" id="f-q"></div>
+    <input type="text" id="f-in" inputmode="numeric" autocomplete="off" placeholder="Приблизне число">
+    <div class="scale"></div>
+    <div style="display:flex;justify-content:space-between;color:var(--ink-2);font-size:13px">
+      <span>дуже мало</span><span>влучно</span><span>дуже багато</span></div>
+    <div class="verdict" id="f-verdict"></div>
+    <div class="why" id="f-why"></div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="f-act">Відповісти</button></div>
+  </div>
+</section>
+
+<section id="s-speed" class="screen">
+  <div class="bar"><button class="back" onclick="quitSpeed()">‹ Ігри</button><h2 id="sp-title"></h2><span class="tmr" id="sp-tmr"></span></div>
+  <div class="panel" id="sp-intro">
+    <div class="trick" id="sp-trick"></div>
+    <div class="row center"><button class="btn" onclick="runSpeed()">Почати · 60 секунд</button></div>
+    <div class="score"><div><b id="sp-best">0</b><span>рекорд раунду</span></div></div>
+  </div>
+  <div class="panel" id="sp-play" style="display:none">
+    <div class="ex" id="sp-ex"></div>
+    <input type="text" id="sp-in" inputmode="numeric" autocomplete="off" placeholder="Відповідь">
+    <div class="verdict" id="sp-verdict"></div>
+    <div class="score">
+      <div><b id="sp-right">0</b><span>правильних</span></div>
+      <div><b id="sp-wrong">0</b><span>помилок</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="s-end" class="screen">
+  <div class="bar"><button class="back" onclick="go('s-home')">‹ Ігри</button><h2 id="e-h"></h2><span class="tmr"></span></div>
+  <div class="panel">
+    <h2 id="e-title" style="font-size:23px;text-align:center"></h2>
+    <div class="score">
+      <div><b id="e-now">0</b><span>цього разу</span></div>
+      <div><b id="e-best">0</b><span>рекорд</span></div>
+    </div>
+    <div class="row center" style="margin-top:16px">
+      <button class="btn" id="e-again">Ще раз</button>
+      <button class="btn ghost" onclick="go('s-home')">До ігор</button>
+    </div>
+  </div>
+  <div class="panel" id="e-log"></div>
+</section>
+
+</div>
+<script>
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const tg = window.Telegram && window.Telegram.WebApp; if (tg) { tg.ready(); tg.expand(); }
+const KEY='sovenya-matem-v1';
+let PR = {best:{}, nim:{w:0,l:0}, solved24:0};
+try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } catch(e){}
+if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
+function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
+  if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
+function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+/* ================= 1. ДВАДЦЯТЬ ЧОТИРИ ================= */
+const S24=[
+ {n:[4,6,1,2], s:'(4*6)*(2-1)'}, {n:[3,8,2,1], s:'3*8*(2-1)'},
+ {n:[5,5,2,4], s:'2*(5+5)+4'},   {n:[6,6,2,2], s:'6*2+6*2'},
+ {n:[7,3,3,1], s:'7*3+3*1'},     {n:[9,4,2,1], s:'(9+4-1)*2'},
+ {n:[5,7,2,1], s:'(5+7)*2*1'},   {n:[6,4,3,2], s:'6*4*(3-2)'},
+ {n:[8,3,3,8], s:'8/(3-8/3)'},   {n:[9,9,3,3], s:'9+9+3+3'},
+ {n:[3,3,7,7], s:'(3+3/7)*7'}
+];
+let CUR24=null, EXPR='';
+function next24(){
+  CUR24 = pick(S24.filter(x=>x!==CUR24));
+  EXPR=''; draw24();
+  $('#g24-verdict').className='verdict';
+}
+function draw24(){
+  const used = usedNums(EXPR);
+  $('#g24-nums').innerHTML = CUR24.n.map((v,i)=>{
+    const cnt = used.filter(x=>x===v).length, before = CUR24.n.slice(0,i).filter(x=>x===v).length;
+    return '<div class="num'+(cnt>before?' used':'')+'">'+v+'</div>'; }).join('');
+  $('#g24-expr').textContent = EXPR || '…';
+  $('#g24-n').textContent = (PR.solved24||0)+'✓';
+  const keys=$('#g24-keys'); keys.innerHTML='';
+  const add=(label,cls,fn)=>{ const b=document.createElement('button'); if(cls) b.className=cls;
+    b.textContent=label; b.onclick=fn; keys.appendChild(b); };
+  CUR24.n.forEach(v=>add(v,'', ()=>{ EXPR+=v; draw24(); }));
+  ['+','-','*','/','(',')'].forEach(o=>add(o,'op',()=>{ EXPR+=o; draw24(); }));
+  add('⌫','',()=>{ EXPR=EXPR.slice(0,-1); draw24(); });
+  add('C','',()=>{ EXPR=''; draw24(); });
+}
+function usedNums(s){ return (s.match(/\d+/g)||[]).map(Number); }
+/* маленький розбірник виразів — без eval */
+function calc(src){
+  let i=0; const s=src.replace(/\s/g,'');
+  function expr(){ let v=term(); while(s[i]==='+'||s[i]==='-'){ const o=s[i++]; const r=term();
+      if(r===null||v===null) return null; v = o==='+'? v+r : v-r; } return v; }
+  function term(){ let v=fact(); while(s[i]==='*'||s[i]==='/'){ const o=s[i++]; const r=fact();
+      if(r===null||v===null) return null; if(o==='/'&&r===0) return null; v = o==='*'? v*r : v/r; } return v; }
+  function fact(){
+    if(s[i]==='('){ i++; const v=expr(); if(s[i]!==')') return null; i++; return v; }
+    if(s[i]==='-'){ i++; const v=fact(); return v===null?null:-v; }
+    let d=''; while(i<s.length && /\d/.test(s[i])) d+=s[i++];
+    return d===''? null : Number(d);
+  }
+  const v=expr();
+  return (i===s.length && v!==null && isFinite(v)) ? v : null;
+}
+function sameSet(a,b){ const x=[...a].sort(), y=[...b].sort();
+  return x.length===y.length && x.every((v,i)=>v===y[i]); }
+function check24(){
+  const v=$('#g24-verdict');
+  if(!EXPR){ return; }
+  const nums=usedNums(EXPR), val=calc(EXPR);
+  if(val===null){ v.className='verdict on warn'; v.textContent='Вираз не читається — перевір дужки.'; return; }
+  if(!sameSet(nums,CUR24.n)){ v.className='verdict on warn';
+    v.textContent='Кожне число має бути використане рівно один раз.'; buzz(false); return; }
+  if(Math.abs(val-24)>1e-6){ v.className='verdict on warn'; v.textContent='Виходить '+(Math.round(val*100)/100)+', а треба 24.'; buzz(false); return; }
+  v.className='verdict on good'; v.innerHTML='Так! '+EXPR+' = 24';
+  PR.solved24=(PR.solved24||0)+1; saveP(); buzz(true); homeDraw(); draw24();
+}
+function giveUp24(){
+  const v=$('#g24-verdict'); v.className='verdict on note';
+  v.innerHTML='Один із варіантів: <b>'+CUR24.s+'</b>. Часто рятує думка «а що множити на 1 або на різницю, яка дорівнює одиниці».';
+}
+
+/* ================= 2. СІРНИКИ (нім проти бота) ================= */
+let HEAP=0, TURN='you', NIMOVER=false;
+function newNim(){
+  do { HEAP=rnd(13,21); } while(HEAP%4===0);       // щоб перший хід був виграшним
+  TURN='you'; NIMOVER=false;
+  $('#nim-verdict').className='verdict'; $('#nim-why').className='why';
+  $('#nim-btns').style.display='flex';
+  drawNim('Твій хід.');
+}
+function drawNim(msg){
+  $('#nim-heap').innerHTML = Array.from({length:HEAP},()=>'<span class="stick"></span>').join('');
+  $('#nim-who').textContent = msg+' Лишилось: '+HEAP;
+  $$('#nim-btns .btn').forEach((b,i)=>{ b.disabled = NIMOVER || (i+1)>HEAP; });
+  $('#nim-w').textContent=PR.nim.w; $('#nim-l').textContent=PR.nim.l;
+}
+function nimTake(k){
+  if(NIMOVER || k>HEAP) return;
+  HEAP-=k;
+  if(HEAP===0){ NIMOVER=true; PR.nim.w++; saveP(); buzz(true);
+    $('#nim-verdict').className='verdict on good';
+    $('#nim-verdict').textContent='Ти взяв останній — перемога.';
+    $('#nim-btns').style.display='none'; drawNim('Партію завершено.'); homeDraw(); return; }
+  drawNim('Бот думає…');
+  setTimeout(()=>{
+    if(!document.querySelector('#nim-heap')) return;
+    let take = HEAP%4;                              // оптимальний хід
+    if(take===0) take = rnd(1,Math.min(3,HEAP));    // програшна позиція — бере навмання
+    HEAP-=take;
+    if(HEAP===0){ NIMOVER=true; PR.nim.l++; saveP(); buzz(false);
+      $('#nim-verdict').className='verdict on warn';
+      $('#nim-verdict').textContent='Бот узяв останні '+take+'. Цього разу він.';
+      $('#nim-btns').style.display='none'; drawNim('Партію завершено.'); homeDraw(); return; }
+    drawNim('Бот узяв '+take+'. Твій хід.');
+  }, 600);
+}
+function nimSecret(){
+  $('#nim-why').className='why on';
+  $('#nim-why').innerHTML='<b>Стратегія</b>Лишай супернику кількість, кратну <b>чотирьом</b>: 4, 8, 12, 16, 20. Тоді хоч би скільки він узяв (1, 2 чи 3), ти доповнюєш його хід до чотирьох — і знову лишаєш кратне. Останні чотири сірники завжди закінчуються твоїм ходом. Саме тому початкову купку тут ніколи не роблять кратною чотирьом: перший хід виграшний, але тільки якщо зробити його правильно.';
+}
+
+/* ================= 3. ФЕРМІ ================= */
+const FERMI=[
+ {q:'Скільки разів б\'ється серце людини за добу?', a:100000,
+  r:'Приблизно 70 ударів за хвилину × 60 × 24 ≈ 100 тисяч. Точність тут не потрібна — важливо не помилитися в кількості нулів.'},
+ {q:'Скільки секунд у році?', a:31500000,
+  r:'365 × 24 × 60 × 60 ≈ 31,5 мільйона. Зручно пам\'ятати як «трохи більше за 30 мільйонів».'},
+ {q:'Скільки літрів води в басейні 25 м × 10 м × 1,5 м?', a:375000,
+  r:'25 × 10 × 1,5 = 375 кубометрів, а в кубометрі 1000 літрів → 375 тисяч. Головна пастка — забути, що кубометр це аж тисяча літрів.'},
+ {q:'Скільки кроків від Києва до Львова (це близько 540 км)?', a:770000,
+  r:'540 000 метрів поділити на крок ≈ 0,7 м → близько 770 тисяч кроків. Якщо йти по 20 тисяч на день — більше місяця дороги.'},
+ {q:'Скільки хвилин людина спить за рік?', a:175000,
+  r:'8 годин × 60 = 480 хвилин на добу, × 365 ≈ 175 тисяч хвилин, тобто близько третини життя.'},
+ {q:'Скільки волосин на голові дорослої людини?', a:100000,
+  r:'Близько 100 тисяч. Оцінити можна так: на квадратному сантиметрі приблизно 200 волосин, а площа голови — десь 500 см².'},
+ {q:'Скільки цеглин у стіні 10 м × 3 м завтовшки в одну цеглину?', a:1500,
+  r:'Одна цеглина закриває приблизно 25 × 6,5 см, тобто 0,02 м². 30 м² поділити на 0,02 ≈ 1500 штук.'},
+ {q:'Скільки уроків ти відсидиш за всі 11 років школи?', a:11000,
+  r:'Приблизно 5 уроків на день × 175 навчальних днів × 11 років ≈ 10 тисяч. Кожен із них — приблизно одна двадцятитисячна твого життя.'}
+];
+let FSET=[], FI=0, FLOG=[];
+function startFermi(){
+  FSET=[...FERMI].sort(()=>Math.random()-.5).slice(0,6); FI=0; FLOG=[];
+  go('s-fermi'); renderFermi();
+}
+function fdots(){ $('#f-dots').innerHTML=FSET.map((_,i)=>{
+  const l=FLOG[i]; return '<span class="dot '+(l===undefined?(i===FI?'now':''):(l===2?'g':l===1?'y':'r'))+'"></span>'; }).join(''); }
+function renderFermi(){
+  const it=FSET[FI]; fdots();
+  $('#f-q').textContent=it.q;
+  $('#f-in').value=''; $('#f-in').disabled=false;
+  $('#f-verdict').className='verdict'; $('#f-why').className='why';
+  $('#f-act').textContent='Відповісти'; $('#f-act').onclick=answerFermi;
+  $('#f-in').onkeydown=e=>{ if(e.key==='Enter') answerFermi(); };
+}
+function answerFermi(){
+  const it=FSET[FI];
+  const v=parseFloat(($('#f-in').value||'').replace(/[\s,]/g,'').replace(',','.'));
+  if(!v || v<=0) return;
+  const k = v>it.a ? v/it.a : it.a/v;
+  const sc = k<=2 ? 2 : k<=10 ? 1 : 0;
+  FLOG[FI]=sc; fdots(); buzz(sc>0);
+  const ver=$('#f-verdict'); ver.className='verdict on '+(sc===2?'good':sc===1?'note':'warn');
+  ver.innerHTML = (sc===2?'Влучно. ':sc===1?'Той самий порядок. ':'Мимо на порядки. ')+
+    'Приблизна відповідь: <b>'+it.a.toLocaleString('uk-UA')+'</b>, у тебе '+v.toLocaleString('uk-UA')+
+    ' — це в '+(Math.round(k*10)/10)+' раза '+(v>it.a?'більше':'менше')+'.';
+  $('#f-why').className='why on'; $('#f-why').innerHTML='<b>Як прикинути</b>'+it.r;
+  $('#f-in').disabled=true;
+  $('#f-act').textContent = FI===FSET.length-1 ? 'Підсумок' : 'Далі →';
+  $('#f-act').onclick=()=>{ FI++; if(FI>=FSET.length) endFermi(); else renderFermi(); };
+}
+function endFermi(){
+  const pts=FLOG.reduce((s,x)=>s+x,0), max=FSET.length*2;
+  PR.best=PR.best||{}; if(pts>(PR.best.fermi||0)) PR.best.fermi=pts;
+  saveP();
+  $('#e-h').textContent='Оцінка на око';
+  $('#e-title').textContent = pts>=max-2?'Чуття на числа є.' : pts>=max/2?'Порядок ловиш.' : 'Головне — не кількість нулів навмання.';
+  $('#e-now').textContent=pts+' / '+max; $('#e-best').textContent=PR.best.fermi;
+  $('#e-again').onclick=startFermi;
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Що було</b>'+FSET.map((it,i)=>
+    '<div class="log-line"><span>'+(FLOG[i]===2?'🟩':FLOG[i]===1?'🟨':'🟥')+'</span><span>'+it.q+' — <b>'+it.a.toLocaleString('uk-UA')+'</b></span></div>').join('');
+  homeDraw(); go('s-end');
+}
+
+/* ================= 4. ШВИДКИЙ РАХУНОК ================= */
+const TRICKS=[
+ {id:'t11', t:'Множення на 11', ic:'1️⃣',
+  trick:'<b>Множення на 11</b>Розсунь цифри числа й встав між ними їхню суму. 43 × 11 → 4_(4+3)_3 = 473. Якщо сума більша за 9, одиницю переносиш ліворуч: 87 × 11 → 8_(15)_7 = 957.',
+  gen:()=>{ const a=rnd(12,98); return {q:a+' × 11', a:a*11}; }},
+ {id:'t5', t:'Квадрат числа на 5', ic:'5️⃣',
+  trick:'<b>Квадрат числа, що закінчується на 5</b>Візьми першу цифру, помнож на наступне за нею число — і допиши 25. 35² → 3 × 4 = 12, далі 25 → 1225. 65² → 6 × 7 = 42 → 4225.',
+  gen:()=>{ const d=rnd(1,9); const a=d*10+5; return {q:a+'²', a:a*a}; }},
+ {id:'tx5', t:'Множення на 5', ic:'✋',
+  trick:'<b>Множення на 5</b>П\'ять — це половина десятки. Тому подвій нуль, а число поділи навпіл: 86 × 5 → 860 : 2 = 430. Швидше, ніж стовпчиком.',
+  gen:()=>{ const a=rnd(12,98); return {q:a+' × 5', a:a*5}; }},
+ {id:'t99', t:'Множення на 99', ic:'9️⃣',
+  trick:'<b>Множення на 99</b>99 = 100 − 1. Множ на сто й відніми саме число: 47 × 99 → 4700 − 47 = 4653. Так само працює для 9 (10−1) і 999.',
+  gen:()=>{ const a=rnd(12,98); return {q:a+' × 99', a:a*99}; }}
+];
+let TR=null, SP_LEFT=0, SP_R=0, SP_W=0, SP_T=null, SP_CUR=null;
+function openSpeed(id){
+  TR=TRICKS.find(t=>t.id===id);
+  $('#sp-title').textContent=TR.t; $('#sp-trick').innerHTML=TR.trick;
+  $('#sp-best').textContent=(PR.best&&PR.best[TR.id])||0;
+  $('#sp-intro').style.display='block'; $('#sp-play').style.display='none';
+  $('#sp-tmr').textContent=''; go('s-speed');
+}
+function runSpeed(){
+  SP_LEFT=60; SP_R=0; SP_W=0;
+  $('#sp-intro').style.display='none'; $('#sp-play').style.display='block';
+  $('#sp-right').textContent='0'; $('#sp-wrong').textContent='0';
+  $('#sp-verdict').className='verdict';
+  nextEx();
+  $('#sp-in').onkeydown=e=>{ if(e.key==='Enter') answerSpeed(); };
+  clearInterval(SP_T);
+  SP_T=setInterval(()=>{
+    if(!document.querySelector('#sp-tmr')) return clearInterval(SP_T);
+    SP_LEFT--; $('#sp-tmr').textContent=SP_LEFT+'с';
+    $('#sp-tmr').classList.toggle('hot',SP_LEFT<=10);
+    if(SP_LEFT<=0) endSpeed();
+  },1000);
+  $('#sp-tmr').textContent='60с';
+}
+function nextEx(){ SP_CUR=TR.gen(); $('#sp-ex').textContent=SP_CUR.q; $('#sp-in').value=''; $('#sp-in').focus(); }
+function answerSpeed(){
+  const v=parseInt(($('#sp-in').value||'').trim(),10);
+  if(isNaN(v)) return;
+  const ok = v===SP_CUR.a;
+  const ver=$('#sp-verdict'); ver.className='verdict on '+(ok?'good':'warn');
+  ver.textContent = ok ? 'Так.' : SP_CUR.q+' = '+SP_CUR.a;
+  if(ok) SP_R++; else SP_W++;
+  $('#sp-right').textContent=SP_R; $('#sp-wrong').textContent=SP_W;
+  nextEx();
+}
+function quitSpeed(){ clearInterval(SP_T); go('s-home'); }
+function endSpeed(){
+  clearInterval(SP_T);
+  PR.best=PR.best||{}; if(SP_R>(PR.best[TR.id]||0)) PR.best[TR.id]=SP_R;
+  saveP();
+  $('#e-h').textContent=TR.t;
+  $('#e-title').textContent = SP_R>=12?'Швидко.' : SP_R>=6?'Нормально.' : 'Трюк працює лише тоді, коли не рахуєш стовпчиком у голові.';
+  $('#e-now').textContent=SP_R; $('#e-best').textContent=PR.best[TR.id];
+  $('#e-again').onclick=()=>openSpeed(TR.id);
+  $('#e-log').innerHTML='<b style="display:block;margin-bottom:6px">Трюк</b><div style="font-size:15px">'+TR.trick+'</div>';
+  homeDraw(); go('s-end');
+}
+
+/* ================= ГОЛОВНА ================= */
+function homeDraw(){
+  const box=$('#home-list'); box.innerHTML='';
+  const add=(ic,t,s,sc,fn)=>{ const b=document.createElement('button'); b.className='item';
+    b.innerHTML='<span class="ic">'+ic+'</span><span class="tx"><b>'+t+'</b><span>'+s+'</span></span><span class="sc">'+(sc||'')+'</span>';
+    b.onclick=fn; box.appendChild(b); };
+  add('🎲','Двадцять чотири','З чотирьох чисел скласти 24', (PR.solved24||0)+'✓', ()=>{ next24(); go('s-24'); });
+  add('🪵','Сірники','Гра проти бота, який не помиляється', PR.nim.w+':'+PR.nim.l, ()=>{ newNim(); go('s-nim'); });
+  add('🔭','Оцінка на око','Задачі Фермі: головне — кількість нулів', (PR.best&&PR.best.fermi!==undefined?PR.best.fermi+'/12':''), startFermi);
+  const h=document.createElement('div'); h.style.cssText='color:var(--ink-2);font-size:14px;margin:22px 0 8px';
+  h.textContent='Швидкий рахунок · 60 секунд'; box.appendChild(h);
+  TRICKS.forEach(t=>add(t.ic, t.t, 'Трюк + раунд на швидкість', ((PR.best&&PR.best[t.id])||0)+'', ()=>openSpeed(t.id)));
+}
+
+homeDraw();
+</script>
+</body>
+</html>
