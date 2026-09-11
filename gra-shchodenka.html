@@ -160,6 +160,40 @@ try { PR = Object.assign(PR, JSON.parse(localStorage.getItem(KEY)||'{}')); } cat
 if (tg && tg.CloudStorage) tg.CloudStorage.getItem(KEY,(e,v)=>{ if(!e&&v){ try{PR=Object.assign(PR,JSON.parse(v));homeDraw();}catch(_){}}});
 function saveP(){ try{localStorage.setItem(KEY,JSON.stringify(PR));}catch(e){}
   if(tg && tg.CloudStorage) tg.CloudStorage.setItem(KEY,JSON.stringify(PR),()=>{}); }
+
+/* ---------- спільна черга повторення Арени (однакова в усіх модулях) ----------
+   Помилка в будь-якій грі лягає сюди, а Щоденка перепитує її назавтра,
+   потім через 3, 7 і 21 день. Повний текст картки — у localStorage,
+   короткий список — у CloudStorage, щоб не впертися в ліміт 4 КБ.        */
+const SRS_KEY='sovenya-srs-v1', SRS_STEPS=[1,3,7,21];
+function srsDay(n){ const t=new Date(), d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+(n||0));
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+function srsLoad(){ try{ const q=JSON.parse(localStorage.getItem(SRS_KEY)||'[]'); return Array.isArray(q)?q:[]; }catch(e){ return []; } }
+function srsSave(q){
+  q=q.slice(-40);
+  try{ localStorage.setItem(SRS_KEY, JSON.stringify(q)); }catch(e){}
+  if(tg && tg.CloudStorage){
+    const idx=q.map(c=>({i:c.i,m:c.m,d:c.d,s:c.s}));
+    let s=JSON.stringify(idx);
+    while(s.length>3800 && idx.length){ idx.shift(); s=JSON.stringify(idx); }
+    try{ tg.CloudStorage.setItem(SRS_KEY, s, ()=>{}); }catch(e){}
+  }
+}
+function srsMiss(id, mod, card){
+  if(!id || !card) return;
+  const q=srsLoad(), ex=q.find(x=>x.i===id);
+  if(ex){ ex.s=0; ex.d=srsDay(1); ex.c=card; ex.m=mod; }
+  else q.push({i:id, m:mod, c:card, s:0, d:srsDay(1)});
+  srsSave(q);
+}
+function srsHit(id){
+  const q=srsLoad(), k=q.findIndex(x=>x.i===id); if(k<0) return;
+  const it=q[k]; it.s=(it.s||0)+1;
+  if(it.s>=SRS_STEPS.length) q.splice(k,1); else it.d=srsDay(SRS_STEPS[it.s]);
+  srsSave(q);
+}
+function srsDue(){ const t=srsDay(0); return srsLoad().filter(x=>x.d<=t && x.c); }
+
 function go(id){ $$('.screen').forEach(s=>s.classList.remove('on')); $('#'+id).classList.add('on'); window.scrollTo(0,0); }
 function buzz(ok){ try{ tg.HapticFeedback.notificationOccurred(ok?'success':'error'); }catch(e){} }
 
@@ -454,9 +488,12 @@ function dailySet(){
   }
   return set;
 }
-function dueItems(){
-  return (PR.srs||[]).filter(x=>x.due<=DAY)
-    .map(x=>POOL.find(t=>t.id===x.id)).filter(Boolean).slice(0,3);
+function dueItems(){        // картки з усієї Арени, не лише зі свого пулу
+  return srsDue().slice(0,3).map(c=>Object.assign({}, c.c, {id:c.i, mod:c.m, _srs:true}));
+}
+function cardOf(t){
+  return {sub:t.sub, tag:t.tag, type:t.type, q:t.q, extra:t.extra, o:t.o, a:t.a,
+          items:t.items, hint:t.hint, why:t.why, term:t.term, answer:t.answer};
 }
 
 /* ---------- стан забігу ---------- */
@@ -466,7 +503,7 @@ function homeDraw(){
   $('#h-date').textContent = today.getDate()+' '+MON[today.getMonth()]+'. П\'ять завдань дня.';
   $('#st-streak').textContent = PR.streak||0;
   $('#st-acorn').textContent = PR.coins||0;
-  $('#st-queue').textContent = dueItems().length;
+  $('#st-queue').textContent = srsDue().length;
   const done = PR.log && PR.log[String(DAY)];
   $('#p-done').style.display = done ? 'block' : 'none';
   $('#b-start').textContent = done ? (dueItems().length ? 'Пройти повторення' : 'Зіграти ще раз') : 'Грати';
@@ -517,7 +554,8 @@ function renderQ(){
     $('#q-inp').onkeydown=e=>{ if(e.key==='Enter') act(); };
   } else if(t.type==='order'){
     $('#q-act').textContent='Перевірити';
-    b.innerHTML='<div class="ord">'+t.items.map((s,i)=>'<button class="it" data-i="'+i+'"><span class="n">·</span><span>'+s+'</span></button>').join('')+'</div>';
+    b.innerHTML='<div class="ord">'+shuffled([...t.items.keys()], DN*31+idx).map(i=>
+      '<button class="it" data-i="'+i+'"><span class="n">·</span><span>'+t.items[i]+'</span></button>').join('')+'</div>';
     $$('.it',b).forEach(el=>el.onclick=()=>{ if(revealed)return;
       const i=+el.dataset.i;
       if(order.includes(i)) order=order.filter(x=>x!==i); else order.push(i);
@@ -583,31 +621,22 @@ function finishQ(score){
     $('#q-verdict').textContent = score===2?'Точно. З першого разу.' : score===1?'Так — з другої спроби.' : 'Ні. Правильне позначено вище.';
     showWhy();
   }
-  srsUpdate(t.id, score);
+  srsUpdate(t, score);
   $('#q-act').disabled=false;
   $('#q-act').textContent = idx===SET.length-1 ? 'Підсумок' : 'Далі →';
   $('#q-act').onclick = ()=>{ idx++; if(idx>=SET.length) endRun(); else renderQ(); };
 }
 
-/* ---------- черга повторення ---------- */
-const STEPS=[1,3,7,21];
-function srsUpdate(id,score){
-  PR.srs = PR.srs||[];
-  const i = PR.srs.findIndex(x=>x.id===id), ex = i>=0 ? PR.srs[i] : null;
-  if(score===0){                                  // помилка — назад на початок
-    if(ex){ ex.stage=0; ex.due=dnPlus(1); } else PR.srs.push({id, stage:0, due:dnPlus(1)});
-    return;
-  }
-  if(!ex) return;                                 // нова задача взята чисто — нічого не заводимо
-  if(score===1){ ex.stage=Math.max(0,ex.stage); ex.due=dnPlus(STEPS[ex.stage]); return; }
-  ex.stage++;                                     // з першого разу — крок далі
-  if(ex.stage>=STEPS.length) PR.srs.splice(i,1);  // засвоєно, прибираємо
-  else ex.due=dnPlus(STEPS[ex.stage]);
+/* ---------- черга повторення: спільна з усіма іграми Арени ---------- */
+function srsUpdate(t, score){
+  if(t._srs){ if(score>0) srsHit(t.id); else srsMiss(t.id, t.mod||'Арена', cardOf(t)); return; }
+  const id='shch:'+t.id;
+  if(score===0) srsMiss(id,'Щоденка',cardOf(t)); else srsHit(id);
 }
 function dueText(){
-  const q=(PR.srs||[]).length;
+  const q=srsLoad().length;
   if(!q) return 'Черга повторення порожня — усе взято чисто.';
-  return 'У черзі: <i>'+q+'</i>. Кожне повернеться завтра, потім через 3, 7 і 21 день — і лише тоді зникне.';
+  return 'У черзі: <i>'+q+'</i> завдань з усієї Арени. Кожне повернеться завтра, потім через 3, 7 і 21 день — і лише тоді зникне.';
 }
 
 function endRun(){
