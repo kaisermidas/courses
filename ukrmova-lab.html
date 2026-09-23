@@ -186,16 +186,6 @@ function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
 function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
 
 /* --- 1. Сонячна система --- */
-T('sun',{g:0,ic:'🪐',t:'Сонячна система',s:'Орбіти, розміри й порядок планет',html:`
-<div class="panel">
-  <div class="task">Тисни на планету — дізнаєшся про неї. Повзунок прискорює час.</div>
-  <svg viewBox="0 0 320 320" height="310" id="ss-svg"></svg>
-  <div class="row"><div style="flex:1">швидкість часу<input type="range" min="0" max="10" value="3" id="ss-sp"></div></div>
-  <div class="hintline" id="ss-info">Меркурій робить оберт за 88 днів, Нептун — за 165 років. Тому внутрішні планети біжать швидко, а зовнішні майже стоять.</div>
-  <div class="row center"><button class="btn" onclick="ssQuiz()">Питання</button></div>
-  <div class="verdict" id="ss-v"></div>
-  <div class="legend">Розміри й відстані тут не в масштабі: якби Земля була горошиною, Сонце було б за 25 метрів від неї.</div>
-</div>`,init(){ssStart();}});
 
 /* --- 1. Звуки й букви --- */
 T('sounds',{g:0,ic:'🔊',t:'Звуки і букви',s:'Чому їх не порівну',html:`
@@ -243,6 +233,7 @@ function sdCheck(){const w=$('#sd-in').value.trim().toLowerCase();
     say('#sd-v','Так, '+n+' звуки. Букв '+letters+'. '+(letters>n?'Різниця через ь або щ.':letters<n?'Різниця через я/ю/є/ї, що дають два звуки.':'Тут випадково порівну.'),true);}
   else say('#sd-v','Ще ні. Подивись на транскрипцію вище й полічи звуки в дужках.',false);}
 function sdNext(){sdI=(sdI+1)%sdT.length;$('#sd-in').value=sdT[sdI];$('#sd-ans').value='';hide('#sd-v');sdDraw();}
+function sdLoad(){if(!document.querySelector('#sd-in'))return;$('#sd-in').value=sdT[sdI];$('#sd-ans').value='';hide('#sd-v');sdDraw();}
 
 /* --- 2. Наголос --- */
 T('stress',{g:0,ic:'🗣',t:'Наголос',s:'Слова, у яких помиляються найчастіше',html:`
