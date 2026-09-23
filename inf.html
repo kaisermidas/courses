@@ -212,20 +212,50 @@ const COURSE = {"id": "inf5", "title": "Інформатика", "subtitle": "5 
 // ============================================================
 //  Прогрес (localStorage Safari)
 // ============================================================
-const KEY = "course:" + COURSE.id;
+const KEY = "course:" + COURSE.id;                       // localStorage (як і раніше)
+const CKEY = KEY.replace(/[^A-Za-z0-9_-]/g, "_");          // CloudStorage: дозволені лише A-Z a-z 0-9 _ -
+const CPARTS = 3, CCHUNK = 4000;                           // до 12 тис. символів у хмарі (ліміт 4096 на ключ)
 const TG = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData ? window.Telegram.WebApp : null;
 const CS = TG && TG.CloudStorage && (TG.isVersionAtLeast ? TG.isVersionAtLeast("6.9") : true) ? TG.CloudStorage : null;
 let P = {};
+function mergeP(a, b){                                     // b → a, з кожного уроку беремо краще
+  for(const id in (b||{})){
+    const x = b[id] || {}, y = a[id] || (a[id] = {});
+    y.learn = !!(y.learn || x.learn); y.cards = !!(y.cards || x.cards);
+    for(const k of ["best","b2","b3"]){
+      const u = y[k] == null ? null : y[k], v = x[k] == null ? null : x[k];
+      y[k] = u === null ? v : (v === null ? u : Math.max(u, v));
+    }
+  }
+  return a;
+}
 function load(cb){
-  let done=false; const finish=v=>{ if(done) return; done=true; try{ P = JSON.parse(v||"{}"); }catch(e){ P={}; } cb(); };
-  if(CS){ CS.getItem(KEY, (err,v)=>finish(err?null:v)); setTimeout(()=>finish(null), 1500); }
-  else { let v=null; try{ v = localStorage.getItem(KEY); }catch(e){} finish(v); }
+  let local = {}; try{ local = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }catch(e){ local = {}; }
+  let done = false;
+  const finish = cloud => { if(done) return; done = true; P = mergeP(local, cloud); cb(); if(cloud) save(); };
+  if(!CS) return finish(null);
+  const keys = [CKEY]; for(let i = 1; i < CPARTS; i++) keys.push(CKEY + "_p" + i);
+  setTimeout(() => finish(null), 1500);                    // хмара мовчить → працюємо з локальним, нічого не стираємо
+  try{
+    CS.getItems(keys, (err, v) => {
+      let c = null;
+      if(!err && v){ try{ const s = keys.map(k => v[k] || "").join(""); c = s ? JSON.parse(s) : null; }catch(e){ c = null; } }
+      finish(c);
+    });
+  }catch(e){ finish(null); }
 }
 function save(){
   const s = JSON.stringify(P);
-  if(CS) CS.setItem(KEY, s, ()=>{});
   try{ localStorage.setItem(KEY, s); }catch(e){}
+  if(!CS || s.length > CCHUNK * CPARTS) return;
+  try{
+    for(let i = 0; i < CPARTS; i++){
+      const k = i ? CKEY + "_p" + i : CKEY, part = s.slice(i * CCHUNK, (i + 1) * CCHUNK);
+      if(part) CS.setItem(k, part, () => {}); else if(i) CS.removeItem(k, () => {});
+    }
+  }catch(e){}
 }
+
 if(TG){ TG.ready(); TG.expand(); if(TG.disableVerticalSwipes) TG.disableVerticalSwipes(); }
 function lp(id){ const o = P[id] || (P[id] = {learn:false, cards:false, best:null}); if(o.b2===undefined) o.b2=null; if(o.b3===undefined) o.b3=null; return o; }
 function starsOf(pct){ return pct===null?0 : pct>=90?3 : pct>=70?2 : pct>=50?1 : 0; }
@@ -234,7 +264,7 @@ function starStr(n){ let s=""; for(let i=0;i<3;i++) s+= i<n ? "★" : "<span cla
 // ============================================================
 //  Навігація
 // ============================================================
-let L = null, cardsQueue=[], cardsTotal=0, quiz=[], qi=0, qPick=null, qWrong=[], qRight=0;
+let L = null, cardsQueue=[], cardsTotal=0, quiz=[], qi=0, qPick=null, qOrd=[], qWrong=[], qRight=0;
 const BACK = {"s-lesson":"s-list","s-learn":"s-lesson","s-cards":"s-lesson","s-quiz":"s-lesson","s-res":"s-list"};
 let CUR = "s-list";
 function go(id){
@@ -346,7 +376,8 @@ function showQ(){
   const fb = document.getElementById("q-fb"); fb.className="fb"; fb.innerHTML="";
   const btn = document.getElementById("q-btn"); btn.textContent="Перевірити"; btn.dataset.state="check";
   let h="";
-  if(q.t==="choice") h = q.o.map((o,i)=>`<button class="opt" onclick="pick(${i},this)">${o}</button>`).join("");
+  if(q.t==="choice"){ qOrd = q.o.map((_,i)=>i); for(let i=qOrd.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [qOrd[i],qOrd[j]]=[qOrd[j],qOrd[i]]; }
+    h = qOrd.map(i=>`<button class="opt" onclick="pick(${i},this)">${q.o[i]}</button>`).join(""); }
   else if(q.t==="tf") h = `<button class="opt" onclick="pick(true,this)">Так, правильно</button><button class="opt" onclick="pick(false,this)">Ні, неправильно</button>`;
   else h = `<input class="inp" id="q-inp" autocomplete="off" autocapitalize="off" placeholder="Впиши відповідь">`;
   document.getElementById("q-body").innerHTML = h;
@@ -365,7 +396,7 @@ function qNext(){
       if(qPick===null) return;
       ok = (qPick===q.a);
       document.querySelectorAll(".opt").forEach((o,i)=>{
-        const val = q.t==="tf" ? (i===0) : i;
+        const val = q.t==="tf" ? (i===0) : qOrd[i];
         if(val===q.a) o.classList.add("ok"); else if(val===qPick) o.classList.add("bad");
         o.disabled=true;
       });
