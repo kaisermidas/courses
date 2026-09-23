@@ -166,16 +166,6 @@ function every(fn,ms){const id=setInterval(fn,ms);TIMERS.push(id);return id;}
 function stopAll(){TIMERS.forEach(clearInterval);TIMERS=[];}
 
 /* --- 1. Сонячна система --- */
-T('sun',{g:0,ic:'🪐',t:'Сонячна система',s:'Орбіти, розміри й порядок планет',html:`
-<div class="panel">
-  <div class="task">Тисни на планету — дізнаєшся про неї. Повзунок прискорює час.</div>
-  <svg viewBox="0 0 320 320" height="310" id="ss-svg"></svg>
-  <div class="row"><div style="flex:1">швидкість часу<input type="range" min="0" max="10" value="3" id="ss-sp"></div></div>
-  <div class="hintline" id="ss-info">Меркурій робить оберт за 88 днів, Нептун — за 165 років. Тому внутрішні планети біжать швидко, а зовнішні майже стоять.</div>
-  <div class="row center"><button class="btn" onclick="ssQuiz()">Питання</button></div>
-  <div class="verdict" id="ss-v"></div>
-  <div class="legend">Розміри й відстані тут не в масштабі: якби Земля була горошиною, Сонце було б за 25 метрів від неї.</div>
-</div>`,init(){ssStart();}});
 
 /* --- 1. Двійкові лампочки --- */
 T('bits',{g:0,ic:'💡',t:'Двійкові лампочки',s:'Як комп’ютер записує числа',html:`
